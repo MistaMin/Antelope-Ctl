@@ -20,7 +20,7 @@ used; the device firmware is not touched.
 | **`PROTOCOL.md`** | the reverse-engineered wire format in reference form — frames, opcodes, state-report byte maps, the `0x74`/`0x75` readback protocol (§4a), per-device notes (§14) |
 | **`docs/profile-schema.md`** | what every key in `profiles/*.json` means, and which the code reads — start here if you're writing a profile or a client (webUI) |
 | **`docs/profile-labeling.md`** | the cross-client labels and feature-manifest contract — how to add a device and keep shared parameter vocabulary consistent |
-| **`docs/linux-parity-plan.md`** | this fork's plan: Discrete 4 (`0xa270`) and Zen Go parity minus AFX, clean-room roles, hosts, multi-agent layout, checklist |
+| **`docs/linux-parity-plan.md`** | this fork's plan: Discrete 4 (`0xa270`) and Zen Go parity (AFX staged, read-only first), clean-room roles, hosts, multi-agent layout, checklist |
 | **`docs/discrete-remote-agent-playbook.md`** | remote-only workflow for completing the Discrete 4 / 4 Pro / 8 Pro profiles with the repository's probes, capture tools, and safety rules |
 | **`CAPTURING.md`** | how to capture USB traffic — usbmon on Linux (incl. the webUI + usbmon method), Windows VM + USBPcap, or native macOS |
 | **`docs/orion-afx-workflow.md`** | current AFX evidence, existing tools, proposed Launcher batch automation and effect completion criteria |

@@ -78,6 +78,15 @@ status. [PROTOCOL.md §12a](PROTOCOL.md#12a-afx-real-time-chain-and-parameter-co
 contains wire evidence; [the AFX workflow](docs/orion-afx-workflow.md) describes
 implementation/capture passes. Generic raw opcode guards remain enabled.
 
+### Discrete 4 (`0xa270`) and Zen Go (`0xa015`) fork extension
+
+The fork owner extended AFX work to these two devices on 2026-11-16. Buckets
+A-D apply as above. Bucket E (assign/load/remove/reorder) is allowed per
+effect only after an isolated capture of that effect on that device from the
+owner's vendor panel; nothing from the Orion pilot is evidence for another
+model. Bucket F stays excluded. [The parity plan](docs/linux-parity-plan.md)
+holds the stages and checklist.
+
 ## 5. Contributor agreement
 
 Contributions must identify owned-device/public sources (§2) and fit the control
