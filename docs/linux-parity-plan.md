@@ -53,6 +53,19 @@ with the `0xa270` profile and do not copy its offsets.
   includes is recorded privately from owner confirmation, never read from
   account or licensing traffic, and never committed.
 
+  Public-manual facts that shape the insert display (facts only, not wire
+  evidence):
+  - **Zen Go** (Zen Go Synergy Core User Manual, pp. 46-48 and 51-52): two
+    virtual mixers that "share their audio inputs and applied Synergy Core
+    FX"; "Mixer channels 1 to 4 let you apply Synergy Core FX to the input
+    signal", each with an AFX area and a per-channel 'BP' button; the rack
+    has add, drag-reorder, per-effect 'BP', 'BP ALL' and 'DEL ALL'. The
+    manual does not state the number of slots per rack.
+  - **Discrete 4** (Discrete 4 user manual, §6.2.3 and §6.3): the AFX Rack
+    inserts effects "into a mixer channel, forming a Channel Strip"; the
+    mixer has 16 channels with a 'BP' button each; "Discrete 4 Premium – 4
+    channel strips with 4 FX instances each" (Basic: 2 and 2).
+
 **Out of scope:**
 
 - AFX2DAW, Native and Cosmos plugins.
@@ -206,7 +219,7 @@ from its log-named connect walk (`intake_hints` in the profile).
 | Oscillator / talkback / brightness / DC-coupling | check panel | check panel |
 | Meters | todo | `0x83` magic known; calibration open |
 | Mic emulation (emuMic) | todo, last (hint: cat `0x16`) | candidate `0x1a` frame; last |
-| AFX inserts: read-only display | todo (hint: cat `0x19` idx 0..35; needs the vendor connect-walk capture for bounds) | index 0 read on owner fw 05.04: body `01 00 24 00 1b` (observed, layout and contents unconfirmed); outer indices 0..11 appear only in the older `safe_queries` hint (fw 06.06), not as bounds; strip-to-channel mapping unknown |
+| AFX inserts: read-only display | todo (hint: cat `0x19` idx 0..35; needs the vendor connect-walk capture for bounds) | index 0 read on owner fw 05.04: body `01 00 24 00 1b` (observed, layout and contents unconfirmed); outer indices 0..11 appear only in the older `safe_queries` hint (fw 06.06), not as bounds; manual says racks sit on mixer channels 1-4 (shared by both mixers), record-to-channel order on the wire still to be proven |
 | AFX inserts: bypass / load / parameters | todo, per effect, after captures | todo, per effect, after captures |
 | Host-side snapshots / presets | todo | todo |
 | Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent) | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
