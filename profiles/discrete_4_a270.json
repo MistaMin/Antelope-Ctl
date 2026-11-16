@@ -85,7 +85,7 @@
     "in_endpoint": null,
     "poll_interval_ms": null,
     "status": "unconfirmed",
-    "notes": "Interface 3 is a HID interface with two endpoints (observed). Report size, report IDs and endpoint addresses are unknown: run tools/hid_probe.py on Linux first. The vendor manager-server log names in-band requests with magic 0x74 and responses 0x75 for this unit, which matches the family readback shape in PROTOCOL.md §4a, but that is a hint, not a capture.",
+    "notes": "Interface 3 is a HID v1.11 interface with two endpoints; Linux binds hid-generic and creates a hidraw node (root-only by default; needs a udev rule). Report size, report IDs and endpoint addresses are unknown: run tools/hid_probe.py on Linux first. The vendor manager-server log names in-band requests with magic 0x74 and responses 0x75 for this unit, which matches the family readback shape in PROTOCOL.md §4a, but that is a hint, not a capture.",
     "evidence": "owner's unit, macOS ioreg, 2026-11-16; vendor manager-server runtime log (names only)"
   },
   "frame": {
@@ -117,7 +117,7 @@
       {"category": "0x18", "name": "get_reverb_sends", "indices": [0], "fields": ["level", "mute", "pan", "solo"]},
       {"category": "0x19", "name": "get_afx_strip_order (AFX, out of fork scope)", "indices": "0..35"}
     ],
-    "audio_streaming_hint": "The macOS vendor driver exposed 16 in / 16 out, 24-bit, 32k-192k. Check the device's own UAC2 descriptors and snd-usb-audio behaviour on Linux; do not copy these numbers into a profile without that."
+    "audio_streaming": "Linux 7.2 snd-usb-audio, no quirk (/proc/asound stream0, 2026-11-16): playback iface 1 EP 0x05 OUT async, capture iface 2 EP 0x84 IN async (also the playback sync EP), both S24_3LE x 16 ch, rates 32000/44100/48000/88200/96000/176400/192000, 125 us packets. 2 s record and silent playback at 48 kHz succeeded. Other rates untested."
   },
   "params": {},
   "channels": {
