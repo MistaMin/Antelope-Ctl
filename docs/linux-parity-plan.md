@@ -15,7 +15,7 @@ It does not relax any rule in those files.
 | device | USB id | profile | starting point |
 |---|---|---|---|
 | Discrete 4 (original, not Synergy Core) | `23e5:a270` | [`discrete_4_a270.json`](../profiles/discrete_4_a270.json) | Identity and USB interface classes only. Every feature disabled. |
-| Zen Go Synergy Core | `23e5:a015` | [`zen_go_sc.json`](../profiles/zen_go_sc.json) | Upstream first-pass profile: preamps, buses, routing, 2 mixers, sample rate and clock are mapped. Open items in [PROTOCOL.md §14](../PROTOCOL.md) and the profile's `open_questions`. Needs live round-trip testing on the owner's unit. |
+| Zen Go Synergy Core | `23e5:a015` | [`zen_go_sc.json`](../profiles/zen_go_sc.json) | Upstream first-pass profile: preamps, buses, routing, 2 mixers, sample rate and clock are mapped. Open items in [PROTOCOL.md §14](../PROTOCOL.md) and the profile's `open_questions`. Needs live round-trip testing on the owner's unit. **Owner's unit reports bcdDevice `05.04`; the profile was captured on `06.06`**, so re-check offsets (or update firmware first) before trusting any mapping. |
 
 `discrete_4_sc.json` (`0xa2be`) is a **different product**. Do not merge it
 with the `0xa270` profile and do not copy its offsets.
