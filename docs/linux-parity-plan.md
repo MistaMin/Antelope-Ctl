@@ -180,7 +180,7 @@ from its log-named connect walk (`intake_hints` in the profile).
 
 | feature | Discrete 4 `a270` | Zen Go `a015` |
 |---|---|---|
-| Audio stream, all rates (snd-usb-audio) | todo | todo |
+| Audio stream, all rates (snd-usb-audio) | 16×16 S24_3LE 32k–192k enumerates, no quirk; record + play OK at 48k; other rates todo | same 16×16 layout enumerates; **playback OK, capture fails with I/O error at 44.1/48/96k** (no kernel error), check clock source / start command / power |
 | Transport (report size, framing, endpoints) | todo | upstream confirmed; re-check on owner unit |
 | Preamp gain / mode / 48V / phase | todo | mapped; live verify |
 | Preamp link | todo (hint: cat `0x0b` idx 0) | mapped; live verify |
