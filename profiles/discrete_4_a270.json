@@ -26,16 +26,16 @@
       "input": {"label": "Preamps", "item_format": "Preamp {index}"},
       "bus": {"label": "Output", "item_format": "{label}"}
     },
-    "params": {}
+    "params": {"gain": "Gain"}
   },
   "features": {
     "inputs": {
       "kind": "channel_strips",
       "label": "Inputs",
-      "enabled": false,
+      "enabled": true,
       "space": "input",
-      "controls": [],
-      "status": "disabled -- no command or state mapping captured on this device"
+      "controls": ["gain"],
+      "status": "gain only -- mode, 48 V, phase and link are not captured"
     },
     "buses": {
       "kind": "output_buses",
@@ -90,9 +90,28 @@
   },
   "frame": {
     "command": {
+      "magic_offset": 0,
+      "magic": "0x70",
+      "opcode_offset": 4,
+      "opcode": "0x13",
+      "opcode_name": "SET_PARAM",
+      "param_id_offset": 16,
+      "channel_offset": 17,
+      "value_offset": 18,
+      "status": "confirmed",
+      "notes": "Confirmed for preamp gain only (param 0x50): six isolated vendor writes on preamps 1 and 2, each followed within 20 ms by the matching state-report byte, and each undone by the next write. No other parameter id has been captured on this device.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee)"
+    },
+    "mix_command": {
       "status": "observed",
-      "notes": "Outbound commands are 320-byte reports with magic 0x70 at offset 0, a one-byte opcode at offset 4 and the payload from offset 16. Only the three AFX frames below have been captured; no preamp, bus, routing or mixer command has. Nothing here is wired to a writer.",
-      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
+      "opcode": "0x16",
+      "layout": "70 00 00 00 | 16 00 00 00 | 00 x8 | d4 04 | <mix> | <channel, 1-based> | <fader, dB attenuation> | <pan low 6 bits (32 = centre) + 0x40 mute + 0x80 solo>",
+      "observations": [
+        "Monitor/HP1 channel 1 MUTE on: d4 04 00 01 5a 60; off: d4 04 00 01 5a 20",
+        "Monitor/HP1 channel 2 MUTE on: d4 04 00 02 5a 60; off: d4 04 00 02 5a 20"
+      ],
+      "notes": "Same shape as the Zen Go's SET_MIX, but only the mute bit was exercised here: the fader and pan bytes simply repeated the strip's current state (-90 dB, centre). Mutes produce no 0x73 change. Not wired to a writer.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee)"
     },
     "afx_chain_write": {
       "status": "observed",
@@ -117,6 +136,13 @@
       ],
       "notes": "One effect, one strip, one instance: which of the two zero bytes is the instance and whether a strip is addressed at all is unknown. The last byte reads as enabled = 1 / bypassed = 0. Not replayed by this project.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8)"
+    },
+    "meter_report": {
+      "magic_offset": 0,
+      "magic": "0x83",
+      "status": "identified (magic); byte map not decoded",
+      "notes": "Unsolicited 320-byte report at about 125 Hz, one for each 0x73 state report. Resting lanes read 0x60 / 0x32. No channel mapping.",
+      "evidence": "owner's unit, passive probe 2026-11-16 and every capture of 2026-11-17"
     },
     "readback": {
       "status": "capture-confirmed",
@@ -168,7 +194,12 @@
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29) and the three AFX captures"
     },
     "state_report": {
-      "status": "observed",
+      "magic_offset": 0,
+      "magic": "0x73",
+      "gain_base_offset": 40,
+      "status": "confirmed for preamp 1-2 gain; observed otherwise",
+      "gain_notes": "Bytes 40 and 41 followed the vendor's gain writes to preamps 1 and 2 (6 -> 7 -> 8 -> 7 -> 6 and 6 -> 7 -> 6, raw dB). Bytes 42 and 43 read 0 while the panel showed 0 dB on preamps 3 and 4: consistent, not exercised. The mode / phantom / phase status byte is not located, so there is no status_base_offset.",
+      "gain_evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee)",
       "notes": "The device streams two unsolicited 320-byte reports at ~125 Hz each with no host traffic: magic 0x73 (state) and 0x83 (meter-like, mostly 0x60/0x32 lanes), the same pair as Zen Go. Unlike Zen Go, bytes 4..5 of 0x73 are 0x0000 (Zen Go: 0x4001). With the device at 48 kHz, 0x73 bytes 22..23 = 0xbb80 (48000) and byte 18 = 0x02 (the family's 48k index): candidates only, not tested against a rate change. Over 10 s idle, 0x73 offsets 160-163, 224-227, 242-243 moved. Base offsets deliberately not filled in.",
       "evidence": "owner's unit, tools/readback_probe.py phase 1 (passive, 10 s), 2026-11-16; raw output kept privately"
     }
@@ -208,11 +239,32 @@
     },
     "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
   },
-  "params": {},
+  "params": {
+    "gain": {
+      "id": "0x50",
+      "status": "confirmed",
+      "type": "int",
+      "frame": "command (opcode 0x13) -- channel @17, value @18 (raw dB)",
+      "readback": "state_report.gain_base_offset (40) + channel_index",
+      "runtime_range": [0, 20],
+      "notes": "Only 6, 7 and 8 dB were written in the capture. 0-20 dB is the span every input mode offers according to the public manual (Mic up to 65 dB, Line up to 20 dB, Hi-Z up to 39 dB); the active mode cannot be read yet, so the range stays at that common span. Channels 0 and 1 are captured; 2 and 3 are assumed to follow.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee); Discrete 4 user manual, Mic/Line/Hi-Z selector section, for the per-mode maxima"
+    }
+  },
   "channels": {
-    "count": null,
-    "status": "unconfirmed",
-    "notes": "Preamp count not yet established from this device's reports."
+    "count": 4,
+    "addressing": "0-indexed input channel 0-3, written to frame.command.channel_offset",
+    "names": ["Preamp 1", "Preamp 2", "Preamp 3", "Preamp 4"],
+    "confirmed_indices": [0, 1],
+    "modes": {},
+    "status": "observed",
+    "notes": "The vendor panel shows four preamps and the manual lists four analog inputs. Channel indices 0 and 1 are confirmed by captured gain writes; 2 and 3 are not exercised. Input modes are not mapped."
+  },
+  "constraints": {
+    "_comment": "Conservative: only what has been captured on this device.",
+    "allowed_opcodes": ["0x13"],
+    "channel_bounds": {"min": 0, "max": 3},
+    "min_write_interval_ms": 250
   },
   "buses": {
     "known": {},

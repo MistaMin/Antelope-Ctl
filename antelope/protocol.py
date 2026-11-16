@@ -3046,6 +3046,11 @@ def parse_spdif_gain(profile: dict, data: bytes, spdif_channel: int) -> int:
 def parse_state(profile: dict, data: bytes, channel: int) -> dict:
     sr = profile['frame']['state_report']
     gain_off = _as_int(sr['gain_base_offset']) + channel
+    if sr.get('status_base_offset') is None:
+        # gain is mapped but the status byte is not (e.g. Discrete 4 0xa270)
+        if gain_off >= len(data):
+            raise ValueError(f'state report too short for channel {channel}')
+        return {'channel': channel, 'gain': i8(data[gain_off])}
     status_off = _as_int(sr['status_base_offset']) + channel
     if status_off >= len(data):
         raise ValueError(f'state report too short for channel {channel}')
@@ -3174,7 +3179,8 @@ def meter_led(profile: dict, db, source_frame='meter_report'):
 
 
 def mode_name(profile: dict, mode_val: int) -> str:
-    values = profile['params']['input_mode']['values']
+    # a profile may map gain before its input-mode byte (Discrete 4 0xa270)
+    values = profile['params'].get('input_mode', {}).get('values', {})
     return values.get(str(mode_val), f'?{mode_val}')
 
 

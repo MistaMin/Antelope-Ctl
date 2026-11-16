@@ -280,9 +280,10 @@ def cmd_status(args, profile):
             break
         mode = proto.mode_name(profile, s.get('input_mode', -1))
         glyph, tail = _link_bracket(profile, link_state, ch)
+        flag = lambda key: '?' if key not in s else ('on' if s[key] else 'off')
         print(f"{ch:>2}  {mode:<7} {s['gain']:>5}  "
-              f"{'on' if s.get('phantom') else 'off':<3} "
-              f"{'on' if s.get('phase_invert') else 'off':<5}"
+              f"{flag('phantom'):<3} "
+              f"{flag('phase_invert'):<5}"
               f"{glyph}{tail}")
     confirmed = profile['channels'].get('confirmed_indices', [])
     if confirmed and n_channels > max(confirmed) + 1:

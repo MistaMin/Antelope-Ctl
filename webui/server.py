@@ -2538,9 +2538,24 @@ def api_surround_eq_reset(change: SurroundEQReset):
     }
 
 
+def _gain_outer_bounds():
+    """Widest gain span the profile declares, across modes. The page clamps
+    per mode; this stops a stray request writing a value no mode allows."""
+    gain = PROFILE.get("params", {}).get("gain", {})
+    ranges = list((gain.get("per_mode_range") or gain.get("range_by_mode") or {}).values())
+    ranges.append(gain.get("runtime_range"))
+    ranges = [r for r in ranges if isinstance(r, (list, tuple)) and len(r) == 2]
+    if not ranges:
+        return None
+    return min(r[0] for r in ranges), max(r[1] for r in ranges)
+
+
 @app.post("/api/gain")
 def api_gain(g: Gain):
     proto.check_target(PROFILE, g.channel, "input")
+    bounds = _gain_outer_bounds()
+    if bounds and not bounds[0] <= g.db <= bounds[1]:
+        return _bad(f"gain {g.db} dB is outside this device's range {bounds[0]}..{bounds[1]}")
     DEV.submit(lambda t: t.write(proto.build_command(PROFILE, "gain", g.channel, g.db)))
     return {"ok": True}
 
@@ -2549,6 +2564,8 @@ def api_gain(g: Gain):
 def api_toggle(t: Toggle):
     if t.param not in ("phantom", "phase_invert"):
         return _bad("bad param")
+    if t.param not in PROFILE.get("params", {}):
+        return _bad("not mapped for this device")
     proto.check_target(PROFILE, t.channel, "input")
     val = 1 if t.on else 0
     DEV.submit(lambda tr: tr.write(proto.build_command(PROFILE, t.param, t.channel, val)))

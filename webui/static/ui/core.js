@@ -131,7 +131,8 @@ const RING_D = 'M 44.234 63.591 A 15 15 0 1 1 65.448 63.591';
 const RING_LEN = 70.69;
 function modeRange(mode) {
   const key = String(mode || '').toLowerCase();
-  const range = GAIN_RANGE[mode] || GAIN_RANGE[key];
+  const range = GAIN_RANGE[mode] || GAIN_RANGE[key]
+    || PROFILE?.params?.gain?.runtime_range;   // device whose mode is not mapped yet
   return Array.isArray(range) && range.length === 2
     ? range.map(Number) : [-6, 75];
 }
