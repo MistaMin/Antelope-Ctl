@@ -8,7 +8,8 @@ knowledge; keep the CLI/protocol core stdlib-only.
 
 Upstream hardware work is **Orion Studio Synergy Core**. This fork adds an
 explicit scope change for the owner's **Discrete 4 (`0xa270`)** and **Zen Go
-Synergy Core (`0xa015`)**: every vendor-mixer feature except AFX plugins. Start
+Synergy Core (`0xa015`)**: every vendor-mixer feature, with AFX staged from
+read-only insert display to captured per-effect control. Start
 from [docs/linux-parity-plan.md](docs/linux-parity-plan.md). Other devices still
 need their own evidence and scope change. Work in this repository first;
 follow Gazelle's guidelines when work there is requested. [SCOPE.md](SCOPE.md)

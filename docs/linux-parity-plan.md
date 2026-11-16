@@ -2,8 +2,9 @@
 
 This fork extends `antelope-ctl` from the Orion to two more devices the owner
 has: the original **Discrete 4** and the **Zen Go Synergy Core**. The goal is
-Linux control matching **everything the vendor mixer panel does, except AFX
-plugins**. The work is clean-room and the result stays GPL-3.0 and shareable.
+Linux control matching **everything the vendor mixer panel does**. AFX
+(device-side effects) joined the scope on 2026-11-16 by owner decision, in the
+stages set out in §2. The work is clean-room and the result stays GPL-3.0 and shareable.
 
 Read [AGENTS.md](../AGENTS.md), [SCOPE.md](../SCOPE.md) and the
 [Discrete playbook](discrete-remote-agent-playbook.md) before touching a
@@ -40,12 +41,20 @@ with the `0xa270` profile and do not copy its offsets.
   catalogue depends on the owner's mics, so it comes last.
 - Host-side conveniences such as named snapshots/presets, implemented in
   this project's WebUI, not copied from the vendor.
+- AFX real-time effects (owner decision, 2026-11-16), in this order:
+  1. **Read-only insert display**: decode each device's own strip-order
+     readback and show the loaded inserts in the mixer. No writes.
+  2. **Bypass, load/remove/reorder and parameters**, one effect at a time,
+     each only after an isolated capture from the vendor panel on that
+     device. Orion type IDs, instance ranges and encodings are candidates
+     only, never evidence for `0xa270` or `0xa015`.
+  Effect names shown in the UI come from the shared catalog plus the owner's
+  own confirmation of what a slot holds. Which effects the owner's account
+  includes is recorded privately from owner confirmation, never read from
+  account or licensing traffic, and never committed.
 
 **Out of scope:**
 
-- AFX real-time effects: loading, parameters, strip order, AFX links.
-  Readbacks may be decoded and shown read-only if a decoder needs them to
-  parse a shared category. No writes.
 - AFX2DAW, Native and Cosmos plugins.
 - Firmware updates. Keep the vendor tool for those.
 - Licensing, activation, account and entitlement traffic, under SCOPE.md
@@ -197,6 +206,8 @@ from its log-named connect walk (`intake_hints` in the profile).
 | Oscillator / talkback / brightness / DC-coupling | check panel | check panel |
 | Meters | todo | `0x83` magic known; calibration open |
 | Mic emulation (emuMic) | todo, last (hint: cat `0x16`) | candidate `0x1a` frame; last |
+| AFX inserts: read-only display | todo (hint: cat `0x19` idx 0..35; needs the vendor connect-walk capture for bounds) | todo: cat `0x19` layout not declared for this device; outer indices 0..11 appear only in the older `safe_queries` hint (fw 06.06), not as bounds |
+| AFX inserts: bypass / load / parameters | todo, per effect, after captures | todo, per effect, after captures |
 | Host-side snapshots / presets | todo | todo |
 | Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent) | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
 

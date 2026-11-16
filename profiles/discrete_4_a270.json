@@ -112,11 +112,11 @@
       {"category": "0x0e", "name": "get_trim_configs", "indices": [0], "fields": ["trim_id", "control", "levels[4] {whole, fract}"]},
       {"category": "0x11", "name": "get_assignment_status / get_feature_mask", "indices": [0, 1]},
       {"category": "0x12", "name": "get_panning_law", "indices": [0]},
-      {"category": "0x15", "name": "get_afx_remaining_featured_instances (AFX, out of fork scope)", "indices": [0]},
+      {"category": "0x15", "name": "get_afx_remaining_featured_instances (AFX, in scope since 2026-11-16)", "indices": [0]},
       {"category": "0x16", "name": "get_mic_emulations", "indices": [0]},
       {"category": "0x17", "name": "get_reverb_returns", "indices": [0], "fields": ["level", "mute"], "record_count_hint": 4},
       {"category": "0x18", "name": "get_reverb_sends", "indices": [0], "fields": ["level", "mute", "pan", "solo"]},
-      {"category": "0x19", "name": "get_afx_strip_order (AFX, out of fork scope)", "indices": "0..35"}
+      {"category": "0x19", "name": "get_afx_strip_order (AFX, in scope since 2026-11-16)", "indices": "0..35"}
     ],
     "audio_streaming": "Linux 7.2 snd-usb-audio, no quirk (/proc/asound stream0, 2026-11-16): playback iface 1 EP 0x05 OUT async, capture iface 2 EP 0x84 IN async (also the playback sync EP), both S24_3LE x 16 ch, rates 32000/44100/48000/88200/96000/176400/192000, 125 us packets. 2 s record and silent playback at 48 kHz succeeded. Other rates untested."
   },
