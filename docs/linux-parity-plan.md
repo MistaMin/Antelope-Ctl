@@ -182,7 +182,7 @@ from its log-named connect walk (`intake_hints` in the profile).
 |---|---|---|
 | Audio stream, all rates (snd-usb-audio) | 16×16 S24_3LE 32k–192k enumerates, no quirk; record + play OK at 48k; other rates todo | same 16×16 layout enumerates; playback OK. **Capture alone fails** (I/O error): usbmon shows UAC2 SET_CUR rate + SET_INTERFACE succeed but the device returns 0-byte iso IN packets. **Capture works while playback runs** (2 s/96k/16ch exact). Next: test snd-usb-audio `quirk_flags` (needs root), else document "open playback too" |
 | Transport (report size, framing, endpoints) | todo | upstream confirmed; re-check on owner unit |
-| Preamp gain / mode / 48V / phase | todo | gain verified on owner fw 05.04 (ch 1 0→1→0 dB, readback); mode/phase not yet toggled; **48V deliberately not toggled** (mic safety, owner present only) |
+| Preamp gain / mode / 48V / phase | todo | all verified on owner fw 05.04 with readback and exact restore (no mics connected): gain, 48V and phase on both preamps; mode Mic/Line on both, HiZ on ch 0 only (ch 1 HiZ not captured). Device keeps a separate gain per mode (ch 0: Mic 20 / Line 15 / HiZ 12 dB) |
 | Preamp link | todo (hint: cat `0x0b` idx 0) | mapped; live verify |
 | Digital input gain / link | todo | todo |
 | Output buses: level / mute / dim / mono | todo | dim verified on all 3 buses, full status restored (selftest, fw 05.04); mute set verified; status is an exclusive enum (dim replaces mute); no mono flag in the state report |

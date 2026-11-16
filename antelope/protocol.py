@@ -3181,7 +3181,7 @@ def mode_name(profile: dict, mode_val: int) -> str:
 def mode_value(profile: dict, name: str) -> int:
     values = profile['params']['input_mode']['values']
     for k, v in values.items():
-        if v == name:
+        if v.lower() == name.lower():  # Zen Go profile capitalises ("Mic")
             return int(k)
     raise KeyError(f'unknown mode name "{name}"')
 
