@@ -88,6 +88,11 @@
   /* fixed 8-wide: 12 preamps read as 8 top + 4 bottom so every link pair sits
      in one row (7+5 straddled pair CH7-8); ADAT view will be 8 + 8. */
   #channels { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:12px; }
+  /* below 8 x 140px a strip is narrower than its knob + meter and clips them:
+     keep the strip width and wrap instead (small app windows, tiled layouts) */
+  @media (max-width:1240px) {
+    #channels { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+  }
   .pre { position:relative; background:linear-gradient(180deg,#23262e,#191c22); border:1px solid var(--line);
          border-radius:10px; padding:10px 10px 12px; display:flex; flex-direction:column; gap:8px; }
   .pre .top { display:flex; align-items:center; justify-content:flex-start; gap:5px;
