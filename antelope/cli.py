@@ -1770,7 +1770,8 @@ def cmd_set_sample_rate(args, profile):
 # the 0x73 state report (offset 19); pan_law has no known readback.
 
 def _enum_values(profile, param):
-    v = profile['params'].get(param, {}).get('values', {})
+    p = profile['params'].get(param, {})
+    v = p.get('values') or p.get('runtime_values', {})  # Zen Go names clock sources in runtime_values
     return {int(k): s for k, s in v.items()}
 
 
