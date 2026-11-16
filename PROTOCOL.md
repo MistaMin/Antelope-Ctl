@@ -2290,3 +2290,30 @@ two output-volume paths; `param 0x66` (bus dim/mono?); the complete Zen Go
 readback category bounds; and the q03 body-variant discriminator. Live
 round-trip of the capture-confirmed Zen Go maps still needs hardware testing.
 See `open_questions` in the profile.
+
+## Fork addendum: AFX inserts on Discrete 4 (`0xa270`) and Zen Go (`0xa015`)
+
+Evidence: the owner's units, vendor panels 1.9.22 (Discrete 4) and 1.1.26
+(Zen Go) with Manager Server 1.8.20 under Wine, usbmon captures of
+2026-11-17. Hashes, action-log summaries and confirmation status are in
+`profiles/discrete_4_a270.json` and `profiles/zen_go_sc.json`; raw captures
+stay private.
+
+- **Readback family.** Both devices answer `74 00 00 00 | 10 00 00 00 | cat |
+  idx` with `75 00 00 00 | <4 bytes> | cat | idx | body`. Response bytes 4-7
+  are `40 01 00 00` on the Zen Go and `10 00 00 00` on the Discrete 4.
+- **Strip order, category `0x19`.** The vendor panel queries indices 0-11 on
+  the Zen Go and 0-35 on the Discrete 4. Each body is `{type, inst}` byte
+  pairs, zero-padded; an empty rack is all zeros. Record 0 is the mixer
+  channel 1 rack on both.
+- **Type ids seen.** 1 = ClearQ and 27 = Master De-esser on both devices;
+  36 = SMT-100A on the Zen Go. 27 matches the Orion's Master De-Esser id.
+- **Chain write, Discrete 4 only.** Opcode `0x5b`: payload `d7 49 | <strip> |
+  {type, inst} pairs` rewrites the whole rack on every add or remove. Only
+  strip 0 was exercised.
+- **Effect bypass, Discrete 4 only.** Opcode `0x14`: payload `98 00 <type>
+  <enabled>`, seen as `98 00 1b 00` then `98 00 1b 01` for two clicks on one
+  slot's BP button.
+- **Not captured.** Any AFX write on the Zen Go, parameter frames (five
+  opcode-`0x1c` frames follow a ClearQ load on the Discrete 4, undecoded),
+  reorder, strips other than 0, and instances other than 0.
