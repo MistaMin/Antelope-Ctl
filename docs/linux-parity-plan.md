@@ -206,7 +206,7 @@ from its log-named connect walk (`intake_hints` in the profile).
 | Oscillator / talkback / brightness / DC-coupling | check panel | check panel |
 | Meters | todo | `0x83` magic known; calibration open |
 | Mic emulation (emuMic) | todo, last (hint: cat `0x16`) | candidate `0x1a` frame; last |
-| AFX inserts: read-only display | todo (hint: cat `0x19` idx 0..35; needs the vendor connect-walk capture for bounds) | todo: cat `0x19` layout not declared for this device; outer indices 0..11 appear only in the older `safe_queries` hint (fw 06.06), not as bounds |
+| AFX inserts: read-only display | todo (hint: cat `0x19` idx 0..35; needs the vendor connect-walk capture for bounds) | index 0 read on owner fw 05.04: body `01 00 24 00 1b` (observed, layout and contents unconfirmed); outer indices 0..11 appear only in the older `safe_queries` hint (fw 06.06), not as bounds; strip-to-channel mapping unknown |
 | AFX inserts: bypass / load / parameters | todo, per effect, after captures | todo, per effect, after captures |
 | Host-side snapshots / presets | todo | todo |
 | Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent) | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
