@@ -412,7 +412,7 @@
         "0x04": "mixer surface state. Indices 0 and 1 each return 16 two-byte strip records (fader level plus pan/mute/solo flags) in the capture dialect used by the profile.",
         "0x0b": "mixer-link selector state. The capture-confirmed index 3 response is a 24-byte bitmap: byte N is nonzero when wire selector N is linked; selectors 0-7 belong to Mix 1 and 16-23 to Mix 2.",
         "0x11": "1 byte, observed `02`. Orion's 0x11 is 'S/PDIF + a capability bitmask'; the Zen Go has S/PDIF, so `02` is plausibly a channel/capability count -- UNCONFIRMED, do not rely on it.",
-        "0x19": "AFX strip order, index 0 only. OBSERVED on the owner's unit (fw 05.04, 2026-11-16, guarded CLI `readback 0x19 0`): 5 non-zero body bytes `01 00 24 00 1b`. This is NOT a declared layout: the Orion reading (eight {type, inst} pairs, here types 1 / 36 / 27 at instance 0) is a candidate only, and what the strip actually held was not confirmed against the vendor panel. Outer indices above 0 are not bounded for this device (safe_queries is an older fw 06.06 hint, not a bound).", "0x18": "observed dual-surface mixer records at index 0. Only the solo field is declared by the profile; the remaining bytes and exact role are not decoded."
+        "0x19": "AFX strip order. The vendor panel queries indices 0-11 on connect (owner's unit fw 05.04, vendor panel 1.1.26 under Wine, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17: the panel's own connect walk). Each body is {type, inst} byte pairs, zero-padded; an empty rack returns an all-zero body. On the owner's unit index 0 returned `01 00 24 00 1b 00` (types 1, 36, 27, all instance 0) and indices 1-11 were empty; the same walk then issued tagged cat 0x07 queries for exactly types 1, 27 and 36 (index 0x80000000 | type), which ties the pair layout to this device. Index 0 is mixer channel 1 (vendor panel observation, see afx_inserts). No writes captured.", "0x18": "observed dual-surface mixer records at index 0. Only the solo field is declared by the profile; the remaining bytes and exact role are not decoded."
       },
       "observed_walk": "The Zen Go Launcher's connect walk is TINY compared to the Orion's: only 3 queries, categories 0x00 / 0x01 / 0x11, each at index 0 (identical in capture_01_enumeration.pcapng and capture_01_enumeration_diff_filter.pcapng). The Orion walks 113 records across 10 categories. So this capture gives us NO record counts for any category.",
       "hazard": "!! COMPLETE CATEGORY COUNTS ARE NOT KNOWN FOR THIS DEVICE. !! On the Orion, an out-of-range readback index crashes the firmware outright (Cortex-M BusFault, physical power cycle required -- see orion_studio_sc.json frame.readback.hazard). The Zen Go is the same protocol family and must be assumed to share the flaw. Its connect walk queries only index 0 of three categories, so `category_counts` remains EMPTY. The WebUI may use only the explicitly capture-confirmed feature layouts (routing cat 0x03 indices 3, 5, 6-9; mixer cat 0x04 indices 0-1; link bitmap cat 0x0b index 3); all other indices remain blocked until bounded by device evidence.",
@@ -427,7 +427,7 @@
         "firmware_offset": null,
         "notes": "Category 0x01 is a 48-byte record of NUL-terminated ASCII at fixed offsets: model name @0, SERIAL @20 (13 chars), hardware revision @36, then 4 binary bytes @44 (little-endian u32; both units seen decode to mid-2021, so plausibly a build/calibration timestamp -- a GUESS, not confirmed). Category 0x00 is a separate record: only 2 bytes here and BINARY (`01 5a`), with no version string -- firmware_offset is null so parse_firmware_record returns None rather than inventing a version. The ASCII fw rev for this device is the '6.6' at offset 36 of category 0x01. Parsed by protocol.parse_identity_record / parse_firmware_record."
       },
-      "category_counts": {},
+      "category_counts": {"0x19": 12},
       "safe_queries": [
         {"category": "0x01", "index": 0},
         {"category": "0x11", "index": 0},
@@ -588,6 +588,18 @@
           "fields": [{ "name": "linked", "offset": 0, "type": "bool" }],
           "status": "capture-confirmed",
           "evidence": "zen-go-tui/docs/protocol/zengosc-capture-audit.md: q0b/03 is a 24-byte selector bitmap; byte N is asserted/nonzero when selector N is linked."
+        },
+        {
+          "kind": "afx_strip_order",
+          "category": "0x19",
+          "index_range": [0, 11],
+          "name": "afx_strip_order",
+          "record_count": 8,
+          "record_stride": 2,
+          "fields": [{ "name": "type", "offset": 0, "type": "u8" }, { "name": "inst", "offset": 1, "type": "u8" }],
+          "status": "capture-confirmed",
+          "notes": "Outer indices 0-11 are exactly what the vendor panel queries on connect. The {type, inst} pair layout is tied to this device by the same walk (see categories 0x19). record_count 8 is a parse width over a zero-padded body, not a proven slot limit: at most three slots have been seen filled.",
+          "evidence": "owner's unit fw 05.04, vendor panel 1.1.26, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17"
         }
       ],
       "capture_dialect_variants": {
@@ -596,7 +608,7 @@
           "notes": "The TUI audit also records q03 assignment replies with body[0] as a sub-id: q03/05 is a 9-byte body containing four pairs, while q03/06..09 are 33-byte bodies containing an eight-byte early-bank prefix followed by twelve pairs. This is an alternate capture-dialect shape, not a replacement for this profile's 17/65-byte routing layouts. Do not merge the variants without a response discriminator or fixture; the shared parser currently uses the capture-confirmed routing layouts above."
         }
       },
-      "category_counts_note": "Deliberately empty -- see .hazard. Fill this in ONLY from the device's own connect enumeration, never by probing and never by copying the Orion's counts (different device, different record arrays). The routing feature uses only the explicit capture-confirmed layouts above; it does not treat the six observed routing records as a complete category bound. The q0b/03 link bitmap is a bounded feature layout, not proof of the category's complete record count.",
+      "category_counts_note": "0x19 = 12 comes from the vendor panel's connect walk on the owner's unit (owner's unit fw 05.04, 2026-11-17; indices 0-11 queried, none higher). Every other category is deliberately absent -- see .hazard. Fill this in ONLY from the device's own connect enumeration, never by probing and never by copying the Orion's counts (different device, different record arrays). The routing feature uses only the explicit capture-confirmed layouts above; it does not treat the six observed routing records as a complete category bound. The q0b/03 link bitmap is a bounded feature layout, not proof of the category's complete record count.",
       "cli": "Works with the shared code: protocol.build_readback_query / is_readback_response / readback_body; CLI `readback <cat> [idx]`. Routing cat 0x03 indices 3, 5, and 6-9 are capture-confirmed and safely mapped. parse_routing_record uses the profile destination channel counts; parse_mixer_record uses the capture-confirmed Zen Go mixer_state layout for cat 0x04 indices 0 and 1; the generic record decoder exposes the q0b/03 mixer link bitmap.",
       "still_unknown": "The exact roles of routing destinations 3 and 5, the complete Zen Go category-0x03 record count, and the discriminator needed to select the alternate q03 assignment body variant remain unknown. Destinations 6-9 are confirmed as one logical 32-slot mixer input map and are written in lockstep. The mixer category 0x04 layouts for indices 0 and 1 and the q0b/03 link bitmap are capture-confirmed; live control round-trip still needs hardware verification."
     }
@@ -815,6 +827,22 @@
       "Discrete 8 Pro HID report descriptor has no Report ID, so Linux hidraw writes are 321 bytes (leading 0x00 + 320 payload). Check the Zen Go's descriptor before writing from Linux.",
       "min write interval ~250 ms on Discrete 8 Pro (Orion tolerates ~30-80 ms); unknown for Zen Go -- rate-limit."
     ]
+  },
+
+  "afx_inserts": {
+    "_comment": "Read-only insert display for the WebUI mixer. No AFX write is mapped for this device.",
+    "status": "observed",
+    "readback_kind": "afx_strip_order",
+    "mixer_channels": [0, 1, 2, 3],
+    "record_index_for_channel": { "0": 0, "1": 1, "2": 2, "3": 3 },
+    "mapping_status": "derived",
+    "mapping_notes": "The Zen Go Synergy Core User Manual (pp. 46-48) says mixer channels 1 to 4 host the Synergy Core FX racks and that both mixers share them. Record 0 = channel 1 is confirmed: the vendor panel showed a three-effect rack on channel 1 and empty racks on channels 2-4 while record 0 held three slots and records 1-3 were empty. Records 1-3 = channels 2-4 is still derived (no loaded rack seen there). Records 4-11 are polled but not shown; their role is unknown.",
+    "type_labels": {
+      "1": { "label": "ClearQ", "status": "confirmed", "evidence": "vendor panel 1.1.26 on the owner's unit, 2026-11-17: the channel 1 rack lists ClearQ, SMT-100A, Master De-esser in that order while record 0 holds types 1, 36, 27 in that order" },
+      "27": { "label": "Master De-esser", "status": "confirmed", "evidence": "same observation; also the Orion type id" },
+      "36": { "label": "SMT-100A", "status": "confirmed", "evidence": "same observation" }
+    },
+    "evidence": "owner's unit fw 05.04, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17; public manual for the channel placement"
   },
 
   "constraints": {

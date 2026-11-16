@@ -145,6 +145,7 @@ async function reloadReadback() {
   syncMixerLinksFromReadback(STRUCTURED);
   syncInputLinksFromReadback(STRUCTURED);
   renderStructuredReadbacks();
+  paintMixerInserts();
   initAuraVerbPanel();
   const rh = routingHome();
   if (!rh || !rh.children.length || (!RG_POPPED && !rh.querySelector('#rmx'))) buildRouting(); else refreshRouting();

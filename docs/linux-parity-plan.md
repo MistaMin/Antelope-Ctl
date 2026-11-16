@@ -219,8 +219,9 @@ from its log-named connect walk (`intake_hints` in the profile).
 | Oscillator / talkback / brightness / DC-coupling | check panel | check panel |
 | Meters | todo | `0x83` magic known; calibration open |
 | Mic emulation (emuMic) | todo, last (hint: cat `0x16`) | candidate `0x1a` frame; last |
-| AFX inserts: read-only display | todo (hint: cat `0x19` idx 0..35; needs the vendor connect-walk capture for bounds) | index 0 read on owner fw 05.04: body `01 00 24 00 1b` (observed, layout and contents unconfirmed); outer indices 0..11 appear only in the older `safe_queries` hint (fw 06.06), not as bounds; manual says racks sit on mixer channels 1-4 (shared by both mixers), record-to-channel order on the wire still to be proven |
+| AFX inserts: read-only display | vendor panel 1.9.22 connect walk captured (2026-11-17): cat `0x19` indices 0..35 queried, all empty on the owner's unit, so the body layout is not yet seen filled; profile not updated yet | **done, read-only**: vendor panel 1.1.26 connect walk gives cat `0x19` = 12 records; record 0 = mixer channel 1 and types 1 / 36 / 27 = ClearQ / SMT-100A / Master De-esser confirmed against the vendor panel; WebUI mixer shows racks on channels 1-4 from live readback (fw 05.04). Records 1-3 = channels 2-4 still derived; records 4-11 unknown |
 | AFX inserts: bypass / load / parameters | todo, per effect, after captures | todo, per effect, after captures |
+| Vendor panel on Linux for captures | Launcher + Manager Server 1.8.20 + panel run under Wine 11.20 and reach the device over hidraw; needs the service start workaround (see CAPTURING.md) | same; panel 1.1.26 |
 | Host-side snapshots / presets | todo | todo |
 | Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent) | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
 

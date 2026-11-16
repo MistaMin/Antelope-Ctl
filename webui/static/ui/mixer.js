@@ -614,6 +614,69 @@ function wirePrecisionRange(input) {
   }, {passive: false});
 }
 
+// ---- read-only AFX inserts (profile `afx_inserts`) ---------------------
+// Shows what the device reports in each rack. Nothing here writes to the
+// device; a label ending in "?" is a name not yet confirmed on this model.
+function mixerInsertSpec() {
+  const spec = PROFILE?.afx_inserts;
+  return spec && Array.isArray(spec.mixer_channels) ? spec : null;
+}
+
+function mixerInsertBlock(ch, isMaster) {
+  const spec = mixerInsertSpec();
+  if (!spec) return '';
+  // every strip gets the box so faders stay aligned; only rack channels fill it
+  return !isMaster && spec.mixer_channels.includes(ch)
+    ? `<div class="mx-inserts" data-ins-ch="${ch}"></div>`
+    : '<div class="mx-inserts none" aria-hidden="true"></div>';
+}
+
+function paintMixerInserts() {
+  const spec = mixerInsertSpec();
+  if (!spec) return;
+  const layout = (STRUCTURED?.layouts || []).find(l => l.kind === spec.readback_kind);
+  document.querySelectorAll('#mixer [data-ins-ch]').forEach(box => {
+    const index = spec.record_index_for_channel?.[box.dataset.insCh];
+    const records = layout?.current?.[String(index)];
+    const head = document.createElement('span');
+    head.className = 'mx-ins-hd';
+    head.textContent = 'INSERTS';
+    const items = [head];
+    const note = text => {
+      const el = document.createElement('span');
+      el.className = 'mx-ins-empty';
+      el.textContent = text;
+      items.push(el);
+    };
+    if (!records) {
+      box.title = 'No readback from the device yet';
+      note('not read');
+    } else {
+      const loaded = records.filter(r => r.type);
+      box.title = `Device readback, rack record ${index} (read-only)`;
+      if (!loaded.length) note('empty');
+      loaded.forEach(r => {
+        const known = spec.type_labels?.[String(r.type)];
+        const el = document.createElement('span');
+        el.className = 'mx-ins';
+        el.textContent = known
+          ? known.label + (known.status === 'confirmed' ? '' : '?')
+          : 'type ' + r.type;
+        el.title = `${el.textContent} · type ${r.type}, instance ${r.inst}`
+          + (known && known.status !== 'confirmed' ? ' · name not confirmed on this device' : '');
+        items.push(el);
+      });
+    }
+    box.replaceChildren(...items);
+  });
+}
+
+setInterval(async () => {
+  if (!mixerInsertSpec() || !ONLINE) return;
+  try { STRUCTURED = await getJSON('/api/readbacks'); } catch (e) { return; }
+  paintMixerInserts();
+}, 15000);
+
 function renderMix(pane, m) {
   const slots = (MIXER.current || {})[String(m)] || [];
   const [fLo, fHi] = MIXER.ranges.fader, [pLo, pHi] = MIXER.ranges.pan, [sLo, sHi] = MIXER.ranges.send;
@@ -632,6 +695,7 @@ function renderMix(pane, m) {
     return `<div class="mixer-strip${isMaster ? ' master' : ''}" data-ch="${ch}">
       ${sourceFeature && !isMaster ? `<select class="mxsource" data-mix-source ${sourceFeature.writable ? '' : 'disabled'} title="${sourceFeature.note}">${mixerSourceOptions(sourceFeature, m, ch)}</select>` : ''}
       <span class="mxname">${label}</span>
+      ${mixerInsertBlock(ch, isMaster)}
       ${linkStart ? `<button class="linkbtn" data-mix-link title="${linkLabel}">${LINK_ICON}</button>` : ''}
       <span class="mxval" data-fval>${mixerFaderLabel(fader)}</span>
       ${hasSend && !isMaster ? `<div class="mixer-knob-control">
@@ -659,6 +723,7 @@ function renderMix(pane, m) {
       </div>
     </div>`;
   }).join('');
+  paintMixerInserts();
 
   rows.querySelectorAll('.mixer-strip').forEach(strip => {
     const ch = +strip.dataset.ch;
