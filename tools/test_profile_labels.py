@@ -12,7 +12,11 @@ from webui import device_ui
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PROFILE_PATHS = sorted((ROOT / "profiles").glob("*_sc.json"))
+SHARED_CATALOGS = {"afx_effects.json", "mic_models.json"}
+PROFILE_PATHS = sorted(
+    path for path in (ROOT / "profiles").glob("*.json")
+    if path.name not in SHARED_CATALOGS
+)
 
 SHARED_PARAM_LABELS = {
     "gain": "Gain",

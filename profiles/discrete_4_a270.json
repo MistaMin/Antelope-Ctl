@@ -1,0 +1,140 @@
+{
+  "_comment": "Intake stub for the original Discrete 4 (USB PID 0xa270). This is NOT the Discrete 4 Synergy Core (0xa2be, discrete_4_sc.json) and nothing from that profile, Zen Go or Orion is assumed to apply. Every feature is disabled until this device's own captures confirm it. See docs/linux-parity-plan.md.",
+  "device": {
+    "name": "Antelope Discrete 4",
+    "vid": "0x23e5",
+    "pid": "0xa270",
+    "bcdDevice": "02.00",
+    "status": "confirmed",
+    "notes": "vid/pid/bcdDevice and product string \"Discrete4\" read from the attached unit's USB device descriptor (macOS IORegistry / system_profiler, 2026-11-16). Device class 0xEF/0x02/0x01 (interface association), bcdUSB 2.00, high speed, one configuration. Serial deliberately not recorded.",
+    "evidence": "owner's unit, macOS ioreg -c IOUSBHostDevice, 2026-11-16"
+  },
+  "profile_schema": {
+    "id": "antelope-device-profile",
+    "version": 1
+  },
+  "labels": {
+    "sections": {
+      "inputs": "Inputs",
+      "outputs": "Output Buses",
+      "routing": "Routing",
+      "mixer": "Virtual Mixer",
+      "settings": "Settings",
+      "diagnostics": "Protocol Readback"
+    },
+    "spaces": {
+      "input": {"label": "Preamps", "item_format": "Preamp {index}"},
+      "bus": {"label": "Output", "item_format": "{label}"}
+    },
+    "params": {}
+  },
+  "features": {
+    "inputs": {
+      "kind": "channel_strips",
+      "label": "Inputs",
+      "enabled": false,
+      "space": "input",
+      "controls": [],
+      "status": "disabled -- no command or state mapping captured on this device"
+    },
+    "buses": {
+      "kind": "output_buses",
+      "label": "Output Buses",
+      "enabled": false,
+      "controls": [],
+      "status": "disabled -- output mapping not captured"
+    },
+    "routing": {
+      "kind": "routing_matrix",
+      "label": "Routing",
+      "enabled": false,
+      "controls": [],
+      "status": "disabled -- routing frame not captured"
+    },
+    "mixer": {
+      "kind": "virtual_mixer",
+      "label": "Virtual Mixer",
+      "enabled": false,
+      "controls": [],
+      "status": "disabled -- mixer frame not captured"
+    },
+    "settings": {
+      "kind": "device_settings",
+      "label": "Settings",
+      "enabled": false,
+      "controls": [],
+      "status": "disabled -- settings frames not captured"
+    }
+  },
+  "usb_interfaces": {
+    "status": "observed",
+    "notes": "Interface classes from the device's own descriptors. Endpoint addresses, packet sizes, alternate settings and UAC2 channel clusters were NOT readable on macOS without vendor tooling; take them from `lsusb -v -d 23e5:a270` on Linux before relying on any of them.",
+    "evidence": "owner's unit, macOS ioreg, 2026-11-16",
+    "interfaces": [
+      {"number": 0, "class": "0x01 audio", "subclass": "0x01 control", "protocol": "0x20 UAC2", "endpoints": 0},
+      {"number": 1, "class": "0x01 audio", "subclass": "0x02 streaming", "protocol": "0x20 UAC2", "name": "Discrete4 Playback", "endpoints": "1 (alt setting 1)"},
+      {"number": 2, "class": "0x01 audio", "subclass": "0x02 streaming", "protocol": "0x20 UAC2", "name": "Discrete4 Recording", "endpoints": "1 (alt setting 1)"},
+      {"number": 3, "class": "0x03 HID", "subclass": "0x00", "protocol": "0x00", "endpoints": 2}
+    ]
+  },
+  "transport": {
+    "type": "hid",
+    "interface": 3,
+    "report_size": null,
+    "out_endpoint": null,
+    "in_endpoint": null,
+    "poll_interval_ms": null,
+    "status": "unconfirmed",
+    "notes": "Interface 3 is a HID interface with two endpoints (observed). Report size, report IDs and endpoint addresses are unknown: run tools/hid_probe.py on Linux first. The vendor manager-server log names in-band requests with magic 0x74 and responses 0x75 for this unit, which matches the family readback shape in PROTOCOL.md §4a, but that is a hint, not a capture.",
+    "evidence": "owner's unit, macOS ioreg, 2026-11-16; vendor manager-server runtime log (names only)"
+  },
+  "frame": {
+    "command": {
+      "status": "unconfirmed",
+      "notes": "No outbound command captured. Do not assume any sibling's 0x70 / opcode / param-id layout."
+    },
+    "state_report": {
+      "status": "unconfirmed",
+      "notes": "Whether this device streams a passive state report, and with which magic, is unknown."
+    }
+  },
+  "intake_hints": {
+    "status": "unconfirmed",
+    "notes": "Readback requests the vendor panel issued on connect, as printed (names + category/index) in the vendor's own runtime logs on the owner's Mac, 2026-11-13..16. They are hints for planning captures ONLY. They are not device-derived category_counts and must not be used as query bounds (PROTOCOL.md §4a hazard). Confirm each with a usbmon capture of the vendor connect walk before adding frame.readback.",
+    "connect_walk": [
+      {"category": "0x00", "name": "get_firmware", "indices": [0]},
+      {"category": "0x01", "name": "get_passport (identity, contains serial)", "indices": [0]},
+      {"category": "0x03", "name": "get_routing", "indices": "0..13 (14 banks)"},
+      {"category": "0x04", "name": "get_mixer", "indices": "0..3 (4 mixes)"},
+      {"category": "0x0a", "name": "get_reverb_config", "indices": [0], "fields": ["color", "density", "early_ref_gain", "late_ref_delay", "..."]},
+      {"category": "0x0b", "name": "get_preamps_links / get_mixer_links / get_afx_links", "indices": [0, 3, 4]},
+      {"category": "0x0e", "name": "get_trim_configs", "indices": [0], "fields": ["trim_id", "control", "levels[4] {whole, fract}"]},
+      {"category": "0x11", "name": "get_assignment_status / get_feature_mask", "indices": [0, 1]},
+      {"category": "0x12", "name": "get_panning_law", "indices": [0]},
+      {"category": "0x15", "name": "get_afx_remaining_featured_instances (AFX, out of fork scope)", "indices": [0]},
+      {"category": "0x16", "name": "get_mic_emulations", "indices": [0]},
+      {"category": "0x17", "name": "get_reverb_returns", "indices": [0], "fields": ["level", "mute"], "record_count_hint": 4},
+      {"category": "0x18", "name": "get_reverb_sends", "indices": [0], "fields": ["level", "mute", "pan", "solo"]},
+      {"category": "0x19", "name": "get_afx_strip_order (AFX, out of fork scope)", "indices": "0..35"}
+    ],
+    "audio_streaming_hint": "The macOS vendor driver exposed 16 in / 16 out, 24-bit, 32k-192k. Check the device's own UAC2 descriptors and snd-usb-audio behaviour on Linux; do not copy these numbers into a profile without that."
+  },
+  "params": {},
+  "channels": {
+    "count": null,
+    "status": "unconfirmed",
+    "notes": "Preamp count not yet established from this device's reports."
+  },
+  "buses": {
+    "known": {},
+    "status": "unconfirmed",
+    "notes": "No bus ids captured."
+  },
+  "open_questions": [
+    "HID report descriptor, report size, report-ID framing on hidraw, endpoint addresses.",
+    "Does the device stream a passive state report? Which magic? Which magic carries meters?",
+    "Outbound command frame shape (magic, opcode, param-id, target, value offsets).",
+    "Confirmed outer bounds for every readback category in intake_hints.connect_walk.",
+    "Does snd-usb-audio stream 16x16 at every rate without a quirk? Clock-source behaviour?"
+  ]
+}
