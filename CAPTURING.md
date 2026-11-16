@@ -332,3 +332,32 @@ otherwise drown out the real signal -- pass `--magic 0x75` if you're
 specifically hunting meter offsets instead. It prints each frame-to-frame
 transition with the exact offsets and old/new values; match the timestamp
 against when you actually made your change in the Launcher.
+
+## Vendor Launcher under Wine (no VM)
+
+Tried on Arch (Omarchy), Wine 11.20, 2026-11-16/17, with a Zen Go Synergy Core
+and an original Discrete 4. It worked, with two workarounds.
+
+- Wine exposes the devices' HID interface through `winebus` (hidraw), given
+  the udev rule in `packaging/70-antelope.rules`. No Windows USB driver is
+  needed for control; the driver installers a device bundle launches crash
+  under Wine and can be cancelled.
+- Use a dedicated `WINEPREFIX` outside the repository: it ends up holding
+  account data and serials.
+- **Manager Server will not start as a Wine service.** `sc start
+  Antelope-Manager-Service` fails with 1053: the process exits as soon as
+  Wine's `services.exe` launches it, but runs when started by hand. Workaround:
+  point the service's `ImagePath` at a placeholder that just stays alive (for
+  example a batch file running a long `ping`), run `sc start`, and start
+  `AntelopeAudioServer.exe` by hand while the start is pending. It then
+  registers as the running service and serves the devices. Start `SamSs` and
+  `RpcSs` first.
+- If the Launcher's downloads sit at 0 %, check IPv6: a network that hands out
+  an IPv6 address without connectivity stalls them.
+- Stop this project's WebUI (`systemctl --user stop antelope-webui`) before
+  the vendor stack opens a device, and stop Wine (`wineserver -k`) before
+  starting it again.
+- Capture only control traffic to keep files small:
+  `dumpcap -i usbmonN -w - | tshark -r - -Y "usb.transfer_type == 0x01 || usb.transfer_type == 0x02" -w out.pcapng`.
+  The panel's connect walk happens when a control panel starts, not when the
+  Launcher starts: close the panel, start the capture, start the panel.
