@@ -182,18 +182,18 @@ from its log-named connect walk (`intake_hints` in the profile).
 |---|---|---|
 | Audio stream, all rates (snd-usb-audio) | 16×16 S24_3LE 32k–192k enumerates, no quirk; record + play OK at 48k; other rates todo | same 16×16 layout enumerates; playback OK. **Capture alone fails** (I/O error): usbmon shows UAC2 SET_CUR rate + SET_INTERFACE succeed but the device returns 0-byte iso IN packets. **Capture works while playback runs** (2 s/96k/16ch exact). Next: test snd-usb-audio `quirk_flags` (needs root), else document "open playback too" |
 | Transport (report size, framing, endpoints) | todo | upstream confirmed; re-check on owner unit |
-| Preamp gain / mode / 48V / phase | todo | mapped; live verify |
+| Preamp gain / mode / 48V / phase | todo | gain verified on owner fw 05.04 (ch 1 0→1→0 dB, readback); mode/phase not yet toggled; **48V deliberately not toggled** (mic safety, owner present only) |
 | Preamp link | todo (hint: cat `0x0b` idx 0) | mapped; live verify |
 | Digital input gain / link | todo | todo |
-| Output buses: level / mute / dim / mono | todo | level/mute mapped; dim/mono open (`param 0x66`?) |
+| Output buses: level / mute / dim / mono | todo | dim verified on all 3 buses, full status restored (selftest, fw 05.04); mute set verified; status is an exclusive enum (dim replaces mute); no mono flag in the state report |
 | Output trim | todo (hint: cat `0x0e`) | todo |
 | Headphone outputs | todo | todo |
-| Routing matrix | todo (hint: cat `0x03`, 14 banks) | mapped (dest 6–9 lockstep); dest 3/5 and bank `0x03` open |
+| Routing matrix | todo (hint: cat `0x03`, 14 banks) | readback parses; dest 5 write → verify → restore passed (fw 05.04); dest 6–9 lockstep; roles of dest 3/5 and bank `0x03` open |
 | Virtual mixers: fader / pan / mute / solo | todo (hint: cat `0x04`, 4 mixes) | mapped, 2 mixes × 16 |
 | Mixer channel link | todo (hint: cat `0x0b` idx 3) | mapped |
 | Reverb: config / sends / returns | todo (hints: cats `0x0a`, `0x18`, `0x17`) | todo |
 | Pan law | todo (hint: cat `0x12`) | todo |
-| Sample rate / clock source | todo | mapped |
+| Sample rate / clock source | todo | read verified on owner unit (96 kHz, Internal); writes not tested (drop audio) |
 | Oscillator / talkback / brightness / DC-coupling | check panel | check panel |
 | Meters | todo | `0x83` magic known; calibration open |
 | Mic emulation (emuMic) | todo, last (hint: cat `0x16`) | candidate `0x1a` frame; last |
