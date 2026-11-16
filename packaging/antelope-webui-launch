@@ -1,0 +1,12 @@
+#!/bin/bash
+# Start the WebUI service if needed, wait for it to listen, open it as an app window.
+url=http://127.0.0.1:8714
+systemctl --user start antelope-webui.service || exit 1
+for _ in $(seq 50); do
+  (exec 3<>/dev/tcp/127.0.0.1/8714) 2>/dev/null && break
+  sleep 0.1
+done
+if command -v omarchy-launch-webapp >/dev/null; then
+  exec omarchy-launch-webapp "$url"
+fi
+exec chromium --app="$url"
