@@ -90,8 +90,82 @@
   },
   "frame": {
     "command": {
-      "status": "unconfirmed",
-      "notes": "No outbound command captured. Do not assume any sibling's 0x70 / opcode / param-id layout."
+      "status": "observed",
+      "notes": "Outbound commands are 320-byte reports with magic 0x70 at offset 0, a one-byte opcode at offset 4 and the payload from offset 16. Only the three AFX frames below have been captured; no preamp, bus, routing or mixer command has. Nothing here is wired to a writer.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
+    },
+    "afx_chain_write": {
+      "status": "observed",
+      "opcode": "0x5b",
+      "layout": "70 00 00 00 | 5b 00 00 00 | 00 x8 | d7 49 | <strip> | {type, inst} pairs for the whole rack, zero-padded",
+      "observations": [
+        "load Master De-esser into the empty PREAMP 1 rack: d7 49 00 1b 00",
+        "add ClearQ after it: d7 49 00 1b 00 01 00",
+        "remove the first effect: d7 49 00 01 00",
+        "remove the last effect (empty rack): d7 49 00"
+      ],
+      "notes": "The panel rewrites the whole rack on every add or remove. Only strip 0 was exercised, so the <strip> byte position is inferred from it being zero in every frame. Loading ClearQ was followed by five opcode-0x1c frames (param d5 0a ...), not decoded. Not replayed by this project.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8), d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c); each frame matches one logged click to within a second"
+    },
+    "afx_bypass": {
+      "status": "observed",
+      "opcode": "0x14",
+      "layout": "70 00 00 00 | 14 00 00 00 | 00 x8 | 98 | 00 | <type> | <enabled>",
+      "observations": [
+        "first click on the slot's BP button (Master De-esser, PREAMP 1): 98 00 1b 00",
+        "second click: 98 00 1b 01"
+      ],
+      "notes": "One effect, one strip, one instance: which of the two zero bytes is the instance and whether a strip is addressed at all is unknown. The last byte reads as enabled = 1 / bypassed = 0. Not replayed by this project.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8)"
+    },
+    "readback": {
+      "status": "capture-confirmed",
+      "request": "host->device, EP 0x01 OUT, full 320-byte report: 74 00 00 00 | 10 00 00 00 | <category> 00 00 00 | <index> 00 00 00 | 00...",
+      "response": "device->host, EP 0x82 IN, full 320-byte report: 75 00 00 00 | 10 00 00 00 | <category> 00 00 00 | <index> 00 00 00 | <data...>",
+      "request_magic": "0x74",
+      "response_magic": "0x75",
+      "response_discriminator_offset": 1,
+      "response_discriminator": "0x00",
+      "magic_offset": 0,
+      "subcmd_offset": 4,
+      "subcmd": "0x10",
+      "category_offset": 8,
+      "index_offset": 12,
+      "data_offset": 16,
+      "hazard": "Same protocol family as the Orion, where an out-of-range index BusFaults the MCU (power cycle). Query only inside category_counts.",
+      "categories": {
+        "0x03": "routing, 14 records (body lengths seen: 9, 5, 5, 5, 5, 5, 33, 17, 5, 9, 64, 64, 64, 64). Not decoded.",
+        "0x04": "mixer, 4 records of 133 bytes. Not decoded.",
+        "0x07": "per-effect instance state, queried only for loaded types (index 0x1b for Master De-esser; index 0 after ClearQ was loaded). Not bounded: do not query.",
+        "0x0a": "reverb config, 34 bytes. Not decoded.",
+        "0x0b": "link tables; the panel queries indices 0, 3 and 4 only. Not bounded: indices 1 and 2 were never queried.",
+        "0x0c": "queried when the effect menu opens; 118-byte {type, count} style body. Not decoded.",
+        "0x0e": "trim config, 7 bytes. Not decoded.",
+        "0x11": "index 0: 1 byte; index 1: 67 bytes. Not decoded.",
+        "0x12": "pan law, 1 byte.",
+        "0x15": "remaining AFX instances, {type, count} pairs (104 bytes). Not decoded further.",
+        "0x16": "mic emulations, 16 bytes. Not decoded.",
+        "0x17": "reverb returns, 4 bytes.",
+        "0x18": "reverb sends, 66 bytes.",
+        "0x19": "AFX strip order, 36 records of {type, inst} pairs, zero-padded. Record 0 is the mixer channel 1 (PREAMP 1) rack."
+      },
+      "category_counts": {"0x03": 14, "0x04": 4, "0x0a": 1, "0x0c": 1, "0x0e": 1, "0x11": 2, "0x12": 1, "0x15": 1, "0x16": 1, "0x17": 1, "0x18": 1, "0x19": 36},
+      "category_counts_note": "Each count is the highest index the vendor panel itself queried, plus one, identical across three connect walks. Categories 0x00 / 0x01 (firmware, identity with serial) are queried by the Manager Server, not the panel, and are left out until that capture is analysed.",
+      "record_layouts": [
+        {
+          "kind": "afx_strip_order",
+          "category": "0x19",
+          "index_range": [0, 35],
+          "name": "afx_strip_order",
+          "record_count": 8,
+          "record_stride": 2,
+          "fields": [{"name": "type", "offset": 0, "type": "u8"}, {"name": "inst", "offset": 1, "type": "u8"}],
+          "status": "capture-confirmed",
+          "notes": "With one effect loaded record 0 read `1b 00`; with two, `1b 00 01 00`; empty otherwise. record_count 8 is a parse width over a zero-padded body: the manual gives the Premium pack 4 FX instances per strip, and at most two slots have been seen filled.",
+          "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
+        }
+      ],
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29) and the three AFX captures"
     },
     "state_report": {
       "status": "observed",
@@ -120,6 +194,20 @@
     ],
     "audio_streaming": "Linux 7.2 snd-usb-audio, no quirk (/proc/asound stream0, 2026-11-16): playback iface 1 EP 0x05 OUT async, capture iface 2 EP 0x84 IN async (also the playback sync EP), both S24_3LE x 16 ch, rates 32000/44100/48000/88200/96000/176400/192000, 125 us packets. 2 s record and silent playback at 48 kHz succeeded. Other rates untested."
   },
+  "afx_inserts": {
+    "_comment": "Read-only insert data. The WebUI cannot show it yet because this device has no mixer mapping.",
+    "status": "observed",
+    "readback_kind": "afx_strip_order",
+    "mixer_channels": [0, 1, 2, 3],
+    "record_index_for_channel": {"0": 0, "1": 1, "2": 2, "3": 3},
+    "mapping_status": "derived",
+    "mapping_notes": "Record 0 = mixer channel 1 is confirmed: effects loaded into the PREAMP 1 rack appeared in record 0 and the reconnected panel drew them on channel 1. The panel shows AFX areas on channels 1-4; records 1-3 for channels 2-4 are assumed. Records 4-35 are unknown.",
+    "type_labels": {
+      "1": {"label": "ClearQ", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 1"},
+      "27": {"label": "Master De-esser", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 27"}
+    },
+    "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
+  },
   "params": {},
   "channels": {
     "count": null,
@@ -134,8 +222,8 @@
   "open_questions": [
     "HID report descriptor, report size, report-ID framing on hidraw, endpoint addresses.",
     "Does the device stream a passive state report? Which magic? Which magic carries meters?",
-    "Outbound command frame shape (magic, opcode, param-id, target, value offsets).",
-    "Confirmed outer bounds for every readback category in intake_hints.connect_walk.",
+    "Outbound command frames for preamps, buses, routing and mixer (only three AFX frames are captured).",
+    "Body layouts for readback categories 0x03, 0x04, 0x0a, 0x0b, 0x0e, 0x11, 0x15-0x18 (bounds are known, contents are not).",
     "Does snd-usb-audio stream 16x16 at every rate without a quirk? Clock-source behaviour?"
   ]
 }
