@@ -540,7 +540,12 @@ def t_write_bus_flags(dev):
             if data is None:
                 return record(FAIL, f'WRITE bus {bus} {key}', 'no state report before write')
             before = proto.parse_bus_state(dev.p, data, bus)
+            if key not in before:
+                record(SKIP, f'WRITE bus {bus} {key}', 'state report does not carry this flag')
+                continue
             orig = int(before[key])
+            orig_status = before['status_raw']
+            orig_mute = before.get('mute')
             probe = 0 if orig else 1
             after = None
             original_level = int(before['level'])
@@ -564,11 +569,14 @@ def t_write_bus_flags(dev):
                 )
             finally:
                 dev.write(proto.build_command(dev.p, param, bus, orig))
+                # Exclusive-enum status (Zen Go): setting dim replaces mute, so mute must come back too.
+                if orig_mute and 'bus_mute' in dev.p.get('params', {}):
+                    dev.write(proto.build_command(dev.p, 'bus_mute', bus, 1))
                 if level_changed:
                     dev.write(proto.build_command(dev.p, 'bus_level', bus, original_level))
                 data = dev.t.read_one(proto.state_report_magic(dev.p), timeout=3.0)
                 restored = proto.parse_bus_state(dev.p, data, bus) if data is not None else None
-                ok = restored is not None and int(restored[key]) == orig
+                ok = restored is not None and restored['status_raw'] == orig_status
                 record(
                     PASS if ok else FAIL,
                     f'WRITE bus {bus} {key}: restored {orig} '
