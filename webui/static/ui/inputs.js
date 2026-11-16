@@ -14,7 +14,7 @@ function buildChannels(n) {
     el.innerHTML = `
       <div class="top">
         <span class="chid">${channelLabel}</span>
-        <select class="mode" data-mode>${MODES.map(m =>
+        <select class="mode" data-mode${MODES.length ? '' : ' disabled title="not mapped for this device"'}>${MODES.map(m =>
         `<option value="${m}"${String(m).toLowerCase() === 'hiz' && !HIZ.has(ch) ? ' disabled' : ''}>${m.toUpperCase()}</option>`).join('')}</select>
       </div>
       ${ch % 2 === 0 && pairOf(ch) < N_PAIRS
@@ -42,8 +42,8 @@ function buildChannels(n) {
         </div>
       </div>
       <div class="btns">
-        <button class="btn p48" data-tog="phantom">+48</button>
-        <button class="btn" data-tog="phase_invert">Ø</button>
+        <button class="btn p48" data-tog="phantom"${PROFILE?.params?.phantom ? '' : ' disabled title="not mapped for this device"'}>+48</button>
+        <button class="btn" data-tog="phase_invert"${PROFILE?.params?.phase_invert ? '' : ' disabled title="not mapped for this device"'}>Ø</button>
         ${hasEmu(ch) ? `<button class="btn emubtn" data-emu title="mic modeling (emuMic) settings">EMU</button>` : ''}
       </div>`;
 

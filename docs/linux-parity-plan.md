@@ -204,14 +204,14 @@ from its log-named connect walk (`intake_hints` in the profile).
 |---|---|---|
 | Audio stream, all rates (snd-usb-audio) | 16×16 S24_3LE 32k–192k enumerates, no quirk; record + play OK at 48k; other rates todo | same 16×16 layout enumerates; playback OK. **Capture alone fails** (I/O error): usbmon shows UAC2 SET_CUR rate + SET_INTERFACE succeed but the device returns 0-byte iso IN packets. **Capture works while playback runs** (2 s/96k/16ch exact). Next: test snd-usb-audio `quirk_flags` (needs root), else document "open playback too" |
 | Transport (report size, framing, endpoints) | readback requests work through hidraw with the generic 320-byte path (CLI `readback 0x19 0`, 2026-11-17); command magic `0x70`, opcode at offset 4, payload from 16 observed | upstream confirmed; re-check on owner unit |
-| Preamp gain / mode / 48V / phase | todo | all verified on owner fw 05.04 with readback and exact restore (no mics connected): gain, 48V and phase on both preamps; mode Mic/Line on both, HiZ on ch 0 only (ch 1 HiZ not captured). Device keeps a separate gain per mode (ch 0: Mic 20 / Line 15 / HiZ 12 dB) |
+| Preamp gain / mode / 48V / phase | **gain done** for preamps 1-2: vendor writes captured (opcode `0x13`, param `0x50`, state bytes 40-41), then this project's CLI and WebUI wrote 6 -> 7 -> 6 dB on preamp 1 with readback (2026-11-17). Range held to 0-20 dB until the input mode can be read; preamps 3-4 assumed. Mode, 48V, phase: todo | all verified on owner fw 05.04 with readback and exact restore (no mics connected): gain, 48V and phase on both preamps; mode Mic/Line on both, HiZ on ch 0 only (ch 1 HiZ not captured). Device keeps a separate gain per mode (ch 0: Mic 20 / Line 15 / HiZ 12 dB) |
 | Preamp link | todo (hint: cat `0x0b` idx 0) | mapped; live verify |
 | Digital input gain / link | todo | todo |
 | Output buses: level / mute / dim / mono | todo | dim verified on all 3 buses, full status restored (selftest, fw 05.04); mute set verified; status is an exclusive enum (dim replaces mute); no mono flag in the state report |
 | Output trim | todo (hint: cat `0x0e`) | todo |
 | Headphone outputs | todo | todo |
 | Routing matrix | todo (hint: cat `0x03`, 14 banks) | readback parses; dest 5 write → verify → restore passed (fw 05.04); dest 6–9 lockstep; roles of dest 3/5 and bank `0x03` open |
-| Virtual mixers: fader / pan / mute / solo | todo (hint: cat `0x04`, 4 mixes) | mapped, 2 mixes × 16 |
+| Virtual mixers: fader / pan / mute / solo | mute captured on Monitor/HP1 channels 1-2 (opcode `0x16`, `d4 04 <mix> <ch> <fader> <pan+flags>`, same shape as Zen Go); cat `0x04` readback bounded (4 mixes) but not decoded; nothing implemented | mapped, 2 mixes × 16 |
 | Mixer channel link | todo (hint: cat `0x0b` idx 3) | mapped |
 | Reverb: config / sends / returns | todo (hints: cats `0x0a`, `0x18`, `0x17`) | todo |
 | Pan law | todo (hint: cat `0x12`) | todo |
@@ -223,7 +223,7 @@ from its log-named connect walk (`intake_hints` in the profile).
 | AFX inserts: bypass / load / parameters | captured, not implemented: whole-rack chain write (opcode `0x5b`) for load / add / remove, and per-effect bypass (opcode `0x14`), for Master De-esser and ClearQ on strip 0 only. See `frame.afx_chain_write` / `frame.afx_bypass` in the profile | todo, per effect, after captures |
 | Vendor panel on Linux for captures | Launcher + Manager Server 1.8.20 + panel run under Wine 11.20 and reach the device over hidraw; needs the service start workaround (see CAPTURING.md) | same; panel 1.1.26 |
 | Host-side snapshots / presets | todo | todo |
-| Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent) | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
+| Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent). The WebUI runs on this profile (inputs with gain, insert readback) with `ANTELOPE_PROFILE=discrete_4_a270.json` | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
 
 ## 8. Hand-off record
 
