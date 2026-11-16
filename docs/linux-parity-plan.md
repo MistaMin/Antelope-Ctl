@@ -198,7 +198,7 @@ from its log-named connect walk (`intake_hints` in the profile).
 | Meters | todo | `0x83` magic known; calibration open |
 | Mic emulation (emuMic) | todo, last (hint: cat `0x16`) | candidate `0x1a` frame; last |
 | Host-side snapshots / presets | todo | todo |
-| Packaging: udev, systemd user unit | todo | todo |
+| Packaging: udev, systemd user unit | udev rule installed; user unit + launcher in `packaging/` (device-independent) | udev rule installed; user unit + app launcher in `packaging/` (`install-user.sh`); unit and desktop entry validate; live start under systemd not yet run |
 
 ## 8. Hand-off record
 

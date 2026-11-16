@@ -156,7 +156,12 @@ compatibility.
   only an explicitly capture-confirmed feature layout. The incremental sweep
   never invents additional indices.
 - No auth (binds to `127.0.0.1` only).
-- No packaging. It is a sketch.
+- No distro package. `packaging/install-user.sh` installs a `systemd --user`
+  unit (`antelope-webui.service`) and an app-menu launcher that starts the
+  service on demand and opens the UI as a Chromium app window. Set
+  `ANTELOPE_PROFILE` in `~/.config/antelope-ctl/webui.env` when several
+  devices are attached. The service holds the HID node: stop it before
+  using the CLI or a vendor panel on the same device.
 
 ## Run
 
