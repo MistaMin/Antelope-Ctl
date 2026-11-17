@@ -1,0 +1,100 @@
+{
+ "type": 1,
+ "title": "ClearQ",
+ "plate": "Slate",
+ "width": 760,
+ "height": 360,
+ "sections": [
+  {
+   "label": "BAND 1",
+   "x": 20,
+   "y": 20,
+   "w": 136,
+   "h": 320
+  },
+  {
+   "label": "BAND 2",
+   "x": 166,
+   "y": 20,
+   "w": 136,
+   "h": 320
+  },
+  {
+   "label": "BAND 3",
+   "x": 312,
+   "y": 20,
+   "w": 136,
+   "h": 320
+  },
+  {
+   "label": "BAND 4",
+   "x": 458,
+   "y": 20,
+   "w": 136,
+   "h": 320
+  },
+  {
+   "label": "BAND 5",
+   "x": 604,
+   "y": 20,
+   "w": 136,
+   "h": 320
+  }
+ ],
+ "controls": [
+  {
+   "key": "b1_freq",
+   "kind": "knob",
+   "style": "Rd#2f6fb0",
+   "x": 88,
+   "y": 90,
+   "size": 64,
+   "label": "FREQ"
+  },
+  {
+   "key": "b2_gain",
+   "kind": "knob",
+   "style": "Rd#2e7d32",
+   "x": 234,
+   "y": 190,
+   "size": 64,
+   "label": "GAIN"
+  },
+  {
+   "key": "b2_q",
+   "kind": "knob",
+   "style": "Rd#5b7a94",
+   "x": 234,
+   "y": 290,
+   "size": 64,
+   "label": "Q"
+  },
+  {
+   "key": "b3_freq",
+   "kind": "knob",
+   "style": "Rd#2f6fb0",
+   "x": 380,
+   "y": 90,
+   "size": 64,
+   "label": "FREQ"
+  },
+  {
+   "key": "b3_gain",
+   "kind": "knob",
+   "style": "Rd#2e7d32",
+   "x": 380,
+   "y": 190,
+   "size": 64,
+   "label": "GAIN"
+  },
+  {
+   "key": "b3_q",
+   "kind": "knob",
+   "style": "Rd#5b7a94",
+   "x": 380,
+   "y": 290,
+   "size": 64,
+   "label": "Q"
+  }
+ ]
+}

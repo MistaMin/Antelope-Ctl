@@ -55,9 +55,10 @@ class InsertRack:
             'editable_channels': [channel for channel in spec['mixer_channels']
                                   if spec['record_index_for_channel'][str(channel)] in writes['strips']],
             'racks': racks,
-            'mapped_types': sorted(int(kind) for kind in
-                                   ((spec.get('parameters') or {}).get('effects') or {})
-                                   if (spec.get('parameters') or {}).get('enabled')),
+            'mapped_types': sorted(int(kind) for kind, effect in
+                                   ((spec.get('parameters') or {}).get('effects') or {}).items()
+                                   if (spec.get('parameters') or {}).get('enabled')
+                                   and effect.get('editable') is not False),
             'effects': [{'type': int(kind), 'label': labels.get(kind, {}).get('label', f'type {kind}'),
                          'group': labels.get(kind, {}).get('group', '')}
                         for kind in writes['effects']],
@@ -109,7 +110,7 @@ class InsertRack:
             raise RuntimeError('The rack change timed out; check the rack before retrying') from None
 
     # ---- effect parameters -------------------------------------------
-    def _read_block(self, transport, type_id, instance, effect):
+    def _read_reply(self, transport, type_id):
         profile = self.device.profile
         response = transport.query(
             protocol.build_afx_state_query(profile, type_id),
@@ -118,6 +119,10 @@ class InsertRack:
             raise RuntimeError('The device did not return the effect settings')
         body = protocol.readback_body(profile, response)
         self.last_reply = bytes(body)  # whole reply, shown by parameters() for mapping work
+        return self.last_reply
+
+    def _read_block(self, transport, type_id, instance, effect):
+        body = self._read_reply(transport, type_id)
         # The device reports each instance as read_stride bytes; the writable
         # block sits read_offset bytes in (PowerGate: one leading on/off flag).
         length = int(effect['block_length'])
@@ -159,6 +164,11 @@ class InsertRack:
 
         def work(transport):
             type_id, instance, effect = self._slot(transport, spec, channel, slot)
+            if effect.get('editable') is False:
+                # Read layout not confirmed: return the raw reply only, for mapping work.
+                return {'ok': True, 'type': type_id, 'instance': instance, 'editable': False,
+                        'label': spec.get('type_labels', {}).get(str(type_id), {}).get('label', f'type {type_id}'),
+                        'fields': [], 'reply': self._read_reply(transport, type_id).hex(' ')}
             block = self._read_block(transport, type_id, instance, effect)
             return {**self._describe(effect, type_id, instance, block, spec),
                     'reply': self.last_reply.hex(' ')}
@@ -173,6 +183,8 @@ class InsertRack:
 
         def work(transport):
             type_id, instance, effect = self._slot(transport, spec, channel, slot)
+            if effect.get('editable') is False:
+                raise ValueError('The settings of this effect cannot be read back yet, so they are not edited')
             before = self._read_block(transport, type_id, instance, effect)
             # A block whose mapped fields are out of range means the read layout is
             # wrong for this effect; writing it back would shift every setting.
@@ -181,8 +193,10 @@ class InsertRack:
                 raise RuntimeError('The effect settings read back out of range; nothing was changed')
             after = protocol.afx_block_set(effect, before, key, value)
             if after != before:
-                transport.write(protocol.build_afx_parameter_write(
-                    self.device.profile, type_id, instance, after))
+                # One frame, or for a banded effect one frame per changed band.
+                for frame in protocol.build_afx_parameter_writes(
+                        self.device.profile, type_id, instance, after, before):
+                    transport.write(frame)
                 time.sleep(0.15)
                 if self._read_block(transport, type_id, instance, effect) != after:
                     self.failure = ('An effect setting did not read back as written. Editing is off '
@@ -234,6 +248,8 @@ class InsertRack:
                 if instance is None:
                     raise RuntimeError('Every verified instance of this effect is already in use')
                 after = before + [(type_id, instance)]
+                # Built before anything is written: a bad profile entry must not leave a half load.
+                frames, expected = protocol.afx_load_defaults(self.device.profile, type_id, instance)
             packet = protocol.build_afx_insert_chain(self.device.profile, strip, after)
             transport.write(packet)
             time.sleep(0.2)
@@ -245,5 +261,19 @@ class InsertRack:
                 self.failure = ('The rack did not read back as written. Insert editing is off '
                                 'until the server restarts; check the rack in the vendor panel.')
                 raise RuntimeError(self.failure)
+            if operation == 'load':
+                # The vendor panel follows some loads with the effect's default settings.
+                for frame in frames:
+                    transport.write(frame)
+                    time.sleep(0.01)
+                limit = (spec.get('parameters') or {}).get('max_instance')
+                if frames and expected is not None and (limit is None or instance <= limit):
+                    time.sleep(0.15)
+                    params = protocol.afx_parameter_effect(self.device.profile, type_id)
+                    if self._read_block(transport, type_id, instance, params) != expected:
+                        self.failure = ('The default settings of the loaded effect did not read back as '
+                                        'written. Insert editing is off until the server restarts; check '
+                                        'the effect in the vendor panel.')
+                        raise RuntimeError(self.failure)
             return self.state()
         return self._run(work)

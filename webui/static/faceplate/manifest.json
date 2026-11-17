@@ -281,6 +281,13 @@
       "marks": "dark",
       "text": "#101416",
       "w": 760
+    },
+    "Walnut": {
+      "file": "plates/walnut.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f3e3c4",
+      "w": 760
     }
   },
   "switches": {
