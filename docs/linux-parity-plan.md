@@ -235,3 +235,9 @@ Each agent ends with the playbook's compact record, plus:
 - which checklist rows moved, and to what status;
 - branch and commit;
 - any vendor-terms or clean-room question for the owner.
+
+**Discrete 4 live trials, 2026-11-17** (this project's server on the owner's unit, each change read back and restored):
+input mode Line -> Mic -> Line on all four preamps (state byte 44+ch, per-mode gain follows); gain on preamps 3 and 4;
+Headphone 1 level, mute and dim (bytes 30/31); mixer fader, pan, mute and solo on mixes 0-3 (strips 1, 2, 3, 9, 16) via
+cat 0x04; strip 6 source through the five mirrored routing groups. Hi-Z on preamps 2-4, 48V and Headphones 2-4 were
+refused as unconfirmed. Not trialled: Monitor writes (left as found), phase and link state (no readback found).

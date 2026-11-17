@@ -1773,6 +1773,12 @@ AFX_INSERTS = InsertRack(DEV)
 # ---------------------------------------------------------------- HTTP / SSE
 
 app = FastAPI(title="antelope-ctl webui")
+@app.exception_handler(proto.ConstraintError)
+def _constraint_refused(request, error):
+    """A profile bound refused the request: that is the caller's error, not a server fault."""
+    return JSONResponse({"ok": False, "error": str(error)}, status_code=400)
+
+
 app.mount("/webui/assets", StaticFiles(directory=os.path.join(HERE, "assets")),
           name="webui-assets")
 app.mount("/webui/static", StaticFiles(directory=os.path.join(HERE, "static")),
