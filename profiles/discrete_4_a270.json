@@ -226,7 +226,7 @@
         "PREAMP 2 rack: d7 49 01 1b 00, then ... 27 00 (PowerGate), then ... 33 00 (PowerEx)",
         "Master De-esser on PREAMP 1 while one is on PREAMP 2: d7 49 00 1b 01"
       ],
-      "notes": "The panel rewrites the whole rack on every add or remove. Strips 0 and 1 were exercised. Loading ClearQ was followed by five opcode-0x1c frames (param d5 0a ...), not decoded. Not replayed by this project.",
+      "notes": "The panel rewrites the whole rack on every add or remove. Strips 0 and 1 were exercised. Loading ClearQ was followed by five frames d5 0a 01 <inst> <band> ...: its default settings, one band per frame (afx_inserts.parameters.effects.1); this project sends the same five after its own ClearQ load (afx_inserts.writes.effects.1.load_defaults).",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8), d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c); each frame matches one logged click to within a second"
     },
     "afx_bypass": {
@@ -451,8 +451,28 @@
     "parameters": {
       "enabled": true,
       "write": {"param_id": "0xd5", "length_bias": "0x12", "layout": "70 00 00 00 | <len + 0x12> 00 00 00 | 00 x8 | d5 | <len> | <type> | <inst> | <whole parameter block>", "notes": "One frame carries the effect's whole block. Byte 4 is the payload length plus 0x12 on every command frame seen on this device (0x13 for a one-byte SET_PARAM, 0x5b for the chain write), so it is a length, not an opcode family.", "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_params_powergate.pcapng (sha256 471e0697ee0e61533edb4e1585030c9c7220eed6fd7f63473bf6ef2baaf664e5)"},
-      "state_query": {"category": "0x07", "subcmd": "0x10", "index_flag": "0x00", "layout": "index = effect type; the body is every instance back to back. An instance's report can be longer than its write block: see each effect's read_stride / read_offset.", "notes": "Seen from the vendor panel for a loaded Master De-esser (index 0x1b, 8 x 13 bytes). ClearQ is the exception: index 0, not its type. Query only a type that is loaded in a rack.", "evidence": "d4_afx_loaded_walk.pcapng, d4_afx_two_effects.pcapng"},
+      "state_query": {"category": "0x07", "subcmd": "0x10", "index_flag": "0x00", "layout": "index = effect type; the body is every instance back to back. An instance's report can be longer than its write block: see each effect's read_stride / read_offset.", "notes": "Seen from the vendor panel for a loaded Master De-esser (index 0x1b, 8 x 13 bytes). ClearQ is the exception: index 0, not its type (its effect entry carries its own state_query). The guitar amp's read has not been captured. Query only a type that is loaded in a rack.", "evidence": "d4_afx_loaded_walk.pcapng, d4_afx_two_effects.pcapng"},
       "effects": {
+        "1": {
+          "block_length": 35,
+          "read_stride": 36,
+          "read_offset": 0,
+          "read_layout": "per instance 36 bytes: five bands of 7 bytes (the write block without its band byte: frequency u16, Q u16, gain i16, shape u8), then one byte 01. Captured from the vendor panel right after it loaded ClearQ: every instance read 1e 00 47 00 00 00 00 | c8 00 47 00 00 00 02 | e8 03 47 00 00 00 02 | 88 13 47 00 00 00 02 | 98 3a 47 00 00 00 01 | 01, the five default frames it had just written. All eight instances held the defaults, so that instance 0 comes first is assumed from the other effects, and no changed value has been read back on this device yet.",
+          "bands": {"count": 5, "length": 7, "selector_offset": 0, "selector_values": [0, 1, 2, 3, 4], "notes": "A write frame carries one band: the selector byte put in at selector_offset of that band's 7 bytes. Only bands whose bytes changed are sent."},
+          "state_query": {"index": "0x00", "notes": "The vendor panel read ClearQ under index 0, not its type 1: 74 00 00 00 10 00 00 00 07 00 00 00 00 00 00 00.", "evidence": "d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"},
+          "status": "write captured; read layout captured from the vendor panel, not yet round-tripped by this project",
+          "fields": [
+            {"key": "b1_freq", "label": "Band 1 Frequency", "offset": 0, "type": "u16", "min": 20, "max": 800, "unit": "Hz"},
+            {"key": "b2_q", "label": "Band 2 Q", "offset": 9, "type": "u16", "min": 50, "max": 1800, "scale": 0.01},
+            {"key": "b2_gain", "label": "Band 2 Gain", "offset": 11, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01},
+            {"key": "b3_freq", "label": "Band 3 Frequency", "offset": 14, "type": "u16", "min": 125, "max": 8000, "unit": "Hz"},
+            {"key": "b3_q", "label": "Band 3 Q", "offset": 16, "type": "u16", "min": 50, "max": 1800, "scale": 0.01},
+            {"key": "b3_gain", "label": "Band 3 Gain", "offset": 18, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01}
+          ],
+          "defaults": "1e 00 47 00 00 00 00 | c8 00 47 00 00 00 02 | e8 03 47 00 00 00 02 | 88 13 47 00 00 00 02 | 98 3a 47 00 00 00 01",
+          "notes": "ClearQ, a five-band equaliser. Its write block is per band: 8 bytes = band 0-4, frequency u16 (Hz as the panel shows it: 30, 200, 1000, 5k, 15k for raw 30, 200, 1000, 5000, 15000), Q u16 in hundredths (raw 71 shown as 0.71), gain i16, shape u8; one frame sets one band. offset here is the position in the 35-byte read image (band n starts at 7 x n). Mapped = the six controls a sweep took to both ends: band 1 frequency 20-800, band 3 frequency 125-8000, Q of bands 2 and 3 50-1800, gain of bands 2 and 3 -2400..1200. The gain scale 0.01 is inferred (one wheel notch = 100, the panel showed 0.0 at raw 0 and its graph spans +/-20 dB); the displayed end values were not captured. Not mapped, written back unchanged: frequency of bands 2, 4, 5 (only one notch seen: 200->300, 5000->6000, 15000->16000), Q of band 4 (71->121), gain of bands 1, 4, 5 (0->100), Q of bands 1 and 5 (the panel draws no Q knob for their shapes) and the shape byte (defaults 0, 2, 2, 2, 1; the Zen Go owner's band 1 read 4; never seen changing: the panel's shape buttons need a click, the probe only wheeled). The sweep hit the band 3 frequency knob three times and never bands 2, 4, 5.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): clearq_probe.pcapng (sha256 c45dbe19b22b0aa751ca18f4ce8803c5e3795f8935358e51a33b1a58bc040b03), clearq_sweep.pcapng (sha256 9d9dca1c4e4ea54c443f241916fa26db6f1a6902ea59eb0dde571e87aaaa58e8); read layout: d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c) frames 68391/68405"
+        },
         "2": {
           "block_length": 18,
           "read_stride": 19,
@@ -468,6 +488,18 @@
           ],
           "notes": "PowerFFC. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): powerffc_sweep.pcapng (sha256 93234e148ecc2747e745804b6fa3fe0a9633f21088c0b2fd74bc44b6247c519b)"
+        },
+        "3": {
+          "block_length": 16,
+          "status": "write-layout-captured, read-unconfirmed",
+          "editable": false,
+          "fields": [
+            {"key": "model", "label": "Model", "offset": 0, "type": "u8", "min": 0, "max": 10},
+            {"key": "output", "label": "Output", "offset": 15, "type": "i8", "min": -48, "max": 12, "unit": "dB"}
+          ],
+          "defaults": "00 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 00",
+          "notes": "Guitar amp (the panel calls the effect Guitar Amp; Darkface 65 (US) is its first model). 16-byte block. Byte 0 = model: the wheel on the MODEL selector sent 0, 1, 2, 5, 6, 7, 9, 10 and changed nothing else in the block; names by number from the Zen Go, where each model was loaded by name: 0 Darkface 65 (US), 1 Top30 (UK) Bright, 2 Modern (US) CH3, 3 Plexi 59 (UK), 4 Rock 22.10 (UK), 5 Rock 75 (UK), 6 Marcus II (US) Lead, 7 Tweed Deluxe (US), 8 Overange 120 (UK), 9 BurnSphere (DE) Lead, 10 Bass SuperTube VR. Byte 15 = output level, signed, -48..12 (panel shows 0 dB at raw 0), swept to both ends. Knobs, one notch only (+2), probed while the model was 1 (Top30: Volume, Top Cut, Treble, Bass from left to right): byte 8 at the Volume position, byte 7 Top Cut, byte 5 Treble, byte 2 Bass; the Darkface picture at load agrees for Volume (raw 89, pointer near 8.9) and Bass (62). Their ranges were not captured: the sweep ran after the model sweeps had left the model at 10 (Bass SuperTube VR), whose panel has its knobs elsewhere, so the four knob sweeps sent no frame. Bytes 1, 3, 4, 6, 9-14 (other models' knobs and switches; default 46 .. 3f 00 .. 00 .. 00 01 00 00 00 00) are unidentified. Only model and output are mapped; every other byte would be written back unchanged. NOT EDITABLE: no cat 0x07 read of this effect has been captured, so its read layout (and whether its index is the type) is unknown and the app never writes a block it could not read first. read_stride / read_offset are left out on purpose.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): amp_darkface_65_probe.pcapng (sha256 bf6534259e6153639775b9eaa1fdad367b5567d0077b69a22621881067e8dc47), amp_darkface_65_sweep.pcapng (sha256 b8bdde701c8923a1a9b7973e94536a002f6ac54d8bfc3771a8042fd978bd7655); model names: Zen Go zengo_batch_load.pcapng (sha256 b90ffd5b6443635f92606209a10c4b4c29199e5caa376c216cb5533d84b3abe4)"
         },
         "5": {
           "block_length": 6,
@@ -1208,8 +1240,16 @@
       "strips": [0, 1, 2, 3],
       "max_slots": 4,
       "effects": {
+        "1": {
+          "instances": [0],
+          "load_defaults": ["00 1e 00 47 00 00 00 00", "01 c8 00 47 00 00 00 02", "02 e8 03 47 00 00 00 02", "03 88 13 47 00 00 00 02", "04 98 3a 47 00 00 00 01"]
+        },
         "2": {
           "instances": [0, 1]
+        },
+        "3": {
+          "instances": [0],
+          "load_defaults": ["00 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 00"]
         },
         "5": {
           "instances": [0, 1]
@@ -1345,7 +1385,7 @@
         }
       },
       "verification": "This project's WebUI server, 2026-11-17, each step confirmed by a fresh cat 0x19 readback: Master De-esser on strip 0 (instance 0) and strip 1 (instance 1), PowerGate and PowerEx on strip 1, removals from the middle and the front; a third De-esser was refused because the device reported no free instance; strips 2 and 3 loaded and removed one effect each. Strips 2 and 3 rest on these trials, not on a vendor capture. All racks ended empty.",
-      "notes": "Only what was captured or verified on this device. Not loadable from here: ClearQ, the guitar amp and the cabinet (their controls are not mapped; they can still be removed). A freshly loaded instance keeps the settings the device holds for it, which can differ from the vendor panel's defaults. Instances 0 and 1 are verified; the device has more. max_slots 4 is the Premium pack's FX instances per strip in the manual; three were seen loaded.",
+      "notes": "Only what was captured or verified on this device. ClearQ and the guitar amp (instance 0 only) are loaded the way the vendor panel does it: the chain write, then the default-settings frames in load_defaults (five band frames for ClearQ, one 16-byte block for the amp: clearq_probe.pcapng frames 5-10, amp_darkface_65_probe.pcapng, d4_afx_two_effects.pcapng). ClearQ's defaults are then read back and compared; the amp's are not, because its read is not captured. These two loads have not been run by this project yet. Cabinet (type 4): not controllable from here and left unmapped. Its load, and every control change in the vendor panel, re-sends seven frames: five 244-byte blocks of impulse-response data (d5 f6 04 00 00 00 02 <0-4> ...) that the vendor software computes for the chosen cabinet, microphones and levels, then d5 53 04 01 00 ... and d5 2a 04 02 00 <cabinet> ... of 32-bit floats. There is no small parameter block to edit; a cabinet can only be removed. Every other effect: a freshly loaded instance keeps the settings the device holds for it, which can differ from the vendor panel's defaults. Instances 0 and 1 are verified; the device has more. max_slots 4 is the Premium pack's FX instances per strip in the manual; three were seen loaded.",
       "verification_2026_11_17_all_effects": "This project's WebUI server with the vendor software closed: each of the 45 loadable effects was loaded into racks 1 and 2 (instances 0 and 1), its settings read, one control changed and restored on each instance with the other instance checked unchanged, then removed. Instance 0 held exactly the block the vendor panel had last written. All racks ended empty."
     },
     "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"

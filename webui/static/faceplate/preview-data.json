@@ -1,4 +1,64 @@
 {
+ "1": {
+  "type": 1,
+  "label": "ClearQ",
+  "fields": [
+   {
+    "key": "b1_freq",
+    "label": "Band 1 Frequency",
+    "min": 20,
+    "max": 800,
+    "scale": 1,
+    "unit": "Hz",
+    "value": 410
+   },
+   {
+    "key": "b2_q",
+    "label": "Band 2 Q",
+    "min": 50,
+    "max": 1800,
+    "scale": 0.01,
+    "unit": "",
+    "value": 925
+   },
+   {
+    "key": "b2_gain",
+    "label": "Band 2 Gain",
+    "min": -2400,
+    "max": 1200,
+    "scale": 0.01,
+    "unit": "",
+    "value": -600
+   },
+   {
+    "key": "b3_freq",
+    "label": "Band 3 Frequency",
+    "min": 125,
+    "max": 8000,
+    "scale": 1,
+    "unit": "Hz",
+    "value": 4062
+   },
+   {
+    "key": "b3_q",
+    "label": "Band 3 Q",
+    "min": 50,
+    "max": 1800,
+    "scale": 0.01,
+    "unit": "",
+    "value": 925
+   },
+   {
+    "key": "b3_gain",
+    "label": "Band 3 Gain",
+    "min": -2400,
+    "max": 1200,
+    "scale": 0.01,
+    "unit": "",
+    "value": -600
+   }
+  ]
+ },
  "2": {
   "type": 2,
   "label": "PowerFFC",
@@ -47,6 +107,30 @@
     "scale": 1,
     "unit": "",
     "value": 15
+   }
+  ]
+ },
+ "3": {
+  "type": 3,
+  "label": "Darkface 65 (US)",
+  "fields": [
+   {
+    "key": "model",
+    "label": "Model",
+    "min": 0,
+    "max": 10,
+    "scale": 1,
+    "unit": "",
+    "value": 5
+   },
+   {
+    "key": "output",
+    "label": "Output",
+    "min": -48,
+    "max": 12,
+    "scale": 1,
+    "unit": "dB",
+    "value": -18
    }
   ]
  },
