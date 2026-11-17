@@ -23,7 +23,7 @@ def load_server_without_web_or_hid_boundaries():
         def get(self, *args, **kwargs):
             return lambda function: function
 
-        post = get
+        post = exception_handler = get
 
         def mount(self, *args, **kwargs):
             return None
