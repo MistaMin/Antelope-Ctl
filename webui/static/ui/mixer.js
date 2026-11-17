@@ -671,8 +671,97 @@ function paintMixerInserts() {
   });
 }
 
+// ---- insert racks: load / remove (server: /api/afx-inserts) ------------
+// The server owns the rules (which racks, which effects, verification).
+// This only draws its state and sends one change at a time.
+let INSERT_RACKS = null, INSERT_BUSY = false;
+
+function renderInsertRacks() {
+  const section = $('#insertsec'), box = $('#insertracks');
+  if (!section || !box) return;
+  const state = INSERT_RACKS;
+  section.hidden = !state?.available;
+  if (!state?.available) { box.replaceChildren(); return; }
+  const canWrite = state.online && state.writes_enabled && !INSERT_BUSY;
+  box.replaceChildren(...Object.keys(state.racks).map(key => {
+    const channel = +key, rows = state.racks[key];
+    const editable = canWrite && state.editable_channels.includes(channel);
+    const card = document.createElement('div');
+    card.className = 'insert-rack';
+    const head = document.createElement('h3');
+    head.textContent = 'CH ' + (channel + 1);
+    card.append(head);
+    if (rows === null) {
+      const note = document.createElement('p');
+      note.className = 'insert-note';
+      note.textContent = 'not read yet';
+      card.append(note);
+      return card;
+    }
+    rows.forEach((row, slot) => {
+      const line = document.createElement('div');
+      line.className = 'insert-row';
+      const name = document.createElement('span');
+      name.textContent = row.label;
+      name.title = `type ${row.type}, instance ${row.instance}`;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.title = `Remove ${row.label}`;
+      remove.setAttribute('aria-label', `Remove ${row.label} from channel ${channel + 1}`);
+      remove.disabled = !editable;
+      remove.addEventListener('click', () => changeInsertRack({channel, operation: 'remove', slot}));
+      line.append(name, remove);
+      card.append(line);
+    });
+    if (!rows.length) {
+      const note = document.createElement('p');
+      note.className = 'insert-note';
+      note.textContent = 'empty';
+      card.append(note);
+    }
+    const add = document.createElement('select');
+    add.setAttribute('aria-label', `Add effect to channel ${channel + 1}`);
+    add.disabled = !editable || rows.length >= state.max_slots;
+    add.append(new Option(state.editable_channels.includes(channel) ? 'Add effect…' : 'Not editable yet', ''));
+    state.effects.forEach(effect => add.append(new Option(effect.label, effect.type)));
+    add.addEventListener('change', () => {
+      if (add.value) changeInsertRack({channel, operation: 'load', type: +add.value});
+    });
+    card.append(add);
+    return card;
+  }));
+  if (state.failure) reportMessage('inserts', 'Effect racks', state.failure);
+}
+
+async function loadInsertRacks() {
+  try { INSERT_RACKS = await getJSON('/api/afx-inserts'); } catch (e) { return; }
+  renderInsertRacks();
+}
+
+async function changeInsertRack(change) {
+  if (INSERT_BUSY) return;
+  INSERT_BUSY = true;
+  renderInsertRacks();
+  try {
+    const response = await fetch('/api/afx-inserts', {method: 'POST',
+      headers: {'content-type': 'application/json'}, body: JSON.stringify(change)});
+    const result = await response.json();
+    if (response.ok) { INSERT_RACKS = result; clearMessage('inserts'); }
+    else reportMessage('inserts', 'Effect racks', result.error || 'The change was refused.');
+  } catch (e) {
+    reportMessage('inserts', 'Effect racks', 'The server did not answer.');
+  }
+  INSERT_BUSY = false;
+  await loadInsertRacks();
+  try { STRUCTURED = await getJSON('/api/readbacks'); } catch (e) { return; }
+  paintMixerInserts();
+}
+
 setInterval(async () => {
-  if (!mixerInsertSpec() || !ONLINE) return;
+  if (!ONLINE || INSERT_BUSY) return;
+  loadInsertRacks();
+  if (!mixerInsertSpec()) return;
   try { STRUCTURED = await getJSON('/api/readbacks'); } catch (e) { return; }
   paintMixerInserts();
 }, 15000);

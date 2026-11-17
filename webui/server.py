@@ -44,6 +44,7 @@ from antelope.transport import list_connected_hid, open_transport
 from webui.device_ui import features_for
 from webui.afx_catalog import preview_catalog, effect_choices
 from webui.afx_test import MemoryCatTest
+from webui.afx_inserts import InsertRack
 
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
@@ -1752,6 +1753,7 @@ except (KeyError, ValueError, TypeError) as _e:
     DEV = Device(PROFILE)
 
 AFX_TEST = MemoryCatTest(DEV)
+AFX_INSERTS = InsertRack(DEV)
 
 # ---------------------------------------------------------------- HTTP / SSE
 
@@ -2059,6 +2061,29 @@ def api_afx_catalog():
     except (OSError, ValueError):
         catalog = {}
     return preview_catalog(catalog, os.path.basename(PROFILE_PATH))
+
+
+class InsertChange(BaseModel):
+    channel: StrictInt
+    operation: str
+    slot: StrictInt | None = None
+    type: StrictInt | None = None
+
+
+@app.get("/api/afx-inserts")
+def api_afx_inserts():
+    """Insert racks read from the device, plus what this profile may edit."""
+    return AFX_INSERTS.state()
+
+
+@app.post("/api/afx-inserts")
+def api_afx_inserts_change(change: InsertChange):
+    """Load or remove one effect: whole-rack write, verified by readback."""
+    try:
+        return AFX_INSERTS.change(change.channel, change.operation,
+                                  slot=change.slot, type_id=change.type)
+    except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
+        return _bad(str(error))
 
 
 class AfxChainTestChange(BaseModel):

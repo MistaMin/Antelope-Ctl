@@ -2388,6 +2388,59 @@ def parse_afx_strip_order(profile: dict, body: bytes, category: int, index: int)
                                   kind='afx_strip_order')
 
 
+def afx_insert_writes(profile: dict):
+    """The profile's bounded insert-rack write contract, or None.
+
+    ``afx_inserts.chain_write`` holds the captured whole-rack frame and
+    ``afx_inserts.writes`` the strips, effects and instances that have been
+    exercised on that device. Both must be present and enabled."""
+    spec = profile.get('afx_inserts') or {}
+    writes = spec.get('writes') or {}
+    if not spec.get('chain_write') or not writes.get('enabled'):
+        return None
+    return writes
+
+
+def build_afx_insert_chain(profile: dict, strip: int, slots) -> bytes:
+    """Build the whole-rack write for one insert strip.
+
+    ``slots`` is the complete ordered rack as ``(type, instance)`` pairs; the
+    device replaces the strip's chain with it, so an empty list clears the
+    rack. Refuses strips, effects and instances outside the profile contract."""
+    writes = afx_insert_writes(profile)
+    if writes is None:
+        raise ConstraintError('this profile has no enabled afx_inserts write contract')
+    frame = profile['afx_inserts']['chain_write']
+    slots = [(int(kind), int(instance)) for kind, instance in slots]
+    if strip not in [int(value) for value in writes.get('strips', [])]:
+        raise ConstraintError(f'insert strip {strip} is outside the verified strips '
+                              f'{writes.get("strips", [])}')
+    if len(slots) > int(writes['max_slots']):
+        raise ConstraintError(f'a rack holds at most {writes["max_slots"]} effects here')
+    known = {int(key): value for key, value in
+             (profile['afx_inserts'].get('type_labels') or {}).items()}
+    seen = set()
+    for kind, instance in slots:
+        if kind not in known:
+            raise ConstraintError(f'effect type {kind} is not identified on this device')
+        if not 0 <= instance <= 255 or (kind, instance) in seen:
+            raise ConstraintError(f'bad or repeated instance {instance} of effect type {kind}')
+        seen.add((kind, instance))
+    opcode = _as_int(frame['opcode'])
+    check_opcode(profile, opcode)
+    pkt = bytearray(profile['transport']['report_size'])
+    pkt[_as_int(frame['magic_offset'])] = _as_int(frame['magic'])
+    pkt[_as_int(frame['opcode_offset'])] = opcode
+    pkt[_as_int(frame['param_id_offset'])] = _as_int(frame['param_id'])
+    pkt[_as_int(frame['subcmd_offset'])] = _as_int(frame['subcmd'])
+    pkt[_as_int(frame['strip_offset'])] = strip
+    base = _as_int(frame['slots_offset'])
+    for position, (kind, instance) in enumerate(slots):
+        pkt[base + 2 * position] = kind
+        pkt[base + 2 * position + 1] = instance
+    return bytes(pkt)
+
+
 def parse_afx_instance_table(profile: dict, body: bytes, category: int,
                              index: int):
     """Decode an available/max/remaining AFX instance-count table."""

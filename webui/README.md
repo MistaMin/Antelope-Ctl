@@ -151,6 +151,12 @@ compatibility.
 
 ## What it deliberately does NOT do
 
+- **Effect racks (Zen Go, Discrete 4).** The "Effect racks" section lists
+  what each of the four insert racks holds, read from the device, and can add
+  or remove an effect. The server reads the rack, rewrites it whole as the
+  vendor panel does, and reads it back; a mismatch turns editing off until
+  the server restarts. Only effects whose load was captured on that device
+  can be added (see the profile's `afx_inserts.writes`).
 - **No unbounded readback.** Orion routing/mixer indices are inside
   `frame.readback.category_counts`; profiles without a complete count may use
   only an explicitly capture-confirmed feature layout. The incremental sweep

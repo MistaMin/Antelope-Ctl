@@ -2314,6 +2314,17 @@ stay private.
 - **Effect bypass, Discrete 4 only.** Opcode `0x14`: payload `98 00 <type>
   <enabled>`, seen as `98 00 1b 00` then `98 00 1b 01` for two clicks on one
   slot's BP button.
-- **Not captured.** Any AFX write on the Zen Go, parameter frames (five
-  opcode-`0x1c` frames follow a ClearQ load on the Discrete 4, undecoded),
-  reorder, strips other than 0, and instances other than 0.
+- **Chain write, Zen Go.** Opcode `0x23`, payload `d7 11 | <strip> |
+  {type, inst} pairs`: the Orion's assign frame. Captured on strip 1.
+- **Strip and instance numbering, both devices.** The strip byte is the mixer
+  channel minus one. A second copy of an effect takes the lowest instance
+  not already in a rack (a second Master De-esser carried instance 1).
+- **More type ids, both devices.** 39 = PowerGate, 51 = PowerEx.
+- **Before each add** the vendor panel reads categories `0x15` and `0x0c`
+  ({type, count} pairs; `0x15` is the remaining-instance table).
+- **Implemented.** `protocol.build_afx_insert_chain` and the WebUI's
+  `/api/afx-inserts` rebuild these frames from the profile's
+  `afx_inserts.chain_write` / `writes` contract and verify by readback.
+- **Not captured.** Zen Go bypass, parameter frames (five opcode-`0x1c`
+  frames follow a ClearQ load on the Discrete 4, undecoded), reorder, and
+  linked racks.
