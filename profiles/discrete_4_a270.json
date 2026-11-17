@@ -121,9 +121,11 @@
         "load Master De-esser into the empty PREAMP 1 rack: d7 49 00 1b 00",
         "add ClearQ after it: d7 49 00 1b 00 01 00",
         "remove the first effect: d7 49 00 01 00",
-        "remove the last effect (empty rack): d7 49 00"
+        "remove the last effect (empty rack): d7 49 00",
+        "PREAMP 2 rack: d7 49 01 1b 00, then ... 27 00 (PowerGate), then ... 33 00 (PowerEx)",
+        "Master De-esser on PREAMP 1 while one is on PREAMP 2: d7 49 00 1b 01"
       ],
-      "notes": "The panel rewrites the whole rack on every add or remove. Only strip 0 was exercised, so the <strip> byte position is inferred from it being zero in every frame. Loading ClearQ was followed by five opcode-0x1c frames (param d5 0a ...), not decoded. Not replayed by this project.",
+      "notes": "The panel rewrites the whole rack on every add or remove. Strips 0 and 1 were exercised. Loading ClearQ was followed by five opcode-0x1c frames (param d5 0a ...), not decoded. Not replayed by this project.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8), d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c); each frame matches one logged click to within a second"
     },
     "afx_bypass": {
@@ -226,7 +228,7 @@
     "audio_streaming": "Linux 7.2 snd-usb-audio, no quirk (/proc/asound stream0, 2026-11-16): playback iface 1 EP 0x05 OUT async, capture iface 2 EP 0x84 IN async (also the playback sync EP), both S24_3LE x 16 ch, rates 32000/44100/48000/88200/96000/176400/192000, 125 us packets. 2 s record and silent playback at 48 kHz succeeded. Other rates untested."
   },
   "afx_inserts": {
-    "_comment": "Read-only insert data. The WebUI cannot show it yet because this device has no mixer mapping.",
+    "_comment": "Insert racks for the WebUI: display from readback, load and remove through the captured whole-rack write.",
     "status": "observed",
     "readback_kind": "afx_strip_order",
     "mixer_channels": [0, 1, 2, 3],
@@ -235,7 +237,32 @@
     "mapping_notes": "Record 0 = mixer channel 1 is confirmed: effects loaded into the PREAMP 1 rack appeared in record 0 and the reconnected panel drew them on channel 1. The panel shows AFX areas on channels 1-4; records 1-3 for channels 2-4 are assumed. Records 4-35 are unknown.",
     "type_labels": {
       "1": {"label": "ClearQ", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 1"},
-      "27": {"label": "Master De-esser", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 27"}
+      "27": {"label": "Master De-esser", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 27"},
+      "39": {"label": "PowerGate", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 39 (d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb))"},
+      "51": {"label": "PowerEx", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 51 (same capture)"}
+    },
+    "chain_write": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x5b",
+      "param_id_offset": 16, "param_id": "0xd7",
+      "subcmd_offset": 17, "subcmd": "0x49",
+      "strip_offset": 18,
+      "slots_offset": 19,
+      "status": "confirmed",
+      "notes": "See frame.afx_chain_write. The strip byte is the mixer channel minus one (00 for PREAMP 1, 01 for PREAMP 2). A second Master De-esser took instance 1 while instance 0 sat in the other rack.",
+      "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb) and the earlier AFX captures"
+    },
+    "writes": {
+      "enabled": true,
+      "strips": [0, 1, 2, 3],
+      "max_slots": 4,
+      "effects": {
+        "27": {"instances": [0, 1]},
+        "39": {"instances": [0]},
+        "51": {"instances": [0]}
+      },
+      "verification": "This project's WebUI server, 2026-11-17, each step confirmed by a fresh cat 0x19 readback: Master De-esser on strip 0 (instance 0) and strip 1 (instance 1), PowerGate and PowerEx on strip 1, removals from the middle and the front; a third De-esser was refused because the device reported no free instance; strips 2 and 3 loaded and removed one effect each. Strips 2 and 3 rest on these trials, not on a vendor capture. All racks ended empty.",
+      "notes": "Only what was captured or verified on this device. ClearQ is not loadable: the vendor follows its load with five parameter frames (opcode 0x1c) that this project does not send; it can still be removed. max_slots 4 is the Premium pack's FX instances per strip in the manual; three were seen loaded."
     },
     "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
   },
@@ -262,7 +289,7 @@
   },
   "constraints": {
     "_comment": "Conservative: only what has been captured on this device.",
-    "allowed_opcodes": ["0x13"],
+    "allowed_opcodes": ["0x13", "0x5b"],
     "channel_bounds": {"min": 0, "max": 3},
     "min_write_interval_ms": 250
   },

@@ -426,6 +426,21 @@
   .mx-ins { padding:1px 3px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; color:#e7c98a; background:#231c0e;
             border:1px solid #5a4516; border-radius:2px; font:600 9px/1.2 ui-monospace,monospace; }
   .mx-ins-empty { color:#59616d; font:600 9px/1.2 ui-monospace,monospace; }
+  /* insert racks with load / remove */
+  .insert-racks + .hint { margin-top:8px; }
+  .insert-racks { display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:12px; }
+  .insert-rack { display:flex; flex-direction:column; gap:6px; padding:10px; background:linear-gradient(180deg,#23262e,#191c22);
+                 border:1px solid var(--line); border-radius:10px; }
+  .insert-rack h3 { margin:0; color:var(--dim); font:600 11px/1 ui-monospace,monospace; letter-spacing:.02em; }
+  .insert-row { display:flex; align-items:center; gap:6px; padding:3px 4px 3px 7px; color:#e7c98a; background:#231c0e;
+                border:1px solid #5a4516; border-radius:4px; font:600 12px/1.2 ui-monospace,monospace; }
+  .insert-row span { flex:1 1 auto; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .insert-row button { flex:0 0 auto; width:22px; height:22px; padding:0; cursor:pointer; color:#e7c98a; background:#0e1116;
+                       border:1px solid #5a4516; border-radius:4px; font:700 14px/1 inherit; }
+  .insert-row button:disabled, .insert-rack select:disabled { opacity:.4; cursor:not-allowed; }
+  .insert-note { margin:0; color:#59616d; font:600 11px/1.4 ui-monospace,monospace; }
+  .insert-rack select { margin-top:auto; padding:4px; color:var(--fg); background:#0e1116; border:1px solid var(--line);
+                        border-radius:4px; font:600 11px/1 ui-monospace,monospace; }
   .mixer-strip .mxsource { width:100%; min-width:0; padding:3px 2px; color:#c8f2ec; background:#050608;
                            border:1px solid #159680; border-radius:2px; font:600 9px/1.1 ui-monospace,monospace; }
   .mixer-strip .mxsource:disabled { opacity:.82; cursor:not-allowed; }

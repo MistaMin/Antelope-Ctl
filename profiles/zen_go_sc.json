@@ -564,6 +564,14 @@
           "evidence": "zen-go-tui/docs/protocol/zengosc-capture-audit.md: isolated mixer-link captures query 0x0b/0x03 and return one byte per selector; a nonzero byte means linked."
         },
         {
+          "category": "0x0b",
+          "index": 4,
+          "kind": "afx_link_state",
+          "status": "capture-confirmed",
+          "notes": "Rack link state. The vendor panel queries index 4 on connect; the body was all zeros with no rack linked and is not decoded. Used only as a guard: insert editing is refused unless it reads all zeros.",
+          "evidence": "owner's unit fw 05.04, vendor panel 1.1.26, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17"
+        },
+        {
           "category": "0x18",
           "index": 0,
           "kind": "observed_mixer_records",
@@ -588,6 +596,18 @@
           "fields": [{ "name": "linked", "offset": 0, "type": "bool" }],
           "status": "capture-confirmed",
           "evidence": "zen-go-tui/docs/protocol/zengosc-capture-audit.md: q0b/03 is a 24-byte selector bitmap; byte N is asserted/nonzero when selector N is linked."
+        },
+        {
+          "kind": "afx_link_state",
+          "category": "0x0b",
+          "index": 4,
+          "name": "Zen Go rack link state (undecoded)",
+          "record_count": 8,
+          "record_stride": 1,
+          "fields": [{ "name": "raw", "offset": 0, "type": "u8" }],
+          "status": "capture-confirmed",
+          "notes": "Outer index 4 is queried by the vendor panel on connect. The body was all zeros with no rack linked; record_count 8 is a display width, not a decoded layout. Insert editing treats any non-zero byte as 'linked' and refuses.",
+          "evidence": "owner's unit fw 05.04, vendor panel 1.1.26, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17"
         },
         {
           "kind": "afx_strip_order",
@@ -830,7 +850,7 @@
   },
 
   "afx_inserts": {
-    "_comment": "Read-only insert display for the WebUI mixer. No AFX write is mapped for this device.",
+    "_comment": "Insert racks for the WebUI: display from readback, load and remove through the captured whole-rack write.",
     "status": "observed",
     "readback_kind": "afx_strip_order",
     "mixer_channels": [0, 1, 2, 3],
@@ -840,16 +860,42 @@
     "type_labels": {
       "1": { "label": "ClearQ", "status": "confirmed", "evidence": "vendor panel 1.1.26 on the owner's unit, 2026-11-17: the channel 1 rack lists ClearQ, SMT-100A, Master De-esser in that order while record 0 holds types 1, 36, 27 in that order" },
       "27": { "label": "Master De-esser", "status": "confirmed", "evidence": "same observation; also the Orion type id" },
-      "36": { "label": "SMT-100A", "status": "confirmed", "evidence": "same observation" }
+      "36": { "label": "SMT-100A", "status": "confirmed", "evidence": "same observation" },
+      "39": { "label": "PowerGate", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 39 (zengo_afx_load_remove.pcapng (sha256 497b43813548cef6cb41712a2e826523e80422b59cfd303f426964a0d8387b55))" },
+      "51": { "label": "PowerEx", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 51 (same capture)" }
+    },
+    "chain_write": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x23",
+      "param_id_offset": 16, "param_id": "0xd7",
+      "subcmd_offset": 17, "subcmd": "0x11",
+      "strip_offset": 18,
+      "slots_offset": 19,
+      "status": "confirmed",
+      "notes": "The vendor panel rewrites the whole rack on every add or remove: {type, inst} pairs for the strip, zero-padded. Same frame as the Orion's AFX assign. Captured on strip 1 (mixer channel 2): d7 11 01 1b 01 / ... 27 00 / ... 33 00, then the three removals down to d7 11 01. A second Master De-esser took instance 1 because instance 0 was in the channel 1 rack. No parameter frames followed these loads.",
+      "evidence": "owner's unit fw 05.04, vendor panel 1.1.26 under Wine, usbmon, 2026-11-17: zengo_afx_load_remove.pcapng (sha256 497b43813548cef6cb41712a2e826523e80422b59cfd303f426964a0d8387b55); each frame matches one logged click"
+    },
+    "writes": {
+      "enabled": true,
+      "strips": [0, 1, 2, 3],
+      "max_slots": 4,
+      "effects": {
+        "27": { "instances": [0, 1] },
+        "39": { "instances": [0] },
+        "51": { "instances": [0] }
+      },
+      "verification": "This project's WebUI server, 2026-11-17, fw 05.04, each step confirmed by a fresh cat 0x19 readback: strip 1 loaded PowerGate, Master De-esser (took instance 1) and PowerEx, then removed them from the middle and the front; strips 2 and 3 loaded and removed one effect each; strip 0 had PowerGate appended to the owner's three-effect rack and removed again, leaving ClearQ / SMT-100A / Master De-esser as before. Strips 0, 2 and 3 rest on these trials, not on a vendor capture.",
+      "notes": "Only what was captured or verified on this device: the strips listed, the three effects whose vendor load was a chain write alone, and the instance numbers seen. Removing works for any identified effect. ClearQ and SMT-100A are not loadable: their vendor loads were not captured here, and on the Discrete 4 a ClearQ load is followed by parameter frames this project does not send. max_slots 4 is one more than the fullest rack seen."
     },
     "evidence": "owner's unit fw 05.04, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17; public manual for the channel placement"
   },
 
   "constraints": {
     "_comment": "Bounds a client should enforce before writing. Conservative first pass -- widen only as captures confirm.",
-    "allowed_opcodes": ["0x12", "0x13", "0x14", "0x16", "0x53"],
+    "allowed_opcodes": ["0x12", "0x13", "0x14", "0x16", "0x23", "0x53"],
     "allowed_opcodes_note": "0x16 (SET_MIX) and 0x53 (SET_ROUTE) are frame-decoded but NOT hardware round-trip tested from this project. 0x1a / 0x1c / 0x23 (DSP) are observed-only and excluded on purpose.",
-    "forbidden_opcodes": ["0x1a", "0x1c", "0x23"],
+    "forbidden_opcodes": ["0x1a", "0x1c"],
+    "forbidden_opcodes_note": "0x23 left this list on 2026-11-17: it is the insert chain write, captured on the owner's unit and used only through afx_inserts.chain_write.",
     "channel_bounds": { "min": 0, "max": 1 },
     "bus_ids": [0, 1, 2],
     "input_mode_allowed_values": [0, 1, 2],
