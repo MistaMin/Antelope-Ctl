@@ -252,6 +252,44 @@
       "notes": "See frame.afx_chain_write. The strip byte is the mixer channel minus one (00 for PREAMP 1, 01 for PREAMP 2). A second Master De-esser took instance 1 while instance 0 sat in the other rack.",
       "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb) and the earlier AFX captures"
     },
+    "parameters": {
+      "enabled": true,
+      "write": {
+        "param_id": "0xd5",
+        "length_bias": "0x12",
+        "layout": "70 00 00 00 | <len + 0x12> 00 00 00 | 00 x8 | d5 | <len> | <type> | <inst> | <whole parameter block>",
+        "notes": "One frame carries the effect's whole block. Byte 4 is the payload length plus 0x12 on every command frame seen on this device (0x13 for a one-byte SET_PARAM, 0x5b for the chain write), so it is a length, not an opcode family.",
+        "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_params_powergate.pcapng (sha256 471e0697ee0e61533edb4e1585030c9c7220eed6fd7f63473bf6ef2baaf664e5)"
+      },
+      "state_query": {
+        "category": "0x07",
+        "subcmd": "0x10",
+        "index_flag": "0x00",
+        "layout": "index = effect type; the body is every instance back to back. An instance's report can be longer than its write block: see each effect's read_stride / read_offset.",
+        "notes": "Seen from the vendor panel for a loaded Master De-esser (index 0x1b, 8 x 13 bytes). ClearQ is the exception: index 0, not its type. Query only a type that is loaded in a rack.",
+        "evidence": "d4_afx_loaded_walk.pcapng, d4_afx_two_effects.pcapng"
+      },
+      "effects": {
+        "39": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte (01 seen on every instance, loaded or not), then the 9-byte block the write frame carries",
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 120},
+            {"key": "range", "label": "Range", "offset": 1, "type": "u8", "min": 0, "max": 20},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u16", "min": 1, "max": 750, "scale": 0.1},
+            {"key": "decay", "label": "Decay", "offset": 4, "type": "u16", "min": 1, "max": 1000},
+            {"key": "hold", "label": "Hold", "offset": 6, "type": "u16", "min": 0, "max": 5000},
+            {"key": "gain", "label": "Gain", "offset": 8, "type": "i8", "min": -24, "max": 12}
+          ],
+          "defaults": "5a 00 64 00 32 00 00 00 00",
+          "notes": "PowerGate. Each knob moved one notch up and back changed exactly one field; full sweeps gave the limits, which match the numbers the vendor panel displayed at both ends (120 / 20 / 75.0 and 0.1 / 1000 and 1 / 5000 / 12 and -24). Units are not shown by the panel and are not claimed here. The panel's ON/OFF switch is the bypass frame (frame.afx_bypass), not part of this block.",
+          "evidence": "d4_params_powergate.pcapng (sha256 471e0697ee0e61533edb4e1585030c9c7220eed6fd7f63473bf6ef2baaf664e5), d4_params_powergate_sweep2.pcapng (sha256 c1f870d55d9d5330d1e5fc7f31f1d9a1e5d0ea1c0d1bd55eb91902eb405a4475)"
+        }
+      }
+    },
     "writes": {
       "enabled": true,
       "strips": [0, 1, 2, 3],

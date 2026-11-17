@@ -711,7 +711,16 @@ function renderInsertRacks() {
       remove.setAttribute('aria-label', `Remove ${row.label} from channel ${channel + 1}`);
       remove.disabled = !editable;
       remove.addEventListener('click', () => changeInsertRack({channel, operation: 'remove', slot}));
-      line.append(name, remove);
+      if (state.mapped_types?.includes(row.type)) {
+        const edit = document.createElement('button');
+        edit.type = 'button';
+        edit.className = 'insert-edit';
+        edit.textContent = 'Edit';
+        edit.title = `Edit ${row.label} settings`;
+        edit.disabled = !state.online;
+        edit.addEventListener('click', () => openInsertParams(channel, slot));
+        line.append(name, edit, remove);
+      } else line.append(name, remove);
       card.append(line);
     });
     if (!rows.length) {
@@ -746,6 +755,129 @@ function renderInsertRacks() {
   if (state.failure) reportMessage('inserts', 'Effect racks', state.failure);
 }
 
+// ---- effect settings (server: /api/afx-inserts/parameters) -------------
+// One effect at a time. A knob shows the value the device last confirmed;
+// while dragging, the newest value waits until the previous write returns.
+let INSERT_PARAMS = null;   // {channel, slot, data, pending: {key: value}, busy}
+
+function insertParamText(field, value) {
+  const scale = Number(field.scale) || 1;
+  const shown = scale === 1 ? String(value) : (value * scale).toFixed(String(scale).split('.')[1]?.length || 0);
+  return field.unit ? `${shown} ${field.unit}` : shown;
+}
+
+function renderInsertParams() {
+  const box = $('#insertparams');
+  if (!box) return;
+  const view = INSERT_PARAMS;
+  box.hidden = !view;
+  if (!view) { box.replaceChildren(); return; }
+  const head = document.createElement('div');
+  head.className = 'insert-params-hd';
+  const title = document.createElement('h3');
+  title.textContent = view.data ? `${view.data.label} · CH ${view.channel + 1}` : 'Reading settings…';
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.textContent = 'Close';
+  close.addEventListener('click', () => { INSERT_PARAMS = null; renderInsertParams(); });
+  head.append(title, close);
+  const knobs = document.createElement('div');
+  knobs.className = 'insert-knobs';
+  (view.data?.fields || []).forEach(field => {
+    const cell = document.createElement('label');
+    cell.className = 'insert-knob';
+    const span = (field.max - field.min) || 1;
+    const paint = value => {
+      cell.style.setProperty('--turn', `${-135 + (value - field.min) / span * 270}deg`);
+      cell.querySelector('output').textContent = insertParamText(field, value);
+    };
+    cell.innerHTML = '<span class="insert-knob-label"></span><span class="insert-knob-body" aria-hidden="true"><i></i></span>'
+      + '<input type="range" step="1"><output></output>';
+    cell.querySelector('.insert-knob-label').textContent = field.label;
+    const input = cell.querySelector('input');
+    input.min = field.min; input.max = field.max; input.value = field.value;
+    input.setAttribute('aria-label', field.label);
+    const send = () => queueInsertParam(field.key, +input.value);
+    input.addEventListener('input', () => { paint(+input.value); send(); });
+    const body = cell.querySelector('.insert-knob-body');
+    body.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      const startY = event.clientY, startValue = +input.value, id = event.pointerId;
+      body.setPointerCapture(id);
+      const move = next => {
+        if (next.pointerId !== id) return;
+        const perPixel = span / (next.shiftKey ? 1200 : 240);
+        input.value = Math.round(Math.max(field.min, Math.min(field.max, startValue + (startY - next.clientY) * perPixel)));
+        paint(+input.value); send();
+      };
+      const done = next => {
+        if (next.pointerId !== id) return;
+        body.removeEventListener('pointermove', move);
+        body.removeEventListener('pointerup', done);
+        body.removeEventListener('pointercancel', done);
+      };
+      body.addEventListener('pointermove', move);
+      body.addEventListener('pointerup', done);
+      body.addEventListener('pointercancel', done);
+    });
+    cell.addEventListener('wheel', event => {
+      event.preventDefault();
+      input.value = Math.max(field.min, Math.min(field.max, +input.value - Math.sign(event.deltaY)));
+      paint(+input.value); send();
+    }, {passive: false});
+    paint(field.value);
+    knobs.append(cell);
+  });
+  const note = document.createElement('p');
+  note.className = 'hint';
+  note.textContent = 'Values are the device\'s own numbers, as the vendor panel shows them. Each change is written and read back.';
+  box.replaceChildren(head, knobs, note);
+}
+
+async function openInsertParams(channel, slot) {
+  INSERT_PARAMS = {channel, slot, data: null, pending: {}, busy: false};
+  renderInsertParams();
+  try {
+    const response = await fetch(`/api/afx-inserts/parameters?channel=${channel}&slot=${slot}`);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'The settings could not be read.');
+    if (INSERT_PARAMS?.channel === channel && INSERT_PARAMS.slot === slot) INSERT_PARAMS.data = result;
+  } catch (error) {
+    reportMessage('inserts', 'Effect settings', error.message);
+    INSERT_PARAMS = null;
+  }
+  renderInsertParams();
+}
+
+async function queueInsertParam(key, value) {
+  const view = INSERT_PARAMS;
+  if (!view) return;
+  view.pending[key] = value;
+  if (view.busy) return;
+  view.busy = true;
+  while (INSERT_PARAMS === view && Object.keys(view.pending).length) {
+    const [nextKey, nextValue] = Object.entries(view.pending)[0];
+    delete view.pending[nextKey];
+    try {
+      const response = await fetch('/api/afx-inserts/parameters', {method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({channel: view.channel, slot: view.slot, key: nextKey, value: nextValue})});
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'The change was refused.');
+      view.data = result;
+      clearMessage('inserts');
+    } catch (error) {
+      reportMessage('inserts', 'Effect settings', error.message);
+      view.pending = {};
+      view.busy = false;
+      if (INSERT_PARAMS === view) openInsertParams(view.channel, view.slot);
+      return;
+    }
+  }
+  view.busy = false;
+}
+
 async function loadInsertRacks() {
   try { INSERT_RACKS = await getJSON('/api/afx-inserts'); } catch (e) { return; }
   renderInsertRacks();
@@ -759,7 +891,7 @@ async function changeInsertRack(change) {
     const response = await fetch('/api/afx-inserts', {method: 'POST',
       headers: {'content-type': 'application/json'}, body: JSON.stringify(change)});
     const result = await response.json();
-    if (response.ok) { INSERT_RACKS = result; clearMessage('inserts'); }
+    if (response.ok) { INSERT_RACKS = result; clearMessage('inserts'); INSERT_PARAMS = null; renderInsertParams(); }
     else reportMessage('inserts', 'Effect racks', result.error || 'The change was refused.');
   } catch (e) {
     reportMessage('inserts', 'Effect racks', 'The server did not answer.');

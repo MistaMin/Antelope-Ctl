@@ -438,6 +438,25 @@
   .insert-row button { flex:0 0 auto; width:22px; height:22px; padding:0; cursor:pointer; color:#e7c98a; background:#0e1116;
                        border:1px solid #5a4516; border-radius:4px; font:700 14px/1 inherit; }
   .insert-row button:disabled, .insert-rack select:disabled { opacity:.4; cursor:not-allowed; }
+  .insert-row .insert-edit { width:auto; padding:0 6px; font:600 10px/1 ui-monospace,monospace; }
+  .insert-params { margin-top:12px; padding:12px; background:linear-gradient(180deg,#23262e,#191c22); border:1px solid var(--line);
+                   border-radius:10px; }
+  .insert-params-hd { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+  .insert-params-hd h3 { flex:1 1 auto; margin:0; color:#e7c98a; font:600 13px/1.2 ui-monospace,monospace; }
+  .insert-params-hd button { padding:4px 10px; cursor:pointer; color:var(--fg); background:#0e1116; border:1px solid var(--line);
+                             border-radius:4px; font:600 11px/1 ui-monospace,monospace; }
+  .insert-knobs { display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:14px 10px; }
+  .insert-knob { position:relative; display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+  .insert-knob-label { color:var(--dim); font:600 10px/1 ui-monospace,monospace; letter-spacing:.06em; text-transform:uppercase; }
+  .insert-knob-body { position:relative; width:56px; height:56px; border-radius:50%; cursor:ns-resize; touch-action:none;
+                      background:radial-gradient(circle at 35% 28%,#565c66,#1c1f25 72%); border:1px solid #0b0d10;
+                      box-shadow:0 2px 5px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.12); }
+  .insert-knob-body i { position:absolute; inset:0; transform:rotate(var(--turn,-135deg)); }
+  .insert-knob-body i::after { content:""; position:absolute; left:50%; top:5px; width:3px; height:15px; margin-left:-1.5px;
+                               border-radius:2px; background:#f1f3f6; }
+  .insert-knob input { position:absolute; width:1px; height:1px; margin:0; padding:0; opacity:0; }
+  .insert-knob:focus-within .insert-knob-body { outline:2px solid var(--accent); outline-offset:2px; }
+  .insert-knob output { color:#e0e3e7; font:700 12px/1 ui-monospace,monospace; }
   .insert-note { margin:0; color:#59616d; font:600 11px/1.4 ui-monospace,monospace; }
   .insert-rack select { margin-top:auto; padding:4px; color:var(--fg); background:#0e1116; border:1px solid var(--line);
                         border-radius:4px; font:600 11px/1 ui-monospace,monospace; }
