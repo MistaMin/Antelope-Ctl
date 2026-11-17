@@ -1,7 +1,7 @@
 {
  "type": 9,
  "title": "FET-A76",
- "plate": "Slate",
+ "plate": "Stealth",
  "width": 760,
  "height": 224,
  "sections": [
@@ -41,7 +41,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Rck",
+   "style": "Knl",
    "x": 310,
    "y": 110,
    "size": 64,
@@ -51,7 +51,7 @@
   {
    "key": "release",
    "kind": "knob",
-   "style": "Rck",
+   "style": "Knl",
    "x": 450,
    "y": 110,
    "size": 64,

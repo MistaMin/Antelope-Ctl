@@ -1,7 +1,7 @@
 {
  "type": 39,
  "title": "PowerGate",
- "plate": "Mesh",
+ "plate": "Black",
  "width": 760,
  "height": 222,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Led",
+   "style": "Chr",
    "x": 85,
    "y": 108,
    "size": 96,
@@ -41,7 +41,7 @@
   {
    "key": "range",
    "kind": "stepped",
-   "style": "Hex",
+   "style": "Chr",
    "x": 214,
    "y": 108,
    "size": 76,
@@ -51,7 +51,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Dsh",
+   "style": "Chr",
    "x": 337,
    "y": 108,
    "size": 68,
@@ -61,7 +61,7 @@
   {
    "key": "hold",
    "kind": "knob",
-   "style": "Dsh",
+   "style": "Chr",
    "x": 447,
    "y": 108,
    "size": 68,
@@ -71,7 +71,7 @@
   {
    "key": "decay",
    "kind": "knob",
-   "style": "Dsh",
+   "style": "Chr",
    "x": 558,
    "y": 108,
    "size": 68,
@@ -81,7 +81,7 @@
   {
    "key": "gain",
    "kind": "knob",
-   "style": "Led",
+   "style": "Chr",
    "x": 683,
    "y": 108,
    "size": 80,

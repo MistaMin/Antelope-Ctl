@@ -1,7 +1,7 @@
 {
  "type": 27,
  "title": "Master De-esser",
- "plate": "Optic",
+ "plate": "Granite",
  "width": 760,
  "height": 214,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "frequency",
    "kind": "knob",
-   "style": "Seg",
+   "style": "Chr",
    "x": 66,
    "y": 104,
    "size": 72,
@@ -48,7 +48,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Glw",
+   "style": "Chr",
    "x": 181,
    "y": 104,
    "size": 88,
@@ -58,7 +58,7 @@
   {
    "key": "ratio",
    "kind": "knob",
-   "style": "Glw",
+   "style": "Chr",
    "x": 297,
    "y": 104,
    "size": 88,
@@ -68,7 +68,7 @@
   {
    "key": "soft_knee",
    "kind": "knob",
-   "style": "Glw",
+   "style": "Chr",
    "x": 400,
    "y": 104,
    "size": 64,
@@ -78,7 +78,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Brg",
+   "style": "Chr",
    "x": 499,
    "y": 104,
    "size": 64,
@@ -88,7 +88,7 @@
   {
    "key": "release",
    "kind": "knob",
-   "style": "Brg",
+   "style": "Chr",
    "x": 591,
    "y": 104,
    "size": 64,
@@ -98,7 +98,7 @@
   {
    "key": "dry_wet",
    "kind": "knob",
-   "style": "Seg",
+   "style": "Chr",
    "x": 694,
    "y": 104,
    "size": 72,

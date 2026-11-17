@@ -1,7 +1,7 @@
 {
  "type": 17,
  "title": "VEQ-4K Orange",
- "plate": "Cognac",
+ "plate": "Black",
  "width": 760,
  "height": 330,
  "sections": [
@@ -52,7 +52,7 @@
   {
    "key": "high_pass",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Wh",
    "x": 60,
    "y": 146,
    "size": 60,
@@ -61,7 +61,7 @@
   {
    "key": "lf_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd#d2581c",
    "x": 152,
    "y": 95,
    "size": 72,
@@ -70,7 +70,7 @@
   {
    "key": "lf_freq",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd#d2581c",
    "x": 152,
    "y": 225,
    "size": 56,
@@ -79,7 +79,7 @@
   {
    "key": "lmf_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd#5b7a94",
    "x": 290,
    "y": 95,
    "size": 72,
@@ -88,7 +88,7 @@
   {
    "key": "lmf_freq",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd#5b7a94",
    "x": 248,
    "y": 225,
    "size": 56,
@@ -97,7 +97,7 @@
   {
    "key": "lmf_q",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd#5b7a94",
    "x": 332,
    "y": 225,
    "size": 56,
@@ -106,7 +106,7 @@
   {
    "key": "hmf_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd#2e7d32",
    "x": 470,
    "y": 95,
    "size": 72,
@@ -115,7 +115,7 @@
   {
    "key": "hmf_freq",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd#2e7d32",
    "x": 428,
    "y": 225,
    "size": 56,
@@ -124,7 +124,7 @@
   {
    "key": "hmf_q",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd#2e7d32",
    "x": 512,
    "y": 225,
    "size": 56,
@@ -133,7 +133,7 @@
   {
    "key": "hf_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd#b3261e",
    "x": 608,
    "y": 95,
    "size": 72,
@@ -142,7 +142,7 @@
   {
    "key": "hf_freq",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd#b3261e",
    "x": 608,
    "y": 225,
    "size": 56,
@@ -151,7 +151,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Dbl",
+   "style": "Rd",
    "x": 700,
    "y": 146,
    "size": 60,

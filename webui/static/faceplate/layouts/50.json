@@ -1,7 +1,7 @@
 {
  "type": 50,
  "title": "BAE 10DCF",
- "plate": "Steel",
+ "plate": "Optic",
  "width": 760,
  "height": 200,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "ratio",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd",
    "x": 69,
    "y": 98,
    "size": 64,
@@ -55,7 +55,7 @@
   {
    "key": "attack",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd",
    "x": 152,
    "y": 98,
    "size": 64,
@@ -72,7 +72,7 @@
   {
    "key": "recovery",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd",
    "x": 234,
    "y": 98,
    "size": 64,
@@ -89,7 +89,7 @@
   {
    "key": "bypass_filter",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#2f6fb0",
    "x": 355,
    "y": 98,
    "size": 64,
@@ -105,7 +105,7 @@
   {
    "key": "limiter_threshold",
    "kind": "stepped",
-   "style": "Bk",
+   "style": "Rd",
    "x": 476,
    "y": 98,
    "size": 64,
@@ -115,7 +115,7 @@
   {
    "key": "limiter_recovery",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd",
    "x": 558,
    "y": 98,
    "size": 64,
@@ -132,7 +132,7 @@
   {
    "key": "gain_make_up",
    "kind": "stepped",
-   "style": "Bk",
+   "style": "Rd#b3261e",
    "x": 685,
    "y": 98,
    "size": 76,

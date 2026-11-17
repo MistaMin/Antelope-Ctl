@@ -1,7 +1,7 @@
 {
  "type": 2,
  "title": "PowerFFC",
- "plate": "Cyber",
+ "plate": "Black",
  "width": 760,
  "height": 226,
  "sections": [
@@ -24,7 +24,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Arc",
+   "style": "Chr",
    "x": 96,
    "y": 110,
    "size": 100,
@@ -34,7 +34,7 @@
   {
    "key": "ratio",
    "kind": "knob",
-   "style": "Arc",
+   "style": "Chr",
    "x": 257,
    "y": 110,
    "size": 100,
@@ -44,7 +44,7 @@
   {
    "key": "knee",
    "kind": "knob",
-   "style": "Arc",
+   "style": "Chr",
    "x": 404,
    "y": 110,
    "size": 72,
@@ -54,7 +54,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Neo",
+   "style": "Chr",
    "x": 545,
    "y": 110,
    "size": 72,
@@ -64,7 +64,7 @@
   {
    "key": "release",
    "kind": "knob",
-   "style": "Neo",
+   "style": "Chr",
    "x": 678,
    "y": 110,
    "size": 72,

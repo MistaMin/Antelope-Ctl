@@ -1,7 +1,7 @@
 {
  "type": 29,
  "title": "X903",
- "plate": "Granite",
+ "plate": "Black",
  "width": 760,
  "height": 216,
  "sections": [],
@@ -9,7 +9,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Rd",
+   "style": "Rd#b3261e",
    "x": 218,
    "y": 106,
    "size": 92,
@@ -19,7 +19,7 @@
   {
    "key": "ratio",
    "kind": "knob",
-   "style": "Rd",
+   "style": "Rd#5b7a94",
    "x": 380,
    "y": 106,
    "size": 72,
@@ -29,7 +29,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Rd",
+   "style": "Rd#2e7d32",
    "x": 542,
    "y": 106,
    "size": 92,

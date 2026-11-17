@@ -1,7 +1,7 @@
 {
  "type": 15,
  "title": "NEU-W492",
- "plate": "Slate",
+ "plate": "Black",
  "width": 760,
  "height": 330,
  "sections": [
@@ -45,7 +45,7 @@
   {
    "key": "low_gain",
    "kind": "knob",
-   "style": "Wh",
+   "style": "Rd#b3261e",
    "x": 88,
    "y": 95,
    "size": 76,
@@ -54,7 +54,7 @@
   {
    "key": "low_freq",
    "kind": "knob",
-   "style": "Rck",
+   "style": "Rd#b3261e",
    "x": 88,
    "y": 225,
    "size": 56,
@@ -63,7 +63,7 @@
   {
    "key": "low_mid_gain",
    "kind": "knob",
-   "style": "Wh",
+   "style": "Rd#c9a227",
    "x": 234,
    "y": 95,
    "size": 76,
@@ -72,7 +72,7 @@
   {
    "key": "low_mid_freq",
    "kind": "knob",
-   "style": "Rck",
+   "style": "Rd#c9a227",
    "x": 234,
    "y": 225,
    "size": 56,
@@ -81,7 +81,7 @@
   {
    "key": "high_mid_gain",
    "kind": "knob",
-   "style": "Wh",
+   "style": "Rd#2e7d32",
    "x": 380,
    "y": 95,
    "size": 76,
@@ -90,7 +90,7 @@
   {
    "key": "high_mid_freq",
    "kind": "knob",
-   "style": "Rck",
+   "style": "Rd#2e7d32",
    "x": 380,
    "y": 225,
    "size": 56,
@@ -99,7 +99,7 @@
   {
    "key": "high_gain",
    "kind": "knob",
-   "style": "Wh",
+   "style": "Rd#2f6fb0",
    "x": 526,
    "y": 95,
    "size": 76,
@@ -108,7 +108,7 @@
   {
    "key": "high_freq",
    "kind": "knob",
-   "style": "Rck",
+   "style": "Rd#2f6fb0",
    "x": 526,
    "y": 225,
    "size": 56,
@@ -117,7 +117,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Mini",
+   "style": "Rd",
    "x": 672,
    "y": 146,
    "size": 72,

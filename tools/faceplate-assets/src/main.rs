@@ -86,12 +86,21 @@ fn write_json(path: &Path, v: &Value) {
     std::fs::write(path, text).unwrap_or_else(|e| die(format!("{}: {e}", path.display())));
 }
 
-/// Exactly the 47 catalogue codes, plus the 15 lit-only preset codes. No aliases or prefixes.
+/// Optional cap colour: a layout may write a knob style as "Code#rrggbb" (e.g. "Rd#b3261e") to render
+/// that DRI knob with the given accent instead of the neutral grey. Colour only; the shape is DRI's.
+fn knob_parts(name: &str) -> Option<(&str, Color)> {
+    let Some((code, hex)) = name.split_once('#') else { return Some((name, ACCENT)) };
+    if hex.len() != 6 || hex.bytes().any(|b| !matches!(b, b'0'..=b'9' | b'a'..=b'f')) { return None; }
+    Some((code, Color(0xff000000 | u32::from_str_radix(hex, 16).ok()?)))
+}
+
+/// Exactly the 47 catalogue codes, plus the 15 lit-only preset codes, each optionally with "#rrggbb".
 fn knob_known(name: &str) -> bool {
-    KNOB_STYLES.iter().any(|s| s.code == name) || knob3d::PRESETS.contains(&name)
+    knob_parts(name).is_some_and(|(code, _)| KNOB_STYLES.iter().any(|s| s.code == code) || knob3d::PRESETS.contains(&code))
 }
 
 fn render_knob(name: &str, path: &Path) {
+    let (name, accent) = knob_parts(name).unwrap();
     draw::set_knob_scale(1.0);
     hardware::set_device_scale(1.0);
     let c = Point::new(KNOB_SIZE as f32 * 0.5, KNOB_SIZE as f32 * 0.5);
@@ -99,7 +108,7 @@ fn render_knob(name: &str, path: &Path) {
         // DRI angles: 0 points up, negative is counter-clockwise. Frame 0 is the minimum.
         let angle = (-135.0 + 270.0 * i as f32 / (KNOB_FRAMES - 1) as f32).to_radians();
         let mut scene = Scene::new();
-        draw::knob_named_mode(&mut scene, name, c, KNOB_RADIUS, angle, ACCENT, false, KnobMode::Lit);
+        draw::knob_named_mode(&mut scene, name, c, KNOB_RADIUS, angle, accent, false, KnobMode::Lit);
         // A lit knob is one sprite preceded by its printed scale. The scale is dropped: its ink
         // depends on the plate and its sweep (288 deg) is not the 270 deg of these frames.
         if let Some(at) = scene.cmds.iter().position(|c| matches!(c, Cmd::Image { .. })) { scene.cmds.drain(..at); }
@@ -203,6 +212,11 @@ fn main() {
         }
     }
     if !bad.is_empty() { die(format!("{}\n(valid names are in styles.json)", bad.join("\n"))); }
+    // The tinted knob names the layouts use are valid style names too.
+    let mut styles = styles;
+    styles["knobs_tinted"] = json!(knobs.iter().filter(|k| k.contains('#')).collect::<Vec<_>>());
+    styles["knobs"].as_array_mut().unwrap().extend(knobs.iter().filter(|k| k.contains('#')).map(|k| json!(k)));
+    write_json(&out.join("styles.json"), &styles);
     if all {
         knobs = all_knobs.iter().map(|s| s.to_string()).collect();
         sw = all_switches.iter().map(|s| s.to_string()).collect();
@@ -224,7 +238,8 @@ fn main() {
     }
     for name in &knobs {
         render_knob(name, &file("knobs", name));
-        let lit = knob3d::PRESETS.contains(&name.as_str()) || knob3d::style_model(name).is_some();
+        let code = knob_parts(name).unwrap().0;
+        let lit = knob3d::PRESETS.contains(&code) || knob3d::style_model(code).is_some();
         let entry = json!({"frames": KNOB_FRAMES, "size": KNOB_SIZE, "knob": KNOB_RADIUS * 2.0, "lit": lit});
         emit("knobs", name, entry.as_object().unwrap().clone());
     }

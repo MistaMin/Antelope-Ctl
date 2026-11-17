@@ -1,7 +1,7 @@
 {
  "type": 44,
  "title": "VPA-76",
- "plate": "Midnight",
+ "plate": "Olive",
  "width": 760,
  "height": 220,
  "sections": [
@@ -17,7 +17,7 @@
   {
    "key": "warmth",
    "kind": "knob",
-   "style": "Dbl",
+   "style": "Fat",
    "x": 120,
    "y": 108,
    "size": 96,
@@ -52,7 +52,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Dbl",
+   "style": "Fat",
    "x": 648,
    "y": 108,
    "size": 80,

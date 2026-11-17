@@ -1,7 +1,7 @@
 {
  "type": 21,
  "title": "VEQ-STU 089",
- "plate": "Cream",
+ "plate": "Granite",
  "width": 760,
  "height": 206,
  "sections": [
@@ -45,7 +45,7 @@
   {
    "key": "low_filter",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Rd#b3261e",
    "x": 61,
    "y": 100,
    "size": 60,
@@ -55,7 +55,7 @@
   {
    "key": "high_filter",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Rd#b3261e",
    "x": 152,
    "y": 100,
    "size": 60,
@@ -65,7 +65,7 @@
   {
    "key": "80_hz",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#b3261e",
    "x": 259,
    "y": 100,
    "size": 76,
@@ -75,7 +75,7 @@
   {
    "key": "presence_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Rd#b3261e",
    "x": 366,
    "y": 100,
    "size": 60,
@@ -85,7 +85,7 @@
   {
    "key": "presence",
    "kind": "knob",
-   "style": "Bk",
+   "style": "Rd",
    "x": 467,
    "y": 100,
    "size": 80,
@@ -95,7 +95,7 @@
   {
    "key": "8_khz",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#b3261e",
    "x": 584,
    "y": 100,
    "size": 76,
@@ -105,7 +105,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Bk",
+   "style": "Rd",
    "x": 695,
    "y": 100,
    "size": 68,

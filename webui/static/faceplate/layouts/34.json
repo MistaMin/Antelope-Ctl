@@ -1,7 +1,7 @@
 {
  "type": 34,
  "title": "Stay-Levin",
- "plate": "Navy",
+ "plate": "Graphite",
  "width": 760,
  "height": 224,
  "sections": [],
@@ -9,7 +9,7 @@
   {
    "key": "input",
    "kind": "knob",
-   "style": "Chr",
+   "style": "Knl",
    "x": 216,
    "y": 110,
    "size": 100,
@@ -19,7 +19,7 @@
   {
    "key": "recovery_time",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Knl",
    "x": 380,
    "y": 110,
    "size": 68,
@@ -29,7 +29,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Chr",
+   "style": "Knl",
    "x": 544,
    "y": 110,
    "size": 100,

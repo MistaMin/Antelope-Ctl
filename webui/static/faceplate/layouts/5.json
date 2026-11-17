@@ -1,7 +1,7 @@
 {
  "type": 5,
  "title": "VMEQ-5",
- "plate": "Olive",
+ "plate": "Slate",
  "width": 760,
  "height": 220,
  "sections": [
@@ -47,7 +47,7 @@
   {
    "key": "low_peak",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Fat",
    "x": 182,
    "y": 105,
    "size": 88,
@@ -78,7 +78,7 @@
   {
    "key": "dip",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Fat",
    "x": 425,
    "y": 105,
    "size": 88,
@@ -103,7 +103,7 @@
   {
    "key": "high_peak",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Fat",
    "x": 668,
    "y": 105,
    "size": 88,

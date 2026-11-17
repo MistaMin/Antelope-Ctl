@@ -1,7 +1,7 @@
 {
  "type": 8,
  "title": "VEQ-55A",
- "plate": "Steel",
+ "plate": "Black",
  "width": 760,
  "height": 210,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "lf_freq",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "A#6a4c9c",
    "x": 105,
    "y": 100,
    "size": 76,
@@ -48,7 +48,7 @@
   {
    "key": "mf_freq",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "A#6a4c9c",
    "x": 285,
    "y": 100,
    "size": 76,
@@ -58,7 +58,7 @@
   {
    "key": "hf_freq",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "A#6a4c9c",
    "x": 465,
    "y": 100,
    "size": 76,
@@ -68,7 +68,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Chr",
    "x": 650,
    "y": 100,
    "size": 80,

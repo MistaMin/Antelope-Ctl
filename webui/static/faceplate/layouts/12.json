@@ -1,7 +1,7 @@
 {
  "type": 12,
  "title": "UK-69",
- "plate": "Walnut",
+ "plate": "Black",
  "width": 760,
  "height": 220,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "bass",
    "kind": "knob",
-   "style": "Slv",
+   "style": "Brit",
    "x": 90,
    "y": 105,
    "size": 88,
@@ -47,7 +47,7 @@
   {
    "key": "mid_freq",
    "kind": "stepped",
-   "style": "Tab",
+   "style": "Brit",
    "x": 245,
    "y": 105,
    "size": 64,
@@ -57,7 +57,7 @@
   {
    "key": "mid",
    "kind": "knob",
-   "style": "Slv",
+   "style": "Brit",
    "x": 360,
    "y": 105,
    "size": 88,
@@ -66,7 +66,7 @@
   {
    "key": "10_khz",
    "kind": "stepped",
-   "style": "Slv",
+   "style": "Brit",
    "x": 525,
    "y": 105,
    "size": 88,
@@ -76,7 +76,7 @@
   {
    "key": "line_level",
    "kind": "knob",
-   "style": "Mini",
+   "style": "Brit",
    "x": 675,
    "y": 105,
    "size": 64,

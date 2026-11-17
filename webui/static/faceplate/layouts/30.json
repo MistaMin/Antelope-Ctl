@@ -1,7 +1,7 @@
 {
  "type": 30,
  "title": "Gyratec X",
- "plate": "Cream",
+ "plate": "Black",
  "width": 760,
  "height": 208,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "input_level",
    "kind": "knob",
-   "style": "Wnt",
+   "style": "Mtl",
    "x": 82,
    "y": 102,
    "size": 84,
@@ -48,7 +48,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Wnt",
+   "style": "Mtl",
    "x": 228,
    "y": 102,
    "size": 84,
@@ -58,7 +58,7 @@
   {
    "key": "ratio",
    "kind": "knob",
-   "style": "Wnt",
+   "style": "Mtl",
    "x": 327,
    "y": 102,
    "size": 64,
@@ -68,7 +68,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Wnt",
+   "style": "Mtl",
    "x": 453,
    "y": 102,
    "size": 64,
@@ -78,7 +78,7 @@
   {
    "key": "release",
    "kind": "knob",
-   "style": "Wnt",
+   "style": "Mtl",
    "x": 542,
    "y": 102,
    "size": 64,
@@ -88,7 +88,7 @@
   {
    "key": "output_level",
    "kind": "knob",
-   "style": "Wnt",
+   "style": "Mtl",
    "x": 678,
    "y": 102,
    "size": 84,
