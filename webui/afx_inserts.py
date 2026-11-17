@@ -147,6 +147,9 @@ class InsertRack:
         effect = protocol.afx_parameter_effect(self.device.profile, type_id)
         if effect is None:
             raise ValueError('The controls of this effect are not mapped yet')
+        limit = spec['parameters'].get('max_instance')
+        if limit is not None and instance > limit:
+            raise ValueError('Only the first instance of an effect can be edited on this device so far')
         return type_id, instance, effect
 
     def parameters(self, channel, slot):

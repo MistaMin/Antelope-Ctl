@@ -112,6 +112,19 @@ class InsertChainTests(unittest.TestCase):
         self.assertEqual(packet[4], 0x14 + 0x12)
         self.assertEqual(packet[16:20].hex(' '), 'd5 14 02 00')
 
+    def test_zen_go_shares_the_discrete_4_effect_maps(self):
+        zen, d4 = load('zen_go_sc'), load('discrete_4_a270')
+        effects = zen['afx_inserts']['parameters']['effects']
+        self.assertEqual(len(effects), 45)
+        for kind, effect in effects.items():
+            self.assertEqual(effect['fields'], d4['afx_inserts']['parameters']['effects'][kind]['fields'], kind)
+            self.assertEqual(effect['read_offset'], 1)
+        # The Zen Go's read is tagged and its sub-command differs; the write frame is the same.
+        self.assertEqual(protocol.build_afx_state_query(zen, 29)[:16].hex(' '),
+                         '74 00 00 00 11 00 00 00 07 00 00 00 1d 00 00 80')
+        packet = protocol.build_afx_parameter_write(zen, 29, 0, bytes.fromhex('523232'))
+        self.assertEqual((packet[4], packet[16:23].hex(' ')), (0x17, 'd5 05 1d 00 52 32 32'))
+
     def test_orion_has_no_insert_contract(self):
         self.assertIsNone(protocol.afx_insert_writes(load('orion_studio_sc')))
 
