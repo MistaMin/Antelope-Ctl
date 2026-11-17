@@ -131,6 +131,10 @@ def features_for(profile_path, profile):
     if "mixer_sources" in features and isinstance(features["mixer_sources"], dict):
         feature = features["mixer_sources"]
         feature["options"] = _source_options(profile)
+        # sources the profile can label but has not seen written to a strip
+        for option in feature["options"]:
+            if option["key"].split(":")[0] in feature.get("display_only_sources", []):
+                option["selectable"] = False
         routing = frame.get("routing_command", {})
         try:
             destinations = [int(d) for d in feature.get(

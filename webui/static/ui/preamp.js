@@ -157,11 +157,20 @@ function applyChannels(channels) {
     }
     if (!PENDING[c.ch] && !el.classList.contains('dragging')) paintKnob(el, c.gain);
 
+    const unread = c.unread || [];
     const p48 = el.querySelector('[data-tog="phantom"]');
-    p48.classList.toggle('on', c.phantom);
-    p48.disabled = String(c.mode).toLowerCase() !== 'mic';
+    if (!unread.includes('phantom')) p48.classList.toggle('on', c.phantom);
+    // 48V stays off-limits where the profile does not map it
+    p48.disabled = !PROFILE?.params?.phantom || String(c.mode).toLowerCase() !== 'mic';
                                                   // Launcher only exposes 48V in mic mode
-    el.querySelector('[data-tog="phase_invert"]').classList.toggle('on', c.phase_invert);
+    const phase = el.querySelector('[data-tog="phase_invert"]');
+    if (unread.includes('phase_invert')) {
+      // write-only on this device: keep the last value sent from this page
+      if (!phase.dataset.unread && !phase.disabled) {
+        phase.dataset.unread = '1';
+        phase.title = 'write-only: the device state is not read back; this shows what this page last sent';
+      }
+    } else phase.classList.toggle('on', c.phase_invert);
   });
 }
 

@@ -611,6 +611,23 @@ Machine-enforced bounds. `protocol.check_opcode` / `check_target` /
 | `input_mode_allowed_values` `[...]` | `check_enum` | portable-enum guard (a foreign value crashed a sibling) |
 | `gain_bounds` / `adat_gain_bounds` / `spdif_gain_bounds` | the gain CLI commands | dB clamp ranges |
 | `min_write_interval_ms` | (advisory) | rate-limit hint |
+| `mixer_bounds` `{mixes,strips,fader,pan}` | `build_mix_command` | optional: refuse a mix / strip outside the device, clamp fader and pan |
+| `protected_mute_buses` `[...]` | self-tests, WebUI `bus-toggle` | optional: buses whose mute no automatic action may release |
+
+Optional keys for devices that differ from the Orion / Zen Go shape (all
+default to the old behaviour when absent; first used by
+`discrete_4_a270.json`):
+
+| key | read by | meaning |
+|---|---|---|
+| `buses.known[id].status: "unconfirmed"` | `channel_space_bounds("bus")` | a guessed bus: listed, but not a legal target and not shown until the status is changed |
+| `params.<name>.bus_target_key` | `build_command` | the wire target is `buses.known[bus][key]`, not the bus id (output dim ids that differ from level / mute ids) |
+| `frame.state_report.input_mode_base_offset` | `parse_state` | the input mode is a whole byte per channel; used when there is no `status_base_offset`. Phase / 48 V are then reported as unread |
+| `frame.state_report.bus_block.flags_combine` | WebUI `bus-toggle` | true once mute + dim are known to combine; until then dim is refused on a protected muted bus |
+| `frame.mix_command.channel_base` | `build_mix_command` | added to the 0-based strip index on the wire |
+| `mixer.link_write` `{space, pairs_by_mix, companions_before}` | `build_mixer_link_commands` | the only (mix, pair) links that may be written, and SET_LINK frames in other spaces sent first |
+| `mixer.input_routing.strict` (+ `locked_channels`, `display_only_source_banks`) | WebUI routing writes, CLI `route` | the strip source map may only be written to all its mirror groups, on unlocked strips, with selectable sources |
+| `features.mixer_sources.locked_channels`, `.display_only_sources` | WebUI | strips whose source select is disabled; sources that are labelled but not selectable |
 
 Every bound here should have a matching `hazards` entry saying what goes
 wrong without it.

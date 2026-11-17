@@ -140,8 +140,24 @@ def channel_space_bounds(profile: dict, space: str):
         b = c['spdif_channel_bounds']
         return b['min'], b['max']
     if space == 'bus' and 'bus_ids' in c:
-        return sorted(int(x) for x in c['bus_ids'])
+        # A bus the profile lists as a guess (buses.known[id].status ==
+        # 'unconfirmed') is not a legal target until a live trial flips it.
+        known = profile.get('buses', {}).get('known', {}) or {}
+        return sorted(int(x) for x in c['bus_ids']
+                      if not _bus_unconfirmed(known.get(str(int(x)))))
     return None
+
+
+def _bus_unconfirmed(info) -> bool:
+    return isinstance(info, dict) and \
+        str(info.get('status', '')).strip().lower() == 'unconfirmed'
+
+
+def protected_mute_buses(profile: dict) -> list:
+    """Buses whose mute must never be released by an automatic action
+    (constraints.protected_mute_buses): self-tests skip them, and a write
+    that could clear the mute as a side effect is refused."""
+    return [int(x) for x in constraints(profile).get('protected_mute_buses', [])]
 
 
 def space_channel_count(profile: dict, space: str):
@@ -228,6 +244,16 @@ def build_command(profile: dict, param_name: str, channel: int, value: int) -> b
             f'param "{param_name}" has no confirmed param_id yet (status={pdef.get("status")}). '
             'Capture it first, then fill in profile["params"]["%s"]["id"].' % param_name
         )
+    key = pdef.get('bus_target_key')
+    if key is not None:
+        # Discrete 4 0xa270: output dim addresses Monitor as 4 and Headphone 1
+        # as 0, while level/mute use bus 0 and 1. The wire id lives on the bus.
+        info = profile.get('buses', {}).get('known', {}).get(str(channel))
+        if not isinstance(info, dict) or info.get(key) is None \
+                or _bus_unconfirmed(info):
+            raise ConstraintError(
+                f'param "{param_name}" has no confirmed {key} for bus {channel}')
+        channel = _as_int(info[key])
     return build_raw_command(profile, _as_int(pdef['id']), channel, value)
 
 
@@ -319,6 +345,30 @@ def mixer_link_pair_index(profile: dict, mix: int, pair_index: int) -> int:
     if not isinstance(stride, int) or stride < 0:
         raise ConstraintError('mixer.link_pair_index.mix_stride must be a non-negative integer')
     return mix * stride + pair_index
+
+
+def build_mixer_link_commands(profile: dict, mix: int, pair_index: int,
+                              enabled: bool) -> list:
+    """Frames that link/unlink one mixer strip pair, in send order.
+
+    Default: the single space-3 SET_LINK every profile has used. A profile
+    with ``mixer.link_write`` limits writes to the (mix, pair) tuples it lists
+    in ``pairs_by_mix`` and may name companion spaces sent first for some
+    pairs (Discrete 4 0xa270: the panel sends a2 04 then a2 03)."""
+    spec = profile.get('mixer', {}).get('link_write')
+    wire = mixer_link_pair_index(profile, mix, pair_index)
+    if not isinstance(spec, dict):
+        return [build_link_command(profile, wire, enabled, space=3)]
+    if pair_index not in (spec.get('pairs_by_mix', {}).get(str(mix)) or []):
+        raise ConstraintError(
+            f'mixer link for mix {mix} pair {pair_index} is not captured on '
+            'this device (mixer.link_write.pairs_by_mix)')
+    frames = [build_link_command(profile, wire, enabled, space=_as_int(c['space']))
+              for c in spec.get('companions_before', [])
+              if pair_index in c.get('pairs', [])]
+    frames.append(build_link_command(
+        profile, wire, enabled, space=_as_int(spec.get('space', 3))))
+    return frames
 
 
 def build_global_command(profile: dict, param, value: int) -> bytes:
@@ -1487,6 +1537,20 @@ def build_mix_command(profile: dict, mix: int, channel: int, fader: int,
         raise KeyError('this profile has no frame.mix_command -- SET_MIX not available')
     f = profile['frame']['mix_command']
     check_opcode(profile, _as_int(f['opcode']))
+    bounds = constraints(profile).get('mixer_bounds')
+    if bounds:
+        if not 0 <= mix < int(bounds['mixes']):
+            raise ConstraintError(
+                f'mix {mix} is outside 0..{int(bounds["mixes"]) - 1}')
+        if not 0 <= channel < int(bounds['strips']):
+            raise ConstraintError(
+                f'mixer strip {channel} is outside 0..{int(bounds["strips"]) - 1}')
+        lo, hi = bounds.get('fader', (0, 255))
+        fader = max(lo, min(hi, fader))
+        lo, hi = bounds.get('pan', (-32, 31))
+        pan_deg = max(lo, min(hi, pan_deg))
+    # Discrete 4 0xa270 numbers strips from 1 on the wire (channel_base 1).
+    channel += _as_int(f.get('channel_base', 0))
     pan_center = _as_int(f.get('pan_center', 32))
     pan_mask = _as_int(f.get('pan_mask', 0x3f))
     pan_flags = ((pan_center + pan_deg) & pan_mask)
@@ -3205,7 +3269,14 @@ def parse_state(profile: dict, data: bytes, channel: int) -> dict:
         # gain is mapped but the status byte is not (e.g. Discrete 4 0xa270)
         if gain_off >= len(data):
             raise ValueError(f'state report too short for channel {channel}')
-        return {'channel': channel, 'gain': i8(data[gain_off])}
+        result = {'channel': channel, 'gain': i8(data[gain_off])}
+        if sr.get('input_mode_base_offset') is not None:
+            # the mode is a whole byte per channel; phase/48V stay unknown
+            mode_off = _as_int(sr['input_mode_base_offset']) + channel
+            if mode_off >= len(data):
+                raise ValueError(f'state report too short for channel {channel}')
+            result['input_mode'] = data[mode_off]
+        return result
     status_off = _as_int(sr['status_base_offset']) + channel
     if status_off >= len(data):
         raise ValueError(f'state report too short for channel {channel}')
