@@ -854,7 +854,7 @@
     "status": "observed",
     "readback_kind": "afx_strip_order",
     "mixer_channels": [0, 1, 2, 3],
-    "record_index_for_channel": { "0": 0, "1": 1, "2": 2, "3": 3 },
+    "record_index_for_channel": {"0": 0, "1": 1, "2": 2, "3": 3},
     "mapping_status": "derived",
     "mapping_notes": "The Zen Go Synergy Core User Manual (pp. 46-48) says mixer channels 1 to 4 host the Synergy Core FX racks and that both mixers share them. Record 0 = channel 1 is confirmed: the vendor panel showed a three-effect rack on channel 1 and empty racks on channels 2-4 while record 0 held three slots and records 1-3 were empty. Records 1-3 = channels 2-4 is still derived (no loaded rack seen there). Records 4-11 are polled but not shown; their role is unknown.",
     "type_labels": {
@@ -932,10 +932,14 @@
       "86": {"label": "Gate Keeper", "status": "confirmed", "group": "Vintage Compressors"}
     },
     "chain_write": {
-      "magic_offset": 0, "magic": "0x70",
-      "opcode_offset": 4, "opcode": "0x23",
-      "param_id_offset": 16, "param_id": "0xd7",
-      "subcmd_offset": 17, "subcmd": "0x11",
+      "magic_offset": 0,
+      "magic": "0x70",
+      "opcode_offset": 4,
+      "opcode": "0x23",
+      "param_id_offset": 16,
+      "param_id": "0xd7",
+      "subcmd_offset": 17,
+      "subcmd": "0x11",
       "strip_offset": 18,
       "slots_offset": 19,
       "status": "confirmed",
@@ -947,75 +951,880 @@
       "strips": [0, 1, 2, 3],
       "max_slots": 4,
       "effects": {
-        "5": {"instances": [0]},
-        "6": {"instances": [0]},
-        "7": {"instances": [0]},
-        "8": {"instances": [0]},
-        "11": {"instances": [0]},
-        "12": {"instances": [0]},
-        "13": {"instances": [0]},
-        "14": {"instances": [0]},
-        "15": {"instances": [0]},
-        "16": {"instances": [0]},
-        "17": {"instances": [0]},
-        "18": {"instances": [0]},
-        "19": {"instances": [0]},
-        "20": {"instances": [0]},
-        "21": {"instances": [0]},
-        "22": {"instances": [0]},
-        "23": {"instances": [0]},
-        "24": {"instances": [0]},
-        "25": {"instances": [0]},
-        "26": {"instances": [0]},
-        "27": {"instances": [0, 1]},
-        "28": {"instances": [0]},
-        "29": {"instances": [0]},
-        "30": {"instances": [0]},
-        "31": {"instances": [0]},
-        "32": {"instances": [0]},
-        "33": {"instances": [0]},
-        "34": {"instances": [0]},
-        "35": {"instances": [0]},
-        "36": {"instances": [0, 1]},
-        "38": {"instances": [0]},
-        "39": {"instances": [0]},
-        "41": {"instances": [0]},
-        "42": {"instances": [0]},
-        "43": {"instances": [0]},
-        "44": {"instances": [0]},
-        "46": {"instances": [0]},
-        "47": {"instances": [0]},
-        "48": {"instances": [0]},
-        "50": {"instances": [0]},
-        "51": {"instances": [0]},
-        "53": {"instances": [0]},
-        "54": {"instances": [0]},
-        "59": {"instances": [0]},
-        "63": {"instances": [0]},
-        "65": {"instances": [0]},
-        "66": {"instances": [0]},
-        "67": {"instances": [0]},
-        "68": {"instances": [0]},
-        "69": {"instances": [0]},
-        "70": {"instances": [0]},
-        "71": {"instances": [0]},
-        "72": {"instances": [0]},
-        "73": {"instances": [0]},
-        "74": {"instances": [0]},
-        "75": {"instances": [0]},
-        "77": {"instances": [0]},
-        "78": {"instances": [0]},
-        "80": {"instances": [0]},
-        "82": {"instances": [0]},
-        "83": {"instances": [0]},
-        "85": {"instances": [0]},
-        "86": {"instances": [0]}
+        "2": {
+          "instances": [0]
+        },
+        "5": {
+          "instances": [0]
+        },
+        "6": {
+          "instances": [0]
+        },
+        "7": {
+          "instances": [0]
+        },
+        "8": {
+          "instances": [0]
+        },
+        "9": {
+          "instances": [0]
+        },
+        "11": {
+          "instances": [0]
+        },
+        "12": {
+          "instances": [0]
+        },
+        "13": {
+          "instances": [0]
+        },
+        "14": {
+          "instances": [0]
+        },
+        "15": {
+          "instances": [0]
+        },
+        "16": {
+          "instances": [0]
+        },
+        "17": {
+          "instances": [0]
+        },
+        "18": {
+          "instances": [0]
+        },
+        "19": {
+          "instances": [0]
+        },
+        "20": {
+          "instances": [0]
+        },
+        "21": {
+          "instances": [0]
+        },
+        "22": {
+          "instances": [0]
+        },
+        "23": {
+          "instances": [0]
+        },
+        "24": {
+          "instances": [0]
+        },
+        "25": {
+          "instances": [0]
+        },
+        "26": {
+          "instances": [0]
+        },
+        "27": {
+          "instances": [0, 1]
+        },
+        "28": {
+          "instances": [0]
+        },
+        "29": {
+          "instances": [0]
+        },
+        "30": {
+          "instances": [0]
+        },
+        "31": {
+          "instances": [0]
+        },
+        "32": {
+          "instances": [0]
+        },
+        "33": {
+          "instances": [0]
+        },
+        "34": {
+          "instances": [0]
+        },
+        "35": {
+          "instances": [0]
+        },
+        "36": {
+          "instances": [0, 1]
+        },
+        "37": {
+          "instances": [0]
+        },
+        "38": {
+          "instances": [0]
+        },
+        "39": {
+          "instances": [0]
+        },
+        "41": {
+          "instances": [0]
+        },
+        "42": {
+          "instances": [0]
+        },
+        "43": {
+          "instances": [0]
+        },
+        "44": {
+          "instances": [0]
+        },
+        "45": {
+          "instances": [0]
+        },
+        "46": {
+          "instances": [0]
+        },
+        "47": {
+          "instances": [0]
+        },
+        "48": {
+          "instances": [0]
+        },
+        "50": {
+          "instances": [0]
+        },
+        "51": {
+          "instances": [0]
+        },
+        "53": {
+          "instances": [0]
+        },
+        "54": {
+          "instances": [0]
+        },
+        "59": {
+          "instances": [0]
+        },
+        "63": {
+          "instances": [0]
+        },
+        "65": {
+          "instances": [0]
+        },
+        "66": {
+          "instances": [0]
+        },
+        "67": {
+          "instances": [0]
+        },
+        "68": {
+          "instances": [0]
+        },
+        "69": {
+          "instances": [0]
+        },
+        "70": {
+          "instances": [0]
+        },
+        "71": {
+          "instances": [0]
+        },
+        "72": {
+          "instances": [0]
+        },
+        "73": {
+          "instances": [0]
+        },
+        "74": {
+          "instances": [0]
+        },
+        "75": {
+          "instances": [0]
+        },
+        "77": {
+          "instances": [0]
+        },
+        "78": {
+          "instances": [0]
+        },
+        "80": {
+          "instances": [0]
+        },
+        "82": {
+          "instances": [0]
+        },
+        "83": {
+          "instances": [0]
+        },
+        "85": {
+          "instances": [0]
+        },
+        "86": {
+          "instances": [0]
+        }
       },
       "verification": "This project's WebUI server, 2026-11-17, fw 05.04, each step confirmed by a fresh cat 0x19 readback: strip 1 loaded PowerGate, Master De-esser (took instance 1) and PowerEx, then removed them from the middle and the front; strips 2 and 3 loaded and removed one effect each; strip 0 had PowerGate appended to the owner's three-effect rack and removed again, leaving ClearQ / SMT-100A / Master De-esser as before. Strips 0, 2 and 3 rest on these trials, not on a vendor capture.",
       "notes": "Loadable = every effect whose vendor load, captured in the batch below, was a chain write and nothing else. Not loadable yet: ClearQ, PowerFFC, Auraverb, FET-A76, FET-A78, Comp-4K-Strip, BAE-1073MP, Guitar Amp and Guitar Cabinet, whose loads are followed by parameter frames this project does not send. Instance 0 only, except Master De-esser and SMT-100A where instance 1 was also seen. Removing works for any identified effect. max_slots 4 is one more than the fullest rack seen.",
       "batch_evidence": "owner's unit fw 05.04, vendor panel 1.1.26 under Wine, 2026-11-17: all 92 menu entries loaded one at a time by script, each name checked against the panel's rack label; usbmon captures zengo_batch_load.pcapng (sha256 b90ffd5b6443635f92606209a10c4b4c29199e5caa376c216cb5533d84b3abe4), zengo_batch_load_rerun.pcapng (18e7a281522fc920023827b8433917eec45644c0e36fad8e1aa3040cfbab47c4), zengo_batch_load_rerun2.pcapng (f8eacbe5a3eecf0c861c655f8f9e16d7c60229a88c33c97d4fc300478612b67c)"
     },
-    "evidence": "owner's unit fw 05.04, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17; public manual for the channel placement"
+    "evidence": "owner's unit fw 05.04, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17; public manual for the channel placement",
+    "parameters": {
+      "enabled": true,
+      "max_instance": 0,
+      "max_instance_notes": "The tagged cat 0x07 read returned one instance; how a second instance is addressed is not known.",
+      "write": {"param_id": "0xd5", "length_bias": "0x12", "layout": "70 00 00 00 | <len + 0x12> 00 00 00 | 00 x8 | d5 | <len> | <type> | <inst> | <whole parameter block>", "evidence": "vendor panel load captures on the owner's unit (zengo_batch_load*.pcapng): PowerFFC, FET-A76, FET-A78 and BAE 1073MP parameter frames have the Discrete 4's block length and field positions; byte 4 = length + 0x12 on each"},
+      "state_query": {"category": "0x07", "subcmd": "0x11", "index_flag": "0x80000000", "layout": "index = 0x80000000 | effect type", "notes": "Query only a type that is loaded in a rack."},
+      "effects": {
+        "2": {
+          "block_length": 18,
+          "read_stride": 19,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "attack", "label": "Attack", "offset": 0, "type": "u32", "min": 100, "max": 150000, "scale": 0.001},
+            {"key": "release", "label": "Release", "offset": 4, "type": "u32", "min": 1000, "max": 600000, "scale": 0.001},
+            {"key": "ratio", "label": "Ratio", "offset": 10, "type": "u16", "min": 100, "max": 2000, "scale": 0.01},
+            {"key": "threshold", "label": "Threshold", "offset": 15, "type": "u8", "min": 0, "max": 80},
+            {"key": "knee", "label": "Knee", "offset": 16, "type": "u8", "min": 0, "max": 30}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "5": {
+          "block_length": 6,
+          "read_stride": 7,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_peak_freq", "label": "Low Peak Freq", "offset": 0, "type": "u8", "min": 0, "max": 4},
+            {"key": "low_peak", "label": "Low Peak", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "dip_freq", "label": "Dip Freq", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "dip", "label": "Dip", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_peak_freq", "label": "High Peak Freq", "offset": 4, "type": "u8", "min": 0, "max": 4},
+            {"key": "high_peak", "label": "High Peak", "offset": 5, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "6": {
+          "block_length": 8,
+          "read_stride": 9,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_boost", "label": "Low Boost", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_atten", "label": "Low Atten", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_boost", "label": "High Boost", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_atten", "label": "High Atten", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "bandwidth", "label": "Bandwidth", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "atten_sel", "label": "Atten Sel", "offset": 7, "type": "u8", "min": 0, "max": 2}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "7": {
+          "block_length": 8,
+          "read_stride": 9,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "i8", "min": -20, "max": 10},
+            {"key": "high_gain", "label": "High Gain", "offset": 1, "type": "u8", "min": 0, "max": 16},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 3, "type": "u8", "min": 0, "max": 16},
+            {"key": "low_gain", "label": "Low Gain", "offset": 5, "type": "u8", "min": 0, "max": 16},
+            {"key": "high_pass", "label": "High-pass", "offset": 6, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "8": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "output", "label": "Output", "offset": 0, "type": "i8", "min": -48, "max": 12},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 1, "type": "u8", "min": 0, "max": 4},
+            {"key": "mf_freq", "label": "MF Freq", "offset": 3, "type": "u8", "min": 0, "max": 4},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 5, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "9": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 60},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "11": {
+          "block_length": 2,
+          "read_stride": 3,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_cut", "label": "Low Cut", "offset": 0, "type": "u8", "min": 0, "max": 10},
+            {"key": "high_cut", "label": "High Cut", "offset": 1, "type": "u8", "min": 0, "max": 10}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "12": {
+          "block_length": 7,
+          "read_stride": 8,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "bass", "label": "Bass", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "10_khz", "label": "10 kHz", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "mid_freq", "label": "Mid Freq", "offset": 3, "type": "u8", "min": 0, "max": 8},
+            {"key": "mid", "label": "Mid", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "line_level", "label": "Line Level", "offset": 6, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "13": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "60_hz", "label": "60 Hz", "offset": 0, "type": "i8", "min": -5, "max": 3},
+            {"key": "presence", "label": "Presence", "offset": 1, "type": "u8", "min": 0, "max": 4},
+            {"key": "presence_freq", "label": "Presence Freq", "offset": 2, "type": "u8", "min": 0, "max": 6},
+            {"key": "10_khz", "label": "10 kHz", "offset": 3, "type": "i8", "min": -5, "max": 4},
+            {"key": "output", "label": "Output", "offset": 4, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "14": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "lf_boost_freq", "label": "LF Boost Freq", "offset": 0, "type": "u8", "min": 0, "max": 7},
+            {"key": "lf_boost", "label": "LF Boost", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_droop_freq", "label": "LF Droop Freq", "offset": 2, "type": "u8", "min": 0, "max": 3},
+            {"key": "lf_droop", "label": "LF Droop", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_boost_bandwidth", "label": "HF Boost Bandwidth", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_boost_freq", "label": "HF Boost Freq", "offset": 5, "type": "u8", "min": 0, "max": 7},
+            {"key": "hf_boost", "label": "HF Boost", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_droop_freq", "label": "HF Droop Freq", "offset": 7, "type": "u8", "min": 0, "max": 5},
+            {"key": "hf_droop", "label": "HF Droop", "offset": 8, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "15": {
+          "block_length": 14,
+          "read_stride": 15,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_gain", "label": "Low Gain", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_freq", "label": "Low Freq", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_mid_gain", "label": "Low-Mid Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_mid_freq", "label": "Low-Mid Freq", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_mid_gain", "label": "High-Mid Gain", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_mid_freq", "label": "High-Mid Freq", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_gain", "label": "High Gain", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_freq", "label": "High Freq", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 13, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "16": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "17": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "18": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "19": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "20": {
+          "block_length": 8,
+          "read_stride": 9,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_gain", "label": "Low Gain", "offset": 1, "type": "i8", "min": -5, "max": 5},
+            {"key": "mid_freq", "label": "Mid Freq", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 3, "type": "i8", "min": -5, "max": 5},
+            {"key": "high_freq", "label": "High Freq", "offset": 5, "type": "u8", "min": 0, "max": 2},
+            {"key": "high_gain", "label": "High Gain", "offset": 6, "type": "i8", "min": -5, "max": 5},
+            {"key": "output", "label": "Output", "offset": 7, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "21": {
+          "block_length": 7,
+          "read_stride": 8,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_filter", "label": "Low Filter", "offset": 0, "type": "u8", "min": 0, "max": 4},
+            {"key": "high_filter", "label": "High Filter", "offset": 1, "type": "u8", "min": 0, "max": 4},
+            {"key": "80_hz", "label": "80 Hz", "offset": 2, "type": "i8", "min": -4, "max": 4},
+            {"key": "8_khz", "label": "8 kHz", "offset": 3, "type": "i8", "min": -4, "max": 4},
+            {"key": "presence", "label": "Presence", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "presence_freq", "label": "Presence Freq", "offset": 5, "type": "u8", "min": 0, "max": 6},
+            {"key": "output", "label": "Output", "offset": 6, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "22": {
+          "block_length": 6,
+          "read_stride": 7,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "high", "label": "High", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid", "label": "Mid", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "low", "label": "Low", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 5, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: same layout as every other shared effect on this device; read on the owner's loaded instance, in range"
+        },
+        "23": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_pass", "label": "Low-pass", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "24": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "i8", "min": -20, "max": 10},
+            {"key": "high_gain", "label": "High Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_gain", "label": "Low Gain", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_pass", "label": "High-pass", "offset": 7, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "25": {
+          "block_length": 11,
+          "read_stride": 12,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "i8", "min": -20, "max": 10},
+            {"key": "high_gain", "label": "High Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_gain", "label": "Low Gain", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_pass", "label": "Low-pass", "offset": 8, "type": "u8", "min": 0, "max": 5}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "26": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "hp_freq", "label": "HP Freq", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "lp_freq", "label": "LP Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_gain", "label": "Low Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_freq", "label": "Low Freq", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "lo_mid_gain", "label": "Lo-Mid Gain", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lo_mid_freq", "label": "Lo-Mid Freq", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_mid_gain", "label": "Hi-Mid Gain", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_mid_freq", "label": "Hi-Mid Freq", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_gain", "label": "Hi Gain", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_freq", "label": "Hi Freq", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "27": {
+          "block_length": 12,
+          "read_stride": 13,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 80},
+            {"key": "frequency", "label": "Frequency", "offset": 2, "type": "u16", "min": 150, "max": 20000},
+            {"key": "dry_wet", "label": "Dry/Wet", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 8, "type": "u8", "min": 10, "max": 200, "scale": 0.1},
+            {"key": "attack", "label": "Attack", "offset": 9, "type": "u8", "min": 1, "max": 200, "scale": 0.1},
+            {"key": "release", "label": "Release", "offset": 10, "type": "u8", "min": 10, "max": 200},
+            {"key": "soft_knee", "label": "Soft Knee", "offset": 11, "type": "u8", "min": 0, "max": 30}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: same layout as every other shared effect on this device; read on the owner's loaded instance, in range"
+        },
+        "28": {
+          "block_length": 11,
+          "read_stride": 12,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "output", "label": "Output", "offset": 0, "type": "i8", "min": -48, "max": 12},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 1, "type": "u8", "min": 0, "max": 6},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 3, "type": "u8", "min": 0, "max": 6},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 5, "type": "u8", "min": 0, "max": 6},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 7, "type": "u8", "min": 0, "max": 6}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "29": {
+          "block_length": 3,
+          "read_stride": 4,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "output", "label": "Output", "offset": 2, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "30": {
+          "block_length": 7,
+          "read_stride": 8,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input_level", "label": "Input Level", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output_level", "label": "Output Level", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 5, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "31": {
+          "block_length": 6,
+          "read_stride": 7,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "recovery", "label": "Recovery", "offset": 3, "type": "u8", "min": 0, "max": 10},
+            {"key": "output_attenuator", "label": "Output Attenuator", "offset": 4, "type": "u8", "min": 0, "max": 5}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "32": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 4, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "33": {
+          "block_length": 3,
+          "read_stride": 4,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "compression", "label": "Compression", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "output_gain", "label": "Output Gain", "offset": 2, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "34": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "recovery_time", "label": "Recovery Time", "offset": 2, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "35": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "volume", "label": "Volume", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "release_time", "label": "Release Time", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "trim", "label": "Trim", "offset": 3, "type": "i8", "min": -24, "max": 24}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "36": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "gain_reduction", "label": "Gain Reduction", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: same layout as every other shared effect on this device; read on the owner's loaded instance, in range"
+        },
+        "37": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 60},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "38": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "mode", "label": "Mode", "offset": 2, "type": "u8", "min": 0, "max": 2}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "39": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 120},
+            {"key": "range", "label": "Range", "offset": 1, "type": "u8", "min": 0, "max": 20},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u16", "min": 1, "max": 750, "scale": 0.1},
+            {"key": "decay", "label": "Decay", "offset": 4, "type": "u16", "min": 1, "max": 1000},
+            {"key": "hold", "label": "Hold", "offset": 6, "type": "u16", "min": 0, "max": 5000},
+            {"key": "gain", "label": "Gain", "offset": 8, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "41": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input_gain", "label": "Input Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "time_constant", "label": "Time Constant", "offset": 2, "type": "u8", "min": 0, "max": 5},
+            {"key": "output_gain", "label": "Output Gain", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "42": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "detector_high_pass", "label": "Detector High-pass", "offset": 5, "type": "u8", "min": 0, "max": 10},
+            {"key": "detector_band", "label": "Detector Band", "offset": 6, "type": "u8", "min": 0, "max": 10}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "43": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "phase", "label": "Phase", "offset": 2, "type": "u8", "min": 0, "max": 1},
+            {"key": "low_cut", "label": "Low-cut", "offset": 3, "type": "u8", "min": 0, "max": 2}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "44": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "warmth", "label": "Warmth", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_boost", "label": "High Boost", "offset": 1, "type": "u8", "min": 0, "max": 1},
+            {"key": "low_cut", "label": "Low Cut", "offset": 2, "type": "u8", "min": 0, "max": 3},
+            {"key": "output", "label": "Output", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "45": {
+          "block_length": 3,
+          "read_stride": 4,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "46": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "wow_flutter", "label": "Wow & Flutter", "offset": 5, "type": "u8", "min": 0, "max": 20},
+            {"key": "hiss", "label": "Hiss", "offset": 6, "type": "u8", "min": 0, "max": 20},
+            {"key": "output", "label": "Output", "offset": 7, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "47": {
+          "block_length": 2,
+          "read_stride": 3,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "voltage_gain", "label": "Voltage Gain", "offset": 0, "type": "u8", "min": 10, "max": 100},
+            {"key": "output_trim", "label": "Output Trim", "offset": 1, "type": "u8", "min": 10, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "48": {
+          "block_length": 2,
+          "read_stride": 3,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 10, "max": 100},
+            {"key": "trim", "label": "Trim", "offset": 1, "type": "u8", "min": 10, "max": 100}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "50": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain_make_up", "label": "Gain Make-up", "offset": 0, "type": "u8", "min": 0, "max": 20},
+            {"key": "attack", "label": "Attack", "offset": 1, "type": "u8", "min": 0, "max": 5},
+            {"key": "recovery", "label": "Recovery", "offset": 2, "type": "u8", "min": 0, "max": 5},
+            {"key": "ratio", "label": "Ratio", "offset": 3, "type": "u8", "min": 0, "max": 5},
+            {"key": "bypass_filter", "label": "Bypass Filter", "offset": 5, "type": "u8", "min": 0, "max": 4},
+            {"key": "limiter_threshold", "label": "Limiter Threshold", "offset": 6, "type": "u8", "min": 0, "max": 21},
+            {"key": "limiter_recovery", "label": "Limiter Recovery", "offset": 7, "type": "u8", "min": 0, "max": 5}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        },
+        "51": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 80},
+            {"key": "range", "label": "Range", "offset": 1, "type": "u8", "min": 0, "max": 80},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u16", "min": 1, "max": 750, "scale": 0.1},
+            {"key": "decay", "label": "Decay", "offset": 4, "type": "u16", "min": 1, "max": 1000},
+            {"key": "ratio", "label": "Ratio", "offset": 6, "type": "u16", "min": 100, "max": 2000, "scale": 0.01},
+            {"key": "gain", "label": "Gain", "offset": 8, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "Same effect, type id and parameter block as on the Discrete 4 (profiles/discrete_4_a270.json holds the control evidence). On this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)"
+        }
+      }
+    }
   },
 
   "constraints": {
