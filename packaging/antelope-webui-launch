@@ -1,9 +1,11 @@
 #!/bin/bash
-# Start the WebUI service if needed, wait for it to listen, open it as an app window.
-url=http://127.0.0.1:8714
-systemctl --user start antelope-webui.service || exit 1
+# Start a WebUI service if needed, wait for it to listen, open it as an app window.
+# Usage: antelope-webui-launch [unit] [port]   (default: antelope-webui 8714)
+unit=${1:-antelope-webui}; port=${2:-8714}
+url=http://127.0.0.1:$port
+systemctl --user start "$unit.service" || exit 1
 for _ in $(seq 50); do
-  (exec 3<>/dev/tcp/127.0.0.1/8714) 2>/dev/null && break
+  (exec 3<>/dev/tcp/127.0.0.1/"$port") 2>/dev/null && break
   sleep 0.1
 done
 if command -v omarchy-launch-webapp >/dev/null; then
