@@ -137,7 +137,7 @@ function renderFaceplate(container, face, fields, onChange) {
   plate.style.width = `${layout.width}px`;
   plate.style.height = `${layout.height}px`;
   plate.style.backgroundImage = `url("${FACEPLATE_BASE}${plateStyle.file}")`;
-  plate.style.backgroundSize = `${plateStyle.w}px ${plateStyle.h}px`;
+  plate.style.backgroundSize = '100% 100%';  // one tile stretched: taller layouts would show a seam
   (layout.sections || []).forEach(section => {
     const group = document.createElement('div');
     group.className = 'fp-section';
