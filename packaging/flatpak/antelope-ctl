@@ -1,0 +1,11 @@
+#!/bin/sh
+# Start the WebUI server unless one already listens on the port, then open it in the default browser.
+port=${ANTELOPE_PORT:-8714}
+listening() { python3 -c "import socket,sys; sys.exit(socket.socket().connect_ex(('127.0.0.1',$port)))"; }
+cd /app/share/antelope-ctl/webui || exit 1
+if ! listening; then
+  python3 server.py &
+  for _ in $(seq 100); do listening && break; sleep 0.1; done
+fi
+xdg-open "http://127.0.0.1:$port"
+wait

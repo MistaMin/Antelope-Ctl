@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Antelope Control
+Comment=Antelope interface mixer, routing and effects (antelope-ctl WebUI)
+Exec=antelope-ctl
+Icon=io.github.mistamin.AntelopeCtl
+Terminal=false
+Categories=AudioVideo;Audio;Mixer;

@@ -191,6 +191,8 @@ confirm membership, but the maximum safe index remains derived until an
 out-of-range probe is performed; clients must not probe one casually because a
 sibling device faults hard on an invalid index.
 
+See [docs/fork-changes.md](docs/fork-changes.md) for what this fork adds (Discrete 4 and Zen Go Synergy Core).
+
 ## Legal status & disclaimer
 
 This is an independent interoperability project. It is **not affiliated

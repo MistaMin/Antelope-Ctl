@@ -1,0 +1,32 @@
+# Flatpak of the antelope-ctl WebUI. Build and bundle: packaging/flatpak/build.sh
+app-id: io.github.mistamin.AntelopeCtl
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: antelope-ctl
+finish-args:
+  - --device=all        # /dev/hidraw* of the interface (host still needs packaging/70-antelope.rules)
+  - --share=network     # the UI is a local web server on 127.0.0.1
+modules:
+  - name: python-deps
+    buildsystem: simple
+    build-options:
+      build-args: [--share=network]   # shortcut: pip fetches wheels at build time, pin sources if this ever goes to Flathub
+    build-commands:
+      - pip3 install --prefix=/app --no-compile -r requirements.txt
+    sources:
+      - type: file
+        path: ../../webui/requirements.txt
+  - name: antelope-ctl
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/share/antelope-ctl/webui
+      - cp -r antelope profiles LICENSE /app/share/antelope-ctl/
+      - cp -r webui/*.py webui/static webui/assets /app/share/antelope-ctl/webui/
+      - install -Dm755 packaging/flatpak/antelope-ctl /app/bin/antelope-ctl
+      - install -Dm644 packaging/flatpak/io.github.mistamin.AntelopeCtl.desktop -t /app/share/applications
+      - install -Dm644 webui/assets/mon-knob.svg /app/share/icons/hicolor/scalable/apps/io.github.mistamin.AntelopeCtl.svg
+    sources:
+      - type: dir
+        path: ../..
+        skip: [.git, webui/.venv, tools, docs, SUMMARY.md]
