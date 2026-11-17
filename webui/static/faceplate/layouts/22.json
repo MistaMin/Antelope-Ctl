@@ -1,0 +1,65 @@
+{
+ "type": 22,
+ "title": "VEQ-STU 169",
+ "plate": "Walnut",
+ "width": 760,
+ "height": 226,
+ "sections": [
+  {
+   "label": "TONE",
+   "x": 16,
+   "y": 34,
+   "w": 558,
+   "h": 176
+  },
+  {
+   "label": "OUT",
+   "x": 582,
+   "y": 34,
+   "w": 162,
+   "h": 176
+  }
+ ],
+ "controls": [
+  {
+   "key": "low",
+   "kind": "knob",
+   "style": "Ivr",
+   "x": 109,
+   "y": 110,
+   "size": 100,
+   "label": "LOW",
+   "steps": null
+  },
+  {
+   "key": "mid",
+   "kind": "knob",
+   "style": "Ivr",
+   "x": 295,
+   "y": 110,
+   "size": 100,
+   "label": "MID",
+   "steps": null
+  },
+  {
+   "key": "high",
+   "kind": "knob",
+   "style": "Ivr",
+   "x": 481,
+   "y": 110,
+   "size": 100,
+   "label": "HIGH",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Chr",
+   "x": 663,
+   "y": 110,
+   "size": 76,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

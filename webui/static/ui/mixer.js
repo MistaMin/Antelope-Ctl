@@ -758,13 +758,7 @@ function renderInsertRacks() {
 // ---- effect settings (server: /api/afx-inserts/parameters) -------------
 // One effect at a time. A knob shows the value the device last confirmed;
 // while dragging, the newest value waits until the previous write returns.
-let INSERT_PARAMS = null;   // {channel, slot, data, pending: {key: value}, busy}
-
-function insertParamText(field, value) {
-  const scale = Number(field.scale) || 1;
-  const shown = scale === 1 ? String(value) : (value * scale).toFixed(String(scale).split('.')[1]?.length || 0);
-  return field.unit ? `${shown} ${field.unit}` : shown;
-}
+let INSERT_PARAMS = null;   // {channel, slot, data, face, pending: {key: value}, busy}
 
 function renderInsertParams() {
   const box = $('#insertparams');
@@ -781,9 +775,13 @@ function renderInsertParams() {
   close.textContent = 'Close';
   close.addEventListener('click', () => { INSERT_PARAMS = null; renderInsertParams(); });
   head.append(title, close);
+  // The hardware-style panel draws the fields its layout covers; the rest keep the plain knobs.
+  const fields = view.data?.fields || [];
+  const panel = document.createElement('div');
+  const covered = view.face ? renderFaceplate(panel, view.face, fields, queueInsertParam) : new Set();
   const knobs = document.createElement('div');
   knobs.className = 'insert-knobs';
-  (view.data?.fields || []).forEach(field => {
+  fields.filter(field => !covered.has(field.key)).forEach(field => {
     const cell = document.createElement('label');
     cell.className = 'insert-knob';
     const span = (field.max - field.min) || 1;
@@ -797,42 +795,16 @@ function renderInsertParams() {
     const input = cell.querySelector('input');
     input.min = field.min; input.max = field.max; input.value = field.value;
     input.setAttribute('aria-label', field.label);
-    const send = () => queueInsertParam(field.key, +input.value);
-    input.addEventListener('input', () => { paint(+input.value); send(); });
-    const body = cell.querySelector('.insert-knob-body');
-    body.addEventListener('pointerdown', event => {
-      if (event.button !== 0) return;
-      event.preventDefault();
-      const startY = event.clientY, startValue = +input.value, id = event.pointerId;
-      body.setPointerCapture(id);
-      const move = next => {
-        if (next.pointerId !== id) return;
-        const perPixel = span / (next.shiftKey ? 1200 : 240);
-        input.value = Math.round(Math.max(field.min, Math.min(field.max, startValue + (startY - next.clientY) * perPixel)));
-        paint(+input.value); send();
-      };
-      const done = next => {
-        if (next.pointerId !== id) return;
-        body.removeEventListener('pointermove', move);
-        body.removeEventListener('pointerup', done);
-        body.removeEventListener('pointercancel', done);
-      };
-      body.addEventListener('pointermove', move);
-      body.addEventListener('pointerup', done);
-      body.addEventListener('pointercancel', done);
-    });
-    cell.addEventListener('wheel', event => {
-      event.preventDefault();
-      input.value = Math.max(field.min, Math.min(field.max, +input.value - Math.sign(event.deltaY)));
-      paint(+input.value); send();
-    }, {passive: false});
+    const changed = () => { paint(+input.value); queueInsertParam(field.key, +input.value); };
+    input.addEventListener('input', changed);
+    insertKnobGestures(cell, cell.querySelector('.insert-knob-body'), input, field, changed);
     paint(field.value);
     knobs.append(cell);
   });
   const note = document.createElement('p');
   note.className = 'hint';
   note.textContent = 'Values are the device\'s own numbers, as the vendor panel shows them. Each change is written and read back.';
-  box.replaceChildren(head, knobs, note);
+  box.replaceChildren(head, ...(covered.size ? [panel] : []), ...(knobs.children.length || !covered.size ? [knobs] : []), note);
 }
 
 async function openInsertParams(channel, slot) {
@@ -842,7 +814,8 @@ async function openInsertParams(channel, slot) {
     const response = await fetch(`/api/afx-inserts/parameters?channel=${channel}&slot=${slot}`);
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'The settings could not be read.');
-    if (INSERT_PARAMS?.channel === channel && INSERT_PARAMS.slot === slot) INSERT_PARAMS.data = result;
+    const face = await loadFaceplate(result.type);
+    if (INSERT_PARAMS?.channel === channel && INSERT_PARAMS.slot === slot) Object.assign(INSERT_PARAMS, {data: result, face});
   } catch (error) {
     reportMessage('inserts', 'Effect settings', error.message);
     INSERT_PARAMS = null;

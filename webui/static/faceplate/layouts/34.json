@@ -1,0 +1,40 @@
+{
+ "type": 34,
+ "title": "Stay-Levin",
+ "plate": "Navy",
+ "width": 760,
+ "height": 224,
+ "sections": [],
+ "controls": [
+  {
+   "key": "input",
+   "kind": "knob",
+   "style": "Chr",
+   "x": 216,
+   "y": 110,
+   "size": 100,
+   "label": "INPUT",
+   "steps": null
+  },
+  {
+   "key": "recovery_time",
+   "kind": "stepped",
+   "style": "Ptr",
+   "x": 380,
+   "y": 110,
+   "size": 68,
+   "label": "RECOVERY",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Chr",
+   "x": 544,
+   "y": 110,
+   "size": 100,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

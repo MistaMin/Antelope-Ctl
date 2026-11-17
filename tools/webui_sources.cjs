@@ -17,6 +17,7 @@ const JS_FILES = [
   'ui/afx-bbd.js',
   'ui/afx-test.js',
   'ui/afx-live.js',
+  'ui/faceplate.js',
   'ui/mixer.js',
   'ui/surround.js',
   'ui/readback.js',

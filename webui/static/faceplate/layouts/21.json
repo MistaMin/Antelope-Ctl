@@ -1,0 +1,116 @@
+{
+ "type": 21,
+ "title": "VEQ-STU 089",
+ "plate": "Cream",
+ "width": 760,
+ "height": 206,
+ "sections": [
+  {
+   "label": "FILTERS",
+   "x": 16,
+   "y": 34,
+   "w": 182,
+   "h": 156
+  },
+  {
+   "label": "LOW",
+   "x": 206,
+   "y": 34,
+   "w": 107,
+   "h": 156
+  },
+  {
+   "label": "PRESENCE",
+   "x": 321,
+   "y": 34,
+   "w": 202,
+   "h": 156
+  },
+  {
+   "label": "HIGH",
+   "x": 530,
+   "y": 34,
+   "w": 107,
+   "h": 156
+  },
+  {
+   "label": "OUT",
+   "x": 645,
+   "y": 34,
+   "w": 99,
+   "h": 156
+  }
+ ],
+ "controls": [
+  {
+   "key": "low_filter",
+   "kind": "stepped",
+   "style": "Ptr",
+   "x": 61,
+   "y": 100,
+   "size": 60,
+   "label": "LOW CUT",
+   "steps": null
+  },
+  {
+   "key": "high_filter",
+   "kind": "stepped",
+   "style": "Ptr",
+   "x": 152,
+   "y": 100,
+   "size": 60,
+   "label": "HIGH CUT",
+   "steps": null
+  },
+  {
+   "key": "80_hz",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 259,
+   "y": 100,
+   "size": 76,
+   "label": "80 HZ",
+   "steps": null
+  },
+  {
+   "key": "presence_freq",
+   "kind": "stepped",
+   "style": "Ptr",
+   "x": 366,
+   "y": 100,
+   "size": 60,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "presence",
+   "kind": "knob",
+   "style": "Bk",
+   "x": 467,
+   "y": 100,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "8_khz",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 584,
+   "y": 100,
+   "size": 76,
+   "label": "8 KHZ",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Bk",
+   "x": 695,
+   "y": 100,
+   "size": 68,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

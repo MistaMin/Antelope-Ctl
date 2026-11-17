@@ -1,0 +1,163 @@
+{
+ "type": 23,
+ "title": "VEQ-STU 900",
+ "plate": "Steel",
+ "width": 760,
+ "height": 320,
+ "sections": [
+  {
+   "label": "FILTERS",
+   "x": 16,
+   "y": 34,
+   "w": 100,
+   "h": 270
+  },
+  {
+   "label": "LF",
+   "x": 124,
+   "y": 34,
+   "w": 116,
+   "h": 270
+  },
+  {
+   "label": "LMF",
+   "x": 248,
+   "y": 34,
+   "w": 116,
+   "h": 270
+  },
+  {
+   "label": "HMF",
+   "x": 372,
+   "y": 34,
+   "w": 116,
+   "h": 270
+  },
+  {
+   "label": "HF",
+   "x": 496,
+   "y": 34,
+   "w": 116,
+   "h": 270
+  },
+  {
+   "label": "OUT",
+   "x": 620,
+   "y": 34,
+   "w": 124,
+   "h": 270
+  }
+ ],
+ "controls": [
+  {
+   "key": "high_pass",
+   "kind": "knob",
+   "style": "Skt",
+   "x": 66,
+   "y": 100,
+   "size": 64,
+   "label": "HP",
+   "steps": null
+  },
+  {
+   "key": "low_pass",
+   "kind": "knob",
+   "style": "Skt",
+   "x": 66,
+   "y": 222,
+   "size": 64,
+   "label": "LP",
+   "steps": null
+  },
+  {
+   "key": "lf_gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 182,
+   "y": 100,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "lf_freq",
+   "kind": "knob",
+   "style": "Tab",
+   "x": 182,
+   "y": 222,
+   "size": 60,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "lmf_gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 306,
+   "y": 100,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "lmf_freq",
+   "kind": "knob",
+   "style": "Tab",
+   "x": 306,
+   "y": 222,
+   "size": 60,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "hmf_gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 430,
+   "y": 100,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "hmf_freq",
+   "kind": "knob",
+   "style": "Tab",
+   "x": 430,
+   "y": 222,
+   "size": 60,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "hf_gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 554,
+   "y": 100,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "hf_freq",
+   "kind": "knob",
+   "style": "Tab",
+   "x": 554,
+   "y": 222,
+   "size": 60,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 682,
+   "y": 161,
+   "size": 88,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

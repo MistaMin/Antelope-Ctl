@@ -1,0 +1,72 @@
+{
+ "type": 46,
+ "title": "Reel To Reel",
+ "plate": "Monolith",
+ "width": 760,
+ "height": 224,
+ "sections": [
+  {
+   "label": "RECORD",
+   "x": 16,
+   "y": 36,
+   "w": 197,
+   "h": 172
+  },
+  {
+   "label": "TAPE",
+   "x": 227,
+   "y": 36,
+   "w": 306,
+   "h": 172
+  },
+  {
+   "label": "PLAYBACK",
+   "x": 547,
+   "y": 36,
+   "w": 197,
+   "h": 172
+  }
+ ],
+ "controls": [
+  {
+   "key": "input",
+   "kind": "knob",
+   "style": "Mtl",
+   "x": 114,
+   "y": 110,
+   "size": 100,
+   "label": "INPUT",
+   "steps": null
+  },
+  {
+   "key": "wow_flutter",
+   "kind": "stepped",
+   "style": "Tab",
+   "x": 310,
+   "y": 110,
+   "size": 68,
+   "label": "WOW & FLUTTER",
+   "steps": null
+  },
+  {
+   "key": "hiss",
+   "kind": "stepped",
+   "style": "Tab",
+   "x": 450,
+   "y": 110,
+   "size": 68,
+   "label": "HISS",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Mtl",
+   "x": 646,
+   "y": 110,
+   "size": 100,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

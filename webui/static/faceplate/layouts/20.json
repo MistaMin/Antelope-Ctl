@@ -1,0 +1,99 @@
+{
+ "type": 20,
+ "title": "NEU-W495",
+ "plate": "Graphite",
+ "width": 760,
+ "height": 210,
+ "sections": [
+  {
+   "label": "LOW",
+   "x": 16,
+   "y": 34,
+   "w": 126,
+   "h": 160
+  },
+  {
+   "label": "MID",
+   "x": 150,
+   "y": 34,
+   "w": 232,
+   "h": 160
+  },
+  {
+   "label": "HIGH",
+   "x": 390,
+   "y": 34,
+   "w": 232,
+   "h": 160
+  },
+  {
+   "label": "OUT",
+   "x": 630,
+   "y": 34,
+   "w": 114,
+   "h": 160
+  }
+ ],
+ "controls": [
+  {
+   "key": "low_gain",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 79,
+   "y": 102,
+   "size": 84,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "mid_freq",
+   "kind": "stepped",
+   "style": "Pag",
+   "x": 203,
+   "y": 102,
+   "size": 64,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "mid_gain",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 319,
+   "y": 102,
+   "size": 84,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "high_freq",
+   "kind": "stepped",
+   "style": "Pag",
+   "x": 443,
+   "y": 102,
+   "size": 64,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "high_gain",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 559,
+   "y": 102,
+   "size": 84,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Snk",
+   "x": 687,
+   "y": 102,
+   "size": 72,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

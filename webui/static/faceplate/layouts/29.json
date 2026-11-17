@@ -1,0 +1,40 @@
+{
+ "type": 29,
+ "title": "X903",
+ "plate": "Granite",
+ "width": 760,
+ "height": 216,
+ "sections": [],
+ "controls": [
+  {
+   "key": "threshold",
+   "kind": "knob",
+   "style": "Rd",
+   "x": 218,
+   "y": 106,
+   "size": 92,
+   "label": "THRESHOLD",
+   "steps": null
+  },
+  {
+   "key": "ratio",
+   "kind": "knob",
+   "style": "Rd",
+   "x": 380,
+   "y": 106,
+   "size": 72,
+   "label": "RATIO",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Rd",
+   "x": 542,
+   "y": 106,
+   "size": 92,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

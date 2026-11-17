@@ -1,0 +1,30 @@
+{
+ "type": 45,
+ "title": "BAE 1073MP",
+ "plate": "Periwinkle",
+ "width": 760,
+ "height": 228,
+ "sections": [],
+ "controls": [
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Brit",
+   "x": 273,
+   "y": 112,
+   "size": 104,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Brit",
+   "x": 497,
+   "y": 112,
+   "size": 84,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

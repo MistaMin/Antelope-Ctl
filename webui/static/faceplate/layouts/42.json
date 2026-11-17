@@ -1,0 +1,99 @@
+{
+ "type": 42,
+ "title": "Impresser",
+ "plate": "Silver",
+ "width": 760,
+ "height": 208,
+ "sections": [
+  {
+   "label": "INPUT",
+   "x": 16,
+   "y": 36,
+   "w": 136,
+   "h": 156
+  },
+  {
+   "label": "DETECTOR",
+   "x": 166,
+   "y": 36,
+   "w": 199,
+   "h": 156
+  },
+  {
+   "label": "TIMING",
+   "x": 379,
+   "y": 36,
+   "w": 215,
+   "h": 156
+  },
+  {
+   "label": "OUTPUT",
+   "x": 608,
+   "y": 36,
+   "w": 136,
+   "h": 156
+  }
+ ],
+ "controls": [
+  {
+   "key": "input",
+   "kind": "knob",
+   "style": "Tl",
+   "x": 84,
+   "y": 102,
+   "size": 84,
+   "label": "INPUT",
+   "steps": null
+  },
+  {
+   "key": "detector_high_pass",
+   "kind": "stepped",
+   "style": "Bk",
+   "x": 222,
+   "y": 102,
+   "size": 60,
+   "label": "HIGH-PASS",
+   "steps": null
+  },
+  {
+   "key": "detector_band",
+   "kind": "stepped",
+   "style": "Bk",
+   "x": 309,
+   "y": 102,
+   "size": 60,
+   "label": "BAND",
+   "steps": null
+  },
+  {
+   "key": "attack",
+   "kind": "knob",
+   "style": "Tl",
+   "x": 439,
+   "y": 102,
+   "size": 68,
+   "label": "ATTACK",
+   "steps": null
+  },
+  {
+   "key": "release",
+   "kind": "knob",
+   "style": "Tl",
+   "x": 534,
+   "y": 102,
+   "size": 68,
+   "label": "RELEASE",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Tl",
+   "x": 676,
+   "y": 102,
+   "size": 84,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

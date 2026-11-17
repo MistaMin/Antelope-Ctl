@@ -1,0 +1,69 @@
+{
+ "type": 11,
+ "title": "VEQ-HLF",
+ "plate": "Teal",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "LOW CUT",
+   "x": 120,
+   "y": 20,
+   "w": 250,
+   "h": 184
+  },
+  {
+   "label": "HIGH CUT",
+   "x": 390,
+   "y": 20,
+   "w": 250,
+   "h": 184
+  }
+ ],
+ "controls": [
+  {
+   "key": "low_cut",
+   "kind": "stepped",
+   "style": "Bk",
+   "x": 245,
+   "y": 108,
+   "size": 96,
+   "label": "LOW CUT",
+   "steps": [
+    "OFF",
+    "50 Hz",
+    "80 Hz",
+    "100 Hz",
+    "150 Hz",
+    "250 Hz",
+    "500 Hz",
+    "750 Hz",
+    "1 kHz",
+    "1.5 kHz",
+    "2 kHz"
+   ]
+  },
+  {
+   "key": "high_cut",
+   "kind": "stepped",
+   "style": "Bk",
+   "x": 515,
+   "y": 108,
+   "size": 96,
+   "label": "HIGH CUT",
+   "steps": [
+    "1.5 kHz",
+    "2 kHz",
+    "3 kHz",
+    "4 kHz",
+    "5 kHz",
+    "6 kHz",
+    "8 kHz",
+    "10 kHz",
+    "12 kHz",
+    "15 kHz",
+    "OFF"
+   ]
+  }
+ ]
+}
