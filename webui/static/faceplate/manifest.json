@@ -1,0 +1,442 @@
+{
+  "knobs": {
+    "Arc": {
+      "file": "knobs/arc.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Bk": {
+      "file": "knobs/bk.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Brg": {
+      "file": "knobs/brg.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Brit": {
+      "file": "knobs/brit.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Chk": {
+      "file": "knobs/chk.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Chr": {
+      "file": "knobs/chr.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Dbl": {
+      "file": "knobs/dbl.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Dsh": {
+      "file": "knobs/dsh.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Ebn": {
+      "file": "knobs/ebn.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Fat": {
+      "file": "knobs/fat.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Glw": {
+      "file": "knobs/glw.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Grd": {
+      "file": "knobs/grd.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Hex": {
+      "file": "knobs/hex.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Ivr": {
+      "file": "knobs/ivr.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Knl": {
+      "file": "knobs/knl.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Led": {
+      "file": "knobs/led.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Lvr": {
+      "file": "knobs/lvr.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Mini": {
+      "file": "knobs/mini.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Mtl": {
+      "file": "knobs/mtl.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Neo": {
+      "file": "knobs/neo.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Pag": {
+      "file": "knobs/pag.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Pie": {
+      "file": "knobs/pie.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Ptr": {
+      "file": "knobs/ptr.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rck": {
+      "file": "knobs/rck.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd": {
+      "file": "knobs/rd.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rib": {
+      "file": "knobs/rib.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Seg": {
+      "file": "knobs/seg.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    },
+    "Skt": {
+      "file": "knobs/skt.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Slv": {
+      "file": "knobs/slv.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Snk": {
+      "file": "knobs/snk.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Tab": {
+      "file": "knobs/tab.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Tl": {
+      "file": "knobs/tl.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Wh": {
+      "file": "knobs/wh.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Wnt": {
+      "file": "knobs/wnt.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Yel": {
+      "file": "knobs/yel.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": false,
+      "size": 128
+    }
+  },
+  "plates": {
+    "Champagne": {
+      "file": "plates/champagne.webp",
+      "h": 300,
+      "marks": "dark",
+      "text": "#201a0a",
+      "w": 760
+    },
+    "Coal": {
+      "file": "plates/coal.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#eeeeee",
+      "w": 760
+    },
+    "Cognac": {
+      "file": "plates/cognac.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#23150a",
+      "w": 760
+    },
+    "Cream": {
+      "file": "plates/cream.webp",
+      "h": 300,
+      "marks": "dark",
+      "text": "#23323a",
+      "w": 760
+    },
+    "Cyber": {
+      "file": "plates/cyber.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#6cf2f8",
+      "w": 760
+    },
+    "Granite": {
+      "file": "plates/granite.webp",
+      "h": 300,
+      "marks": "dark",
+      "text": "#14181a",
+      "w": 760
+    },
+    "Graphite": {
+      "file": "plates/graphite.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#dde1d5",
+      "w": 760
+    },
+    "Leveler": {
+      "file": "plates/leveler.webp",
+      "h": 300,
+      "marks": "dark",
+      "text": "#1c2428",
+      "w": 760
+    },
+    "Marine": {
+      "file": "plates/marine.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#e9edf5",
+      "w": 760
+    },
+    "Mesh": {
+      "file": "plates/mesh.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#7ff5e8",
+      "w": 760
+    },
+    "Midnight": {
+      "file": "plates/midnight.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#e3eaff",
+      "w": 760
+    },
+    "Monolith": {
+      "file": "plates/monolith.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f2f2f2",
+      "w": 760
+    },
+    "Navy": {
+      "file": "plates/navy.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#e8eefc",
+      "w": 760
+    },
+    "Olive": {
+      "file": "plates/olive.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#e0e4cc",
+      "w": 760
+    },
+    "Optic": {
+      "file": "plates/optic.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#9fe8ff",
+      "w": 760
+    },
+    "Oxblood": {
+      "file": "plates/oxblood.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f1dcc8",
+      "w": 760
+    },
+    "Periwinkle": {
+      "file": "plates/periwinkle.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f3f4ff",
+      "w": 760
+    },
+    "Rust": {
+      "file": "plates/rust.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f2dcc8",
+      "w": 760
+    },
+    "Silver": {
+      "file": "plates/silver.webp",
+      "h": 300,
+      "marks": "dark",
+      "text": "#1b1f21",
+      "w": 760
+    },
+    "Slate": {
+      "file": "plates/slate.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#e6ebef",
+      "w": 760
+    },
+    "Stealth": {
+      "file": "plates/stealth.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f4f4f4",
+      "w": 760
+    },
+    "Steel": {
+      "file": "plates/steel.webp",
+      "h": 300,
+      "marks": "dark",
+      "text": "#101416",
+      "w": 760
+    },
+    "Synthwave": {
+      "file": "plates/synthwave.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#ff7ad9",
+      "w": 760
+    },
+    "Teal": {
+      "file": "plates/teal.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#eaf6f8",
+      "w": 760
+    },
+    "Walnut": {
+      "file": "plates/walnut.webp",
+      "h": 300,
+      "marks": "light",
+      "text": "#f3e3c4",
+      "w": 760
+    }
+  },
+  "switches": {
+    "Bat toggle": {
+      "family": "toggle",
+      "file": "switches/bat-toggle.webp",
+      "h": 216,
+      "states": 2,
+      "w": 128
+    },
+    "Lever toggle": {
+      "family": "toggle",
+      "file": "switches/lever-toggle.webp",
+      "h": 216,
+      "states": 2,
+      "w": 128
+    }
+  }
+}

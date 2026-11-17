@@ -39,3 +39,6 @@ tools/*_out.txt
 # For other query that aren't necessarily related or relevant to the main repository
 sidejob/
 CAPTURE-REQUESTS.md
+
+# Rust build output of the faceplate sprite generator
+tools/faceplate-assets/target/

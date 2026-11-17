@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effect faceplates preview</title>
+<link rel="stylesheet" href="../app.css">
+<style>
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  .preview-item { margin-bottom:20px; }
+  .preview-item h3 small, .preview-missing { color:var(--warn); font:600 11px/1.4 ui-monospace,monospace; }
+</style>
+</head>
+<body>
+<!-- Design review without hardware: serve webui/static with any static file server and open
+     faceplate/preview.html. Data: tools/make_faceplate_preview_data.py. Nothing is sent anywhere. -->
+<main>
+  <h2 class="sechd">Effect faceplates</h2>
+  <p class="hint" id="summary">Loading…</p>
+  <div id="plates"></div>
+  <h2 class="sechd">No usable layout</h2>
+  <p class="hint" id="missing"></p>
+</main>
+<script src="../ui/faceplate.js"></script>
+<script>
+(async () => {
+  const summary = document.getElementById('summary');
+  const data = await faceplateFile('preview-data.json');
+  if (!data) { summary.textContent = 'preview-data.json is missing: run tools/make_faceplate_preview_data.py.'; return; }
+  const missing = [];
+  let drawn = 0;
+  for (const effect of Object.values(data).sort((a, b) => a.type - b.type)) {
+    const face = await loadFaceplate(effect.type);
+    if (!face) { missing.push(`${effect.label} (${effect.type})`); continue; }
+    const item = document.createElement('div');
+    item.className = 'insert-params preview-item';
+    item.innerHTML = '<div class="insert-params-hd"><h3></h3></div><div></div>';
+    const title = item.querySelector('h3');
+    title.textContent = `${face.layout.title || effect.label} · type ${effect.type}`;
+    const covered = renderFaceplate(item.lastChild, face, effect.fields,
+      (key, value) => { title.dataset.last = `${key} = ${value}`; });
+    const left = effect.fields.filter(field => !covered.has(field.key)).map(field => field.key);
+    if (left.length) {
+      const note = document.createElement('small');
+      note.textContent = `  not in the layout (plain knobs in the app): ${left.join(', ')}`;
+      title.append(note);
+    }
+    document.getElementById('plates').append(item);
+    drawn++;
+  }
+  summary.textContent = `${drawn} of ${Object.keys(data).length} effects have a layout. Values are mid-range; nothing is sent to a device.`;
+  document.getElementById('missing').textContent = missing.join(' · ') || 'none';
+})();
+</script>
+</body>
+</html>

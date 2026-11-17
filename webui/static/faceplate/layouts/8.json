@@ -1,0 +1,78 @@
+{
+ "type": 8,
+ "title": "VEQ-55A",
+ "plate": "Steel",
+ "width": 760,
+ "height": 210,
+ "sections": [
+  {
+   "label": "LF",
+   "x": 20,
+   "y": 20,
+   "w": 170,
+   "h": 170
+  },
+  {
+   "label": "MF",
+   "x": 200,
+   "y": 20,
+   "w": 170,
+   "h": 170
+  },
+  {
+   "label": "HF",
+   "x": 380,
+   "y": 20,
+   "w": 170,
+   "h": 170
+  },
+  {
+   "label": "OUTPUT",
+   "x": 560,
+   "y": 20,
+   "w": 180,
+   "h": 170
+  }
+ ],
+ "controls": [
+  {
+   "key": "lf_freq",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 105,
+   "y": 100,
+   "size": 76,
+   "label": "LF FREQ",
+   "steps": null
+  },
+  {
+   "key": "mf_freq",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 285,
+   "y": 100,
+   "size": 76,
+   "label": "MF FREQ",
+   "steps": null
+  },
+  {
+   "key": "hf_freq",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 465,
+   "y": 100,
+   "size": 76,
+   "label": "HF FREQ",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Snk",
+   "x": 650,
+   "y": 100,
+   "size": 80,
+   "label": "OUTPUT"
+  }
+ ]
+}

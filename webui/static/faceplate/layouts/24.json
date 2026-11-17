@@ -1,0 +1,88 @@
+{
+ "type": 24,
+ "title": "BAE 1023",
+ "plate": "Coal",
+ "width": 760,
+ "height": 214,
+ "sections": [
+  {
+   "label": "FILTER",
+   "x": 16,
+   "y": 34,
+   "w": 131,
+   "h": 164
+  },
+  {
+   "label": "EQ",
+   "x": 155,
+   "y": 34,
+   "w": 442,
+   "h": 164
+  },
+  {
+   "label": "LEVEL",
+   "x": 605,
+   "y": 34,
+   "w": 139,
+   "h": 164
+  }
+ ],
+ "controls": [
+  {
+   "key": "high_pass",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 82,
+   "y": 104,
+   "size": 72,
+   "label": "HIGH-PASS",
+   "steps": [
+    "OFF",
+    "50 Hz",
+    "80 Hz",
+    "160 Hz",
+    "300 Hz"
+   ]
+  },
+  {
+   "key": "low_gain",
+   "kind": "knob",
+   "style": "Brit",
+   "x": 229,
+   "y": 104,
+   "size": 88,
+   "label": "LOW",
+   "steps": null
+  },
+  {
+   "key": "mid_gain",
+   "kind": "knob",
+   "style": "Brit",
+   "x": 376,
+   "y": 104,
+   "size": 88,
+   "label": "MID",
+   "steps": null
+  },
+  {
+   "key": "high_gain",
+   "kind": "knob",
+   "style": "Brit",
+   "x": 523,
+   "y": 104,
+   "size": 88,
+   "label": "HIGH",
+   "steps": null
+  },
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Rd",
+   "x": 674,
+   "y": 104,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  }
+ ]
+}
