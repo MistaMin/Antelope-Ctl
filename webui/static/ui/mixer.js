@@ -39,7 +39,7 @@ function mixerSourceOptions(spec, mix, ch) {
   const unknown = selected.startsWith('raw:')
     ? `<option value="${selected}" selected disabled>${rawSourceLabel(selected)}</option>` : '';
   const options = (spec.options || []).map(option =>
-    `<option value="${option.key}"${option.key === selected ? ' selected' : ''}>${option.label}</option>`).join('');
+    `<option value="${option.key}"${option.key === selected ? ' selected' : ''}${option.selectable === false ? ' disabled' : ''}>${option.label}</option>`).join('');
   return `<option value="">INPUT SOURCE</option>${unknown}${options}`;
 }
 
@@ -895,11 +895,13 @@ function renderMix(pane, m) {
     const s = slots[ch] || {fader: 0, pan: 0, send: 0, mute: false, solo: false};
     const fader = Number(s.fader) || 0, pan = Number(s.pan) || 0, send = Number(s.send) || 0;
     const isMaster = hasMaster && ch === 0;
-    const linkStart = mixLinkPair(ch) >= 0 && mixLinkPartner(ch) > ch;
+    // MIXER.link_pairs lists the pairs a profile has captured; absent = all
+    const linkStart = mixLinkPair(ch) >= 0 && mixLinkPartner(ch) > ch
+      && (!MIXER.link_pairs || (MIXER.link_pairs[String(m)] || []).includes(mixLinkPair(ch)));
     const label = isMaster ? 'MASTER' : 'CH ' + String(hasMaster ? ch : ch + 1).padStart(2, '0');
     const linkLabel = `link CH${hasMaster ? ch : ch + 1}+CH${hasMaster ? ch + 1 : ch + 2}`;
     return `<div class="mixer-strip${isMaster ? ' master' : ''}" data-ch="${ch}">
-      ${sourceFeature && !isMaster ? `<select class="mxsource" data-mix-source ${sourceFeature.writable ? '' : 'disabled'} title="${sourceFeature.note}">${mixerSourceOptions(sourceFeature, m, ch)}</select>` : ''}
+      ${sourceFeature && !isMaster ? `<select class="mxsource" data-mix-source ${sourceFeature.writable && !(sourceFeature.locked_channels || []).includes(ch) ? '' : 'disabled'} title="${sourceFeature.note}">${mixerSourceOptions(sourceFeature, m, ch)}</select>` : ''}
       <span class="mxname">${label}</span>
       ${mixerInsertBlock(ch, isMaster)}
       ${linkStart ? `<button class="linkbtn" data-mix-link title="${linkLabel}">${LINK_ICON}</button>` : ''}

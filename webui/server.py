@@ -365,7 +365,8 @@ class Device:
         self.n_ch = proto.space_channel_count(profile, "input") or 12
         self.n_adat = int(profile.get("adat", {}).get("count", 0))
         self.n_spdif = int(profile.get("spdif", {}).get("count", 0))
-        self.bus_ids = sorted(int(x) for x in proto.constraints(profile).get("bus_ids", []))
+        # channel_space_bounds drops buses the profile marks unconfirmed
+        self.bus_ids = proto.channel_space_bounds(profile, "bus") or []
         self.state_magic = proto.state_report_magic(profile)
         self.meter_magic = proto.meter_report_magic(profile)
         readback_magic = profile["frame"].get("readback", {}).get("response_magic")
@@ -1126,6 +1127,17 @@ class Device:
             raise RuntimeError("routing destination group is empty")
         if any(dest not in self.route_dests for dest in destinations):
             raise RuntimeError("routing destination is not safely mapped")
+        strict = self.profile.get("mixer", {}).get("input_routing", {})
+        if strict.get("strict") and set(destinations) & set(self.mixer_source_destinations):
+            # Discrete 4 0xa270: the map is only captured as one write to all
+            # of its mirrors, on the unlocked strips, with captured sources.
+            if destinations != self.mixer_source_destinations:
+                raise RuntimeError("the mixer source map must be written to all its groups")
+            for channel, target in changes:
+                if not 0 <= channel < int(strict["channels"]) \
+                        or channel in strict.get("locked_channels", []) \
+                        or target[0] in strict.get("display_only_source_banks", []):
+                    raise RuntimeError("that strip or source is not captured for this device")
         records = []
         for dest in destinations:
             pairs = self._routing_record_for_write(transport, dest)
@@ -1436,6 +1448,9 @@ class Device:
                 "mode": proto.mode_name(self.profile, s.get("input_mode", -1)),
                 "phantom": bool(s.get("phantom")),
                 "phase_invert": bool(s.get("phase_invert")),
+                # state fields this profile cannot read: the page keeps the
+                # last value it sent instead of showing a made-up "off"
+                "unread": [k for k in ("phantom", "phase_invert") if k not in s],
             })
         return out
 
@@ -2796,6 +2811,17 @@ def api_bus_toggle(t: BusToggle):
         packet = proto.build_command(PROFILE, pname, t.bus, 1 if t.on else 0)
     except (KeyError, ValueError, proto.ConstraintError) as e:
         return _bad(str(e))
+    combine = PROFILE["frame"]["state_report"].get("bus_block", {}).get("flags_combine")
+    if t.param != "mute" and not combine \
+            and t.bus in proto.protected_mute_buses(PROFILE):
+        # On a sibling device the output status is one enum, so dim replaces
+        # mute. Until this device's flags are known to combine, changing
+        # dim/mono on a protected muted (or unread) bus could unmute it.
+        state = next((b for b in DEV.get()[0].get("buses", [])
+                      if b.get("bus") == t.bus), None)
+        if state is None or state.get("mute"):
+            return _bad(f"{proto.bus_name(PROFILE, t.bus)} is muted or unread: "
+                        f"{t.param} is refused so it cannot release the mute")
     DEV.submit(lambda tr, packet=packet: tr.write(packet))
     return {"ok": True}
 
@@ -2844,6 +2870,9 @@ def api_mode(m: Mode):
         proto.check_enum(PROFILE, "input_mode_allowed_values", val, "input_mode")
     except Exception as e:                                       # noqa: BLE001
         return _bad(str(e))
+    hiz = PROFILE.get("channels", {}).get("hiz_channels")
+    if m.mode.lower() == "hiz" and hiz is not None and m.channel not in hiz:
+        return _bad(f"Hi-Z is not confirmed on channel {m.channel} (only {hiz})")
     DEV.submit(lambda t: t.write(proto.build_command(PROFILE, "input_mode", m.channel, val)))
     return {"ok": True}
 
@@ -3010,6 +3039,10 @@ def api_mixer_source(s: MixerSource):
                    if item.get("key") == s.source), None)
     if option is None:
         return _bad(f"unknown mixer source option {s.source!r}")
+    if s.channel in feature.get("locked_channels", []) \
+            or option.get("selectable") is False:
+        return _bad("that strip or source is not captured as a mixer-source "
+                    "write on this device")
     try:
         target = (proto._as_int(option["bank"]),
                   proto._as_int(option["index"]))
@@ -3075,10 +3108,11 @@ def api_mix_link(link: MixerLink):
         return _bad(f"pair {link.pair} out of range 0..{pairs - 1}")
     try:
         wire_pair = proto.mixer_link_pair_index(PROFILE, link.mix, link.pair)
-        pkt = proto.build_link_command(PROFILE, wire_pair, link.enabled, space=3)
+        pkts = proto.build_mixer_link_commands(
+            PROFILE, link.mix, link.pair, link.enabled)
     except (KeyError, proto.ConstraintError) as e:                # noqa: BLE001
         return _bad(str(e))
-    DEV.submit(lambda t: t.write(pkt))
+    DEV.submit(lambda t: [t.write(pkt) for pkt in pkts])
     return {"ok": True, "mix": link.mix, "pair": link.pair,
             "wire_pair": wire_pair, "enabled": link.enabled}
 
@@ -3238,6 +3272,8 @@ def api_mixer():
         "has_send": proto.mix_has_send(PROFILE),
         "send_mixes": [int(m) for m in send.get("mix_indices", [])],
         "send_master": bool(send.get("include_master", False)),
+        # None = every pair is writable (profiles without mixer.link_write)
+        "link_pairs": (mixer.get("link_write") or {}).get("pairs_by_mix"),
         "ranges": {
             "fader": fader,
             "pan": pan,

@@ -533,8 +533,15 @@ def t_write_bus_flags(dev):
     known = dev.p.get('buses', {}).get('known', {}) or {}
     if not known or 'bus_block' not in dev.p.get('frame', {}).get('state_report', {}):
         return record(SKIP, 'WRITE bus dim/mono', 'no profile bus-block contract')
+    allowed = proto.channel_space_bounds(dev.p, 'bus')
     for bus_key in sorted(known, key=int):
         bus = int(bus_key)
+        if bus in proto.protected_mute_buses(dev.p) \
+                or (allowed is not None and bus not in allowed):
+            # an automatic flag write must never release a protected mute,
+            # and an unconfirmed bus id is not a legal target
+            record(SKIP, f'WRITE bus {bus} dim/mono', 'protected or unconfirmed bus')
+            continue
         for param, key in (('bus_dim', 'dim'), ('bus_mono', 'mono')):
             data = dev.t.read_one(proto.state_report_magic(dev.p), timeout=3.0)
             if data is None:

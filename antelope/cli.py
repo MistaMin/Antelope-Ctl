@@ -1066,6 +1066,10 @@ def cmd_route(args, profile):
       route hp2 mute           mute every channel
     """
     dest = _resolve_route_dest_cli(profile, args.destination)
+    strict = profile.get('mixer', {}).get('input_routing', {})
+    if strict.get('strict') and dest in strict.get('destinations', []):
+        sys.exit('this group is one of several mirrors of the mixer source map and is only '
+                 'captured as one write to all of them: change strip sources in the WebUI mixer')
     try:
         nchan = proto.route_dest_channels(profile, dest)
     except ValueError as e:
@@ -1576,6 +1580,8 @@ def cmd_bus_status(args, profile):
     print(f"{'id':>2}  {'name':<12} {'level':>5}  {'dim':<3} {'mute':<4} {'mono':<4}")
     for bus_id_str in sorted(known, key=int):
         bus_id = int(bus_id_str)
+        if proto._bus_unconfirmed(known[bus_id_str]):
+            continue                      # a guessed bus has no confirmed state bytes
         try:
             s = proto.parse_bus_state(profile, data, bus_id)
         except ValueError:

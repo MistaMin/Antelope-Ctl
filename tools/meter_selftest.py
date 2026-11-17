@@ -330,7 +330,7 @@ def test_outputs(dev, routes, buses):
         working = all_mute(len(original))
         working[0] = (0x00, 0)  # Preamp 1
         bus_id = {0: 3, 1: 1, 2: 2, 3: 0, 4: 5, 5: 4}.get(dest)
-        if bus_id is not None:
+        if bus_id is not None and bus_id not in proto.protected_mute_buses(dev.profile):
             # The output meter may be post-level. Preserve the user's level,
             # but put the bus at 0 dB (raw 0) for this controlled pass so the
             # routed test signal can reach the destination. Raw 96 is -inf.

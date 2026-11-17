@@ -107,6 +107,7 @@ function wireMonKnob(el, bus) {
   ['mute', 'dim', 'mono'].forEach(param => {
     const btn = el.querySelector(`[data-b${param}]`);
     if (!btn) return;
+    if (!PROFILE?.params?.['bus_' + param]) return btn.remove();   // not mapped on this device
     btn.addEventListener('click', () => {
       const on = !btn.classList.contains('on');
       btn.classList.toggle('on', on);

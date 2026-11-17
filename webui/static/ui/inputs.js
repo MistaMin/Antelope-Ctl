@@ -56,6 +56,8 @@ function buildChannels(n) {
       if (b.disabled) return;
       const on = !b.classList.contains('on');
       post('/api/toggle', {channel: ch, param: b.dataset.tog, on});
+      // no state byte for this control: show what was last sent
+      if (b.dataset.unread) b.classList.toggle('on', on);
       // 48V follows the linked partner; Ø (phase invert) stays independent
       if (isLinked(ch) && b.dataset.tog === 'phantom')
         post('/api/toggle', {channel: partnerOf(ch), param: 'phantom', on});
