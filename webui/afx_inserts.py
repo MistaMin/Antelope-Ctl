@@ -117,6 +117,7 @@ class InsertRack:
         if response is None:
             raise RuntimeError('The device did not return the effect settings')
         body = protocol.readback_body(profile, response)
+        self.last_reply = bytes(body)  # whole reply, shown by parameters() for mapping work
         # The device reports each instance as read_stride bytes; the writable
         # block sits read_offset bytes in (PowerGate: one leading on/off flag).
         length = int(effect['block_length'])
@@ -156,7 +157,8 @@ class InsertRack:
         def work(transport):
             type_id, instance, effect = self._slot(transport, spec, channel, slot)
             block = self._read_block(transport, type_id, instance, effect)
-            return self._describe(effect, type_id, instance, block, spec)
+            return {**self._describe(effect, type_id, instance, block, spec),
+                    'reply': self.last_reply.hex(' ')}
         return self._run(work)
 
     def set_parameter(self, channel, slot, key, value):
@@ -169,6 +171,11 @@ class InsertRack:
         def work(transport):
             type_id, instance, effect = self._slot(transport, spec, channel, slot)
             before = self._read_block(transport, type_id, instance, effect)
+            # A block whose mapped fields are out of range means the read layout is
+            # wrong for this effect; writing it back would shift every setting.
+            if any(not field['min'] <= value <= field['max'] for field, value in
+                   zip(effect['fields'], protocol.afx_block_get(effect, before).values())):
+                raise RuntimeError('The effect settings read back out of range; nothing was changed')
             after = protocol.afx_block_set(effect, before, key, value)
             if after != before:
                 transport.write(protocol.build_afx_parameter_write(

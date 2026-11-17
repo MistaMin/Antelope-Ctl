@@ -2441,7 +2441,8 @@ def build_afx_insert_chain(profile: dict, strip: int, slots) -> bytes:
     return bytes(pkt)
 
 
-_AFX_FIELD_TYPES = {'u8': (1, False), 'i8': (1, True), 'u16': (2, False), 'i16': (2, True)}
+_AFX_FIELD_TYPES = {'u8': (1, False), 'i8': (1, True), 'u16': (2, False), 'i16': (2, True),
+                    'u32': (4, False), 'i32': (4, True)}
 
 
 def afx_parameter_effect(profile: dict, type_id: int):

@@ -79,7 +79,38 @@ class InsertChainTests(unittest.TestCase):
                 protocol.afx_block_set(effect, defaults, key, value)
         self.assertEqual(protocol.build_afx_state_query(profile, 39)[:16].hex(' '),
                          '74 00 00 00 10 00 00 00 07 00 00 00 27 00 00 00')
-        self.assertIsNone(protocol.afx_parameter_effect(profile, 27))
+        self.assertIsNone(protocol.afx_parameter_effect(profile, 1))  # ClearQ: not mapped
+
+    def test_discrete_4_effect_maps_are_consistent(self):
+        profile = load('discrete_4_a270')
+        effects = profile['afx_inserts']['parameters']['effects']
+        self.assertEqual(len(effects), 45)
+        for kind, effect in effects.items():
+            length = effect['block_length']
+            self.assertGreater(effect['read_stride'], length, kind)
+            keys = [field['key'] for field in effect['fields']]
+            self.assertEqual(len(keys), len(set(keys)), kind)
+            taken = set()
+            for field in effect['fields']:
+                width, signed = protocol._AFX_FIELD_TYPES[field['type']]
+                span = set(range(field['offset'], field['offset'] + width))
+                self.assertFalse(span & taken, f'{kind} {field["key"]} overlaps')
+                self.assertLessEqual(max(span), length - 1, kind)
+                taken |= span
+                low = -(1 << (8 * width - 1)) if signed else 0
+                self.assertLessEqual(low, field['min'], kind)
+                self.assertLess(field['min'], field['max'], kind)
+                self.assertLess(field['max'], (1 << (8 * width - (1 if signed else 0))), kind)
+            self.assertIn(kind, profile['afx_inserts']['writes']['effects'])
+        # PowerFFC's times are 32-bit: the block the vendor panel sent, release changed.
+        ffc = effects['2']
+        block = bytes.fromhex('102700001027000 0ffff64000000001800 00'.replace(' ', ''))
+        self.assertEqual(protocol.afx_block_get(ffc, block)['release'], 10000)
+        changed = protocol.afx_block_set(ffc, block, 'release', 600000)
+        self.assertEqual(changed[4:8].hex(' '), 'c0 27 09 00')
+        packet = protocol.build_afx_parameter_write(profile, 2, 0, changed)
+        self.assertEqual(packet[4], 0x14 + 0x12)
+        self.assertEqual(packet[16:20].hex(' '), 'd5 14 02 00')
 
     def test_orion_has_no_insert_contract(self):
         self.assertIsNone(protocol.afx_insert_writes(load('orion_studio_sc')))
