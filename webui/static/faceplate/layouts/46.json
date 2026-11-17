@@ -1,7 +1,7 @@
 {
  "type": 46,
  "title": "Reel To Reel",
- "plate": "Monolith",
+ "plate": "Steel",
  "width": 760,
  "height": 224,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "input",
    "kind": "knob",
-   "style": "Mtl",
+   "style": "Chr",
    "x": 114,
    "y": 110,
    "size": 100,
@@ -41,7 +41,7 @@
   {
    "key": "wow_flutter",
    "kind": "stepped",
-   "style": "Tab",
+   "style": "Mtl",
    "x": 310,
    "y": 110,
    "size": 68,
@@ -51,7 +51,7 @@
   {
    "key": "hiss",
    "kind": "stepped",
-   "style": "Tab",
+   "style": "Mtl",
    "x": 450,
    "y": 110,
    "size": 68,
@@ -61,7 +61,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Mtl",
+   "style": "Chr",
    "x": 646,
    "y": 110,
    "size": 100,

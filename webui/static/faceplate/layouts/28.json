@@ -1,7 +1,7 @@
 {
  "type": 28,
  "title": "VEQ-55B",
- "plate": "Slate",
+ "plate": "Black",
  "width": 760,
  "height": 210,
  "sections": [
@@ -45,7 +45,7 @@
   {
    "key": "lf_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "A#6a4c9c",
    "x": 86,
    "y": 102,
    "size": 84,
@@ -63,7 +63,7 @@
   {
    "key": "lmf_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "A#6a4c9c",
    "x": 235,
    "y": 102,
    "size": 84,
@@ -81,7 +81,7 @@
   {
    "key": "hmf_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "A#6a4c9c",
    "x": 384,
    "y": 102,
    "size": 84,
@@ -99,7 +99,7 @@
   {
    "key": "hf_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "A#6a4c9c",
    "x": 533,
    "y": 102,
    "size": 84,
@@ -117,7 +117,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Mtl",
+   "style": "Chr",
    "x": 678,
    "y": 102,
    "size": 76,

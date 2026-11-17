@@ -1,7 +1,7 @@
 {
  "type": 42,
  "title": "Impresser",
- "plate": "Silver",
+ "plate": "Black",
  "width": 760,
  "height": 208,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "input",
    "kind": "knob",
-   "style": "Tl",
+   "style": "Slv",
    "x": 84,
    "y": 102,
    "size": 84,
@@ -48,7 +48,7 @@
   {
    "key": "detector_high_pass",
    "kind": "stepped",
-   "style": "Bk",
+   "style": "Mtl",
    "x": 222,
    "y": 102,
    "size": 60,
@@ -58,7 +58,7 @@
   {
    "key": "detector_band",
    "kind": "stepped",
-   "style": "Bk",
+   "style": "Mtl",
    "x": 309,
    "y": 102,
    "size": 60,
@@ -68,7 +68,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Tl",
+   "style": "Slv",
    "x": 439,
    "y": 102,
    "size": 68,
@@ -78,7 +78,7 @@
   {
    "key": "release",
    "kind": "knob",
-   "style": "Tl",
+   "style": "Slv",
    "x": 534,
    "y": 102,
    "size": 68,
@@ -88,7 +88,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Tl",
+   "style": "Slv",
    "x": 676,
    "y": 102,
    "size": 84,

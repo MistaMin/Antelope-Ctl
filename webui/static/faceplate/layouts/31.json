@@ -1,7 +1,7 @@
 {
  "type": 31,
  "title": "Liverpool",
- "plate": "Walnut",
+ "plate": "Dash",
  "width": 760,
  "height": 212,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "input",
    "kind": "knob",
-   "style": "Pag",
+   "style": "Fat",
    "x": 96,
    "y": 104,
    "size": 88,
@@ -41,7 +41,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Pag",
+   "style": "Fat",
    "x": 232,
    "y": 104,
    "size": 88,

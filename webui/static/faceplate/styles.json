@@ -63,7 +63,31 @@
     "Mic",
     "Ebn",
     "Wnt",
-    "Rck"
+    "Rck",
+    "A#6a4c9c",
+    "FS#b3261e",
+    "Rd#1c1c1c",
+    "Rd#2e7d32",
+    "Rd#2f6fb0",
+    "Rd#5b7a94",
+    "Rd#6b3a2a",
+    "Rd#b3261e",
+    "Rd#c2416b",
+    "Rd#c9a227",
+    "Rd#d2581c"
+  ],
+  "knobs_tinted": [
+    "A#6a4c9c",
+    "FS#b3261e",
+    "Rd#1c1c1c",
+    "Rd#2e7d32",
+    "Rd#2f6fb0",
+    "Rd#5b7a94",
+    "Rd#6b3a2a",
+    "Rd#b3261e",
+    "Rd#c2416b",
+    "Rd#c9a227",
+    "Rd#d2581c"
   ],
   "knobs_without_lit_model": [
     "Seg",

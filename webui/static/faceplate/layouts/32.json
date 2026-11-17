@@ -1,7 +1,7 @@
 {
  "type": 32,
  "title": "Tube176",
- "plate": "Champagne",
+ "plate": "Slate",
  "width": 760,
  "height": 220,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "input",
    "kind": "knob",
-   "style": "Skt",
+   "style": "Knl",
    "x": 114,
    "y": 108,
    "size": 96,
@@ -61,7 +61,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Skt",
+   "style": "Knl",
    "x": 646,
    "y": 108,
    "size": 96,

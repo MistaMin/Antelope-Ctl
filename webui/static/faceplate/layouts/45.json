@@ -1,7 +1,7 @@
 {
  "type": 45,
  "title": "BAE 1073MP",
- "plate": "Periwinkle",
+ "plate": "Marine",
  "width": 760,
  "height": 228,
  "sections": [],
@@ -9,7 +9,7 @@
   {
    "key": "gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd#b3261e",
    "x": 273,
    "y": 112,
    "size": 104,
@@ -19,7 +19,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd",
    "x": 497,
    "y": 112,
    "size": 84,

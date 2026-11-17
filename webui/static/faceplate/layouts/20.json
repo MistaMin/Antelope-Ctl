@@ -1,7 +1,7 @@
 {
  "type": 20,
  "title": "NEU-W495",
- "plate": "Graphite",
+ "plate": "Black",
  "width": 760,
  "height": 210,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "low_gain",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#b3261e",
    "x": 79,
    "y": 102,
    "size": 84,
@@ -48,7 +48,7 @@
   {
    "key": "mid_freq",
    "kind": "stepped",
-   "style": "Pag",
+   "style": "Rd#c9a227",
    "x": 203,
    "y": 102,
    "size": 64,
@@ -58,7 +58,7 @@
   {
    "key": "mid_gain",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#c9a227",
    "x": 319,
    "y": 102,
    "size": 84,
@@ -68,7 +68,7 @@
   {
    "key": "high_freq",
    "kind": "stepped",
-   "style": "Pag",
+   "style": "Rd#2f6fb0",
    "x": 443,
    "y": 102,
    "size": 64,
@@ -78,7 +78,7 @@
   {
    "key": "high_gain",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#2f6fb0",
    "x": 559,
    "y": 102,
    "size": 84,
@@ -88,7 +88,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Snk",
+   "style": "Rd",
    "x": 687,
    "y": 102,
    "size": 72,

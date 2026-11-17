@@ -1,10 +1,10 @@
 {
   "knobs": {
-    "Arc": {
-      "file": "knobs/arc.webp",
+    "A#6a4c9c": {
+      "file": "knobs/a-6a4c9c.webp",
       "frames": 64,
       "knob": 80.0,
-      "lit": false,
+      "lit": true,
       "size": 128
     },
     "Bk": {
@@ -12,13 +12,6 @@
       "frames": 64,
       "knob": 80.0,
       "lit": true,
-      "size": 128
-    },
-    "Brg": {
-      "file": "knobs/brg.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
       "size": 128
     },
     "Brit": {
@@ -42,22 +35,8 @@
       "lit": true,
       "size": 128
     },
-    "Dbl": {
-      "file": "knobs/dbl.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
-    "Dsh": {
-      "file": "knobs/dsh.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
-      "size": 128
-    },
-    "Ebn": {
-      "file": "knobs/ebn.webp",
+    "FS#b3261e": {
+      "file": "knobs/fs-b3261e.webp",
       "frames": 64,
       "knob": 80.0,
       "lit": true,
@@ -68,27 +47,6 @@
       "frames": 64,
       "knob": 80.0,
       "lit": true,
-      "size": 128
-    },
-    "Glw": {
-      "file": "knobs/glw.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
-      "size": 128
-    },
-    "Grd": {
-      "file": "knobs/grd.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
-      "size": 128
-    },
-    "Hex": {
-      "file": "knobs/hex.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
       "size": 128
     },
     "Ivr": {
@@ -103,13 +61,6 @@
       "frames": 64,
       "knob": 80.0,
       "lit": true,
-      "size": 128
-    },
-    "Led": {
-      "file": "knobs/led.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
       "size": 128
     },
     "Lvr": {
@@ -133,36 +84,8 @@
       "lit": true,
       "size": 128
     },
-    "Neo": {
-      "file": "knobs/neo.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
-      "size": 128
-    },
-    "Pag": {
-      "file": "knobs/pag.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
-    "Pie": {
-      "file": "knobs/pie.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
     "Ptr": {
       "file": "knobs/ptr.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
-    "Rck": {
-      "file": "knobs/rck.webp",
       "frames": 64,
       "knob": 80.0,
       "lit": true,
@@ -175,22 +98,64 @@
       "lit": true,
       "size": 128
     },
-    "Rib": {
-      "file": "knobs/rib.webp",
+    "Rd#1c1c1c": {
+      "file": "knobs/rd-1c1c1c.webp",
       "frames": 64,
       "knob": 80.0,
       "lit": true,
       "size": 128
     },
-    "Seg": {
-      "file": "knobs/seg.webp",
+    "Rd#2e7d32": {
+      "file": "knobs/rd-2e7d32.webp",
       "frames": 64,
       "knob": 80.0,
-      "lit": false,
+      "lit": true,
       "size": 128
     },
-    "Skt": {
-      "file": "knobs/skt.webp",
+    "Rd#2f6fb0": {
+      "file": "knobs/rd-2f6fb0.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd#5b7a94": {
+      "file": "knobs/rd-5b7a94.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd#6b3a2a": {
+      "file": "knobs/rd-6b3a2a.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd#b3261e": {
+      "file": "knobs/rd-b3261e.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd#c2416b": {
+      "file": "knobs/rd-c2416b.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd#c9a227": {
+      "file": "knobs/rd-c9a227.webp",
+      "frames": 64,
+      "knob": 80.0,
+      "lit": true,
+      "size": 128
+    },
+    "Rd#d2581c": {
+      "file": "knobs/rd-d2581c.webp",
       "frames": 64,
       "knob": 80.0,
       "lit": true,
@@ -203,22 +168,8 @@
       "lit": true,
       "size": 128
     },
-    "Snk": {
-      "file": "knobs/snk.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
     "Tab": {
       "file": "knobs/tab.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
-    "Tl": {
-      "file": "knobs/tl.webp",
       "frames": 64,
       "knob": 80.0,
       "lit": true,
@@ -230,28 +181,14 @@
       "knob": 80.0,
       "lit": true,
       "size": 128
-    },
-    "Wnt": {
-      "file": "knobs/wnt.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": true,
-      "size": 128
-    },
-    "Yel": {
-      "file": "knobs/yel.webp",
-      "frames": 64,
-      "knob": 80.0,
-      "lit": false,
-      "size": 128
     }
   },
   "plates": {
-    "Champagne": {
-      "file": "plates/champagne.webp",
+    "Black": {
+      "file": "plates/black.webp",
       "h": 300,
-      "marks": "dark",
-      "text": "#201a0a",
+      "marks": "light",
+      "text": "#e6e6e6",
       "w": 760
     },
     "Coal": {
@@ -261,25 +198,11 @@
       "text": "#eeeeee",
       "w": 760
     },
-    "Cognac": {
-      "file": "plates/cognac.webp",
+    "Dash": {
+      "file": "plates/dash.webp",
       "h": 300,
       "marks": "light",
-      "text": "#23150a",
-      "w": 760
-    },
-    "Cream": {
-      "file": "plates/cream.webp",
-      "h": 300,
-      "marks": "dark",
-      "text": "#23323a",
-      "w": 760
-    },
-    "Cyber": {
-      "file": "plates/cyber.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#6cf2f8",
+      "text": "#7dff9a",
       "w": 760
     },
     "Granite": {
@@ -310,34 +233,6 @@
       "text": "#e9edf5",
       "w": 760
     },
-    "Mesh": {
-      "file": "plates/mesh.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#7ff5e8",
-      "w": 760
-    },
-    "Midnight": {
-      "file": "plates/midnight.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#e3eaff",
-      "w": 760
-    },
-    "Monolith": {
-      "file": "plates/monolith.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#f2f2f2",
-      "w": 760
-    },
-    "Navy": {
-      "file": "plates/navy.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#e8eefc",
-      "w": 760
-    },
     "Olive": {
       "file": "plates/olive.webp",
       "h": 300,
@@ -350,20 +245,6 @@
       "h": 300,
       "marks": "light",
       "text": "#9fe8ff",
-      "w": 760
-    },
-    "Oxblood": {
-      "file": "plates/oxblood.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#f1dcc8",
-      "w": 760
-    },
-    "Periwinkle": {
-      "file": "plates/periwinkle.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#f3f4ff",
       "w": 760
     },
     "Rust": {
@@ -399,27 +280,6 @@
       "h": 300,
       "marks": "dark",
       "text": "#101416",
-      "w": 760
-    },
-    "Synthwave": {
-      "file": "plates/synthwave.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#ff7ad9",
-      "w": 760
-    },
-    "Teal": {
-      "file": "plates/teal.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#eaf6f8",
-      "w": 760
-    },
-    "Walnut": {
-      "file": "plates/walnut.webp",
-      "h": 300,
-      "marks": "light",
-      "text": "#f3e3c4",
       "w": 760
     }
   },

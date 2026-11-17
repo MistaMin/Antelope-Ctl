@@ -1,7 +1,7 @@
 {
  "type": 6,
  "title": "VEQ-1A",
- "plate": "Champagne",
+ "plate": "Slate",
  "width": 760,
  "height": 220,
  "sections": [
@@ -24,7 +24,7 @@
   {
    "key": "low_boost",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 80,
    "y": 105,
    "size": 88,
@@ -33,7 +33,7 @@
   {
    "key": "low_atten",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 190,
    "y": 105,
    "size": 88,
@@ -42,7 +42,7 @@
   {
    "key": "high_boost",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 325,
    "y": 105,
    "size": 88,
@@ -51,7 +51,7 @@
   {
    "key": "bandwidth",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 435,
    "y": 105,
    "size": 64,
@@ -60,7 +60,7 @@
   {
    "key": "high_atten",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 545,
    "y": 105,
    "size": 88,

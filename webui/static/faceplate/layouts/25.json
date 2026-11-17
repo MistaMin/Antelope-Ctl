@@ -1,7 +1,7 @@
 {
  "type": 25,
  "title": "BAE 1084",
- "plate": "Oxblood",
+ "plate": "Marine",
  "width": 760,
  "height": 214,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "low_pass",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#2f6fb0",
    "x": 82,
    "y": 104,
    "size": 72,
@@ -48,7 +48,7 @@
   {
    "key": "low_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd",
    "x": 229,
    "y": 104,
    "size": 88,
@@ -58,7 +58,7 @@
   {
    "key": "mid_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd",
    "x": 376,
    "y": 104,
    "size": 88,
@@ -68,7 +68,7 @@
   {
    "key": "high_gain",
    "kind": "knob",
-   "style": "Brit",
+   "style": "Rd",
    "x": 523,
    "y": 104,
    "size": 88,
@@ -78,7 +78,7 @@
   {
    "key": "gain",
    "kind": "knob",
-   "style": "Rd",
+   "style": "Rd#b3261e",
    "x": 674,
    "y": 104,
    "size": 80,

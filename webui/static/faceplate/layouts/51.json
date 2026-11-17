@@ -1,7 +1,7 @@
 {
  "type": 51,
  "title": "PowerEx",
- "plate": "Synthwave",
+ "plate": "Granite",
  "width": 760,
  "height": 222,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Neo",
+   "style": "Slv",
    "x": 83,
    "y": 108,
    "size": 96,
@@ -41,7 +41,7 @@
   {
    "key": "ratio",
    "kind": "knob",
-   "style": "Neo",
+   "style": "Slv",
    "x": 218,
    "y": 108,
    "size": 96,
@@ -51,7 +51,7 @@
   {
    "key": "range",
    "kind": "knob",
-   "style": "Neo",
+   "style": "Slv",
    "x": 341,
    "y": 108,
    "size": 72,
@@ -61,7 +61,7 @@
   {
    "key": "attack",
    "kind": "knob",
-   "style": "Grd",
+   "style": "Slv",
    "x": 457,
    "y": 108,
    "size": 68,
@@ -71,7 +71,7 @@
   {
    "key": "decay",
    "kind": "knob",
-   "style": "Grd",
+   "style": "Slv",
    "x": 564,
    "y": 108,
    "size": 68,
@@ -81,7 +81,7 @@
   {
    "key": "gain",
    "kind": "knob",
-   "style": "Yel",
+   "style": "Slv",
    "x": 685,
    "y": 108,
    "size": 80,

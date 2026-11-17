@@ -1,7 +1,7 @@
 {
  "type": 48,
  "title": "BA-31",
- "plate": "Rust",
+ "plate": "Black",
  "width": 760,
  "height": 220,
  "sections": [],
@@ -9,7 +9,7 @@
   {
    "key": "gain",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 267,
    "y": 108,
    "size": 96,
@@ -19,7 +19,7 @@
   {
    "key": "trim",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 493,
    "y": 108,
    "size": 96,

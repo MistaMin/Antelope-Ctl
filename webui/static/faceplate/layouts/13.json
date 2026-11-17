@@ -1,7 +1,7 @@
 {
  "type": 13,
  "title": "NEU-PEV",
- "plate": "Leveler",
+ "plate": "Black",
  "width": 760,
  "height": 220,
  "sections": [
@@ -38,7 +38,7 @@
   {
    "key": "60_hz",
    "kind": "stepped",
-   "style": "Fat",
+   "style": "Rd#b3261e",
    "x": 95,
    "y": 105,
    "size": 84,
@@ -48,7 +48,7 @@
   {
    "key": "presence",
    "kind": "stepped",
-   "style": "Fat",
+   "style": "Rd#c9a227",
    "x": 255,
    "y": 105,
    "size": 84,
@@ -64,7 +64,7 @@
   {
    "key": "presence_freq",
    "kind": "stepped",
-   "style": "Chk",
+   "style": "Rd#c9a227",
    "x": 375,
    "y": 105,
    "size": 64,
@@ -74,7 +74,7 @@
   {
    "key": "10_khz",
    "kind": "stepped",
-   "style": "Fat",
+   "style": "Rd#2f6fb0",
    "x": 535,
    "y": 105,
    "size": 84,
@@ -84,7 +84,7 @@
   {
    "key": "output",
    "kind": "knob",
-   "style": "Mini",
+   "style": "Rd",
    "x": 680,
    "y": 105,
    "size": 64,

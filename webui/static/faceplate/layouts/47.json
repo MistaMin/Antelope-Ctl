@@ -1,7 +1,7 @@
 {
  "type": 47,
  "title": "RD-47",
- "plate": "Olive",
+ "plate": "Coal",
  "width": 760,
  "height": 228,
  "sections": [],
@@ -9,7 +9,7 @@
   {
    "key": "voltage_gain",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 275,
    "y": 112,
    "size": 104,
@@ -19,7 +19,7 @@
   {
    "key": "output_trim",
    "kind": "knob",
-   "style": "Ebn",
+   "style": "Fat",
    "x": 497,
    "y": 112,
    "size": 80,

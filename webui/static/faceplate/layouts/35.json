@@ -1,7 +1,7 @@
 {
  "type": 35,
  "title": "ALT-436C",
- "plate": "Cognac",
+ "plate": "Dash",
  "width": 760,
  "height": 216,
  "sections": [
@@ -31,7 +31,7 @@
   {
    "key": "volume",
    "kind": "knob",
-   "style": "Pie",
+   "style": "Fat",
    "x": 114,
    "y": 106,
    "size": 92,
@@ -41,7 +41,7 @@
   {
    "key": "threshold",
    "kind": "knob",
-   "style": "Pie",
+   "style": "Fat",
    "x": 284,
    "y": 106,
    "size": 92,
@@ -51,7 +51,7 @@
   {
    "key": "release_time",
    "kind": "knob",
-   "style": "Pie",
+   "style": "Fat",
    "x": 482,
    "y": 106,
    "size": 68,

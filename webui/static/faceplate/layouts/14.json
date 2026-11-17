@@ -1,7 +1,7 @@
 {
  "type": 14,
  "title": "Lang PEQ-2",
- "plate": "Graphite",
+ "plate": "Steel",
  "width": 760,
  "height": 340,
  "sections": [
@@ -24,7 +24,7 @@
   {
    "key": "lf_boost",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Bk",
    "x": 90,
    "y": 95,
    "size": 80,
@@ -33,7 +33,7 @@
   {
    "key": "lf_boost_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Chk",
    "x": 90,
    "y": 235,
    "size": 60,
@@ -52,7 +52,7 @@
   {
    "key": "lf_droop",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Bk",
    "x": 220,
    "y": 95,
    "size": 80,
@@ -61,7 +61,7 @@
   {
    "key": "lf_droop_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Chk",
    "x": 220,
    "y": 235,
    "size": 60,
@@ -76,7 +76,7 @@
   {
    "key": "hf_boost",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Bk",
    "x": 375,
    "y": 95,
    "size": 80,
@@ -85,7 +85,7 @@
   {
    "key": "hf_boost_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Chk",
    "x": 375,
    "y": 235,
    "size": 60,
@@ -104,7 +104,7 @@
   {
    "key": "hf_boost_bandwidth",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Bk",
    "x": 520,
    "y": 165,
    "size": 64,
@@ -113,7 +113,7 @@
   {
    "key": "hf_droop",
    "kind": "knob",
-   "style": "Ivr",
+   "style": "Bk",
    "x": 665,
    "y": 95,
    "size": 80,
@@ -122,7 +122,7 @@
   {
    "key": "hf_droop_freq",
    "kind": "stepped",
-   "style": "Ptr",
+   "style": "Chk",
    "x": 665,
    "y": 235,
    "size": 60,
