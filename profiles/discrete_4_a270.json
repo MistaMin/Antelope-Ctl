@@ -236,40 +236,641 @@
     "mapping_status": "derived",
     "mapping_notes": "Record 0 = mixer channel 1 is confirmed: effects loaded into the PREAMP 1 rack appeared in record 0 and the reconnected panel drew them on channel 1. The panel shows AFX areas on channels 1-4; records 1-3 for channels 2-4 are assumed. Records 4-35 are unknown.",
     "type_labels": {
-      "1": {"label": "ClearQ", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 1"},
-      "27": {"label": "Master De-esser", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 27"},
-      "39": {"label": "PowerGate", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 39 (d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb))"},
-      "51": {"label": "PowerEx", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 51 (same capture)"}
+      "1": {"label": "ClearQ", "status": "confirmed", "evidence": "loaded by name in the vendor panel; chain write and readback then carried type 1", "group": "EQ"},
+      "2": {"label": "PowerFFC", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 2 (powerffc_probe.pcapng (sha256 da151a1c09e3652a0c7c5f7fb4934c08e61684f36dba43de80dded24d6fe2f21))"},
+      "3": {"label": "Darkface 65 (US)", "group": "Guitar", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 3 (amp_darkface_65_probe.pcapng (sha256 bf6534259e6153639775b9eaa1fdad367b5567d0077b69a22621881067e8dc47))"},
+      "4": {"label": "Darkface 65 2x12 cab", "group": "Guitar", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 4 (cab_darkface_65_2x12_probe.pcapng (sha256 d2e9d5c82738e50859845f18ae1d567a12ab7157272a3b4d2be971ff58ec1f2e))"},
+      "5": {"label": "VMEQ-5", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 5 (vmeq_5_probe.pcapng (sha256 a08ff4934210ea6de8809c017fd428861943992adf8d49623066d67811899650))"},
+      "6": {"label": "VEQ-1A", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 6 (veq_1a_probe.pcapng (sha256 cc2ebebd4cbd7cbb3d3aa1c76a4ea1bfcd7a24f39900cee4af411cd92a79f4b6))"},
+      "7": {"label": "BAE 1073", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 7 (bae_1073_probe.pcapng (sha256 a77d4f30a1cc5624fa7d8814b7d3922bc0b6f0061e41295b3da5a597ecc0ee48))"},
+      "8": {"label": "VEQ-55A", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 8 (veq_55a_probe.pcapng (sha256 570923648af2c072499805530f005352cffddea6d2d5fef25282de3b85088902))"},
+      "9": {"label": "FET-A76", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 9 (fet_a76_probe.pcapng (sha256 6d8899e7fda733c5891b2345bc608d07d2f797fcd7c25d73d910053ff4ad7dca))"},
+      "11": {"label": "VEQ-HLF", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 11 (veq_hlf_probe.pcapng (sha256 e351d7505c9b2f6b858837fc1a044443f4aaf619820aadce48fac5ce3a5db859))"},
+      "12": {"label": "UK-69", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 12 (uk_69_probe.pcapng (sha256 bd92134730bfa01f7fc356988644ea7583b27424697702571d8840b6adb865a6))"},
+      "13": {"label": "NEU-PEV", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 13 (neu_pev_probe.pcapng (sha256 9fa642fd803816baee781aafe29ee34cf8718b08c00248a277847442097cc479))"},
+      "14": {"label": "Lang PEQ-2", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 14 (lang_peq2_probe.pcapng (sha256 8ebe11009469e2ae50b0f46162d7f461eee7e4675a30aa4f72d0a5cf62a70ede))"},
+      "15": {"label": "NEU-W492", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 15 (neu_w492_probe.pcapng (sha256 793e5a0effe745a631546d31cd6210760355c309f163f126aeb9b64c9d49a035))"},
+      "16": {"label": "VEQ-4K Pink", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 16 (veq_4k_pink_probe.pcapng (sha256 91c0413e99ceb989775a80036ce0f7add6c80dc56a77dfbc67b64d7ac2f94979))"},
+      "17": {"label": "VEQ-4K Orange", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 17 (veq_4k_orange_probe.pcapng (sha256 1d9bded9f4d578b2e4f47e4541e7aa6377b0b165831f74d6bf0b2c40c8a25665))"},
+      "18": {"label": "VEQ-4K Black", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 18 (veq_4k_black_probe.pcapng (sha256 71ad9162944e3a06b74ff645ec66b668cbfd5c46ae3b017869aa641d203d8ddc))"},
+      "19": {"label": "VEQ-4K Brown", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 19 (veq_4k_brown_probe.pcapng (sha256 17e0d68be719eb763055896983c3c3bc2ed5f675a419be0bfa84262be9f83096))"},
+      "20": {"label": "NEU-W495", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 20 (neu_w495_probe.pcapng (sha256 e0f02c6d181ec328a031ef50a3c80467ceb3f14990230a0ea766941b4f0a1a45))"},
+      "21": {"label": "VEQ-STU 089", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 21 (veq_stu_089_probe.pcapng (sha256 16e99b32cb6c9554842e6ac01de2921c21645ccbe5ab0c41b8186cd4ee2cd408))"},
+      "22": {"label": "VEQ-STU 169", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 22 (veq_stu_169_probe.pcapng (sha256 5603d045b9b90d538cf0cc24ab3e1f9b980d7ffe4e8153f83f6e527231535890))"},
+      "23": {"label": "VEQ-STU 900", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 23 (veq_stu_900_probe.pcapng (sha256 37d95c592bb3072aa994f748e011c27dd796dbb69cf73d3611c4e0bc3bd8cd05))"},
+      "24": {"label": "BAE 1023", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 24 (bae_1023_probe.pcapng (sha256 7dc71b0e58f89372d47822ab97a9dab21f9d7ff3fbb79aea195ead2101a17121))"},
+      "25": {"label": "BAE 1084", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 25 (bae_1084_probe.pcapng (sha256 a9351b57075c70fdfb8df922eeb39cc662e8646bdcd73bb8a849a21447cf164c))"},
+      "26": {"label": "VEQ-HA32C", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 26 (veq_ha32c_probe.pcapng (sha256 cc3469091b94dfae1fd6c92e84e7fab8a66ab481573ba8f1ec9cb73b936aadc9))"},
+      "27": {"label": "Master De-esser", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 27 (master_deesser_probe.pcapng (sha256 76f9b400389c66c8e8debfe64f66967a8b9b247ac71bb2afee6a3535e4350da0))"},
+      "28": {"label": "VEQ-55B", "group": "EQ", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 28 (veq_55b_probe.pcapng (sha256 fbb00459e3e35e6f6bfdf5e29287d8da95c9558af66fc677ca451b298d85b798))"},
+      "29": {"label": "X903", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 29 (x903_probe.pcapng (sha256 e6f1c2c113b78fe18dfe535d68377c6e8aa3c46ffa8529c52e35a5df17d51d98))"},
+      "30": {"label": "Gyratec X", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 30 (gyratec_x_probe.pcapng (sha256 462a448700b1370158489316ba3c36c31542f502c78346b9bd90bdd66d1da922))"},
+      "31": {"label": "Liverpool", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 31 (liverpool_probe.pcapng (sha256 1dba16232f79f8aa92849eb97fb3872a1de3faf2d0ebeb9a748db19e81329c37))"},
+      "32": {"label": "Tube176", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 32 (tube_176_probe.pcapng (sha256 d93a3f67527bdfbaded1a1b402c7e307808988bf4497c53610611b7c756dd629))"},
+      "33": {"label": "VCA160", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 33 (vca160_probe.pcapng (sha256 7172e0e2a8192812c87d347001ab98569c4740682d4d39584fe608d4c720e84d))"},
+      "34": {"label": "Stay-Levin", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 34 (stay_levin_probe.pcapng (sha256 17b244c98bc358ebb097319ac66df7be5be396fd3f209851ea46f64b0b6eee2f))"},
+      "35": {"label": "ALT-436C", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 35 (alt_436c_probe.pcapng (sha256 91f1910882e1ca4105de0a0c60af7fc71bcb8174b337106b7bdcffa9fcea2423))"},
+      "36": {"label": "SMT-100A", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 36 (smt_100a_probe.pcapng (sha256 b8b4d35cbaffb917d91ca3baad1f0e2e593efe74bc6e991d76de138df34e6c16))"},
+      "37": {"label": "FET-A78", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 37 (fet_a78_probe.pcapng (sha256 4243f86cd4477400c0254f3a2be6a7f758cd5561159c05250c6edfd22554e57d))"},
+      "38": {"label": "BA-6A", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 38 (ba_6a_probe.pcapng (sha256 b488d0d22d21b04d4f893aaf7c6350a14b24653af6ac8158046155b6139c62cd))"},
+      "39": {"label": "PowerGate", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 39 (d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb))", "group": "Dynamics"},
+      "41": {"label": "Tubechild670", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 41 (tubechild670_probe.pcapng (sha256 086506653c2753bd2d9dd43189eeaba1788f274eb359f3e990eca4c182ffd772))"},
+      "42": {"label": "Impresser", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 42 (impresser_probe.pcapng (sha256 b84cb2daf5f5551a40fba32af6029412678eb806ba1f015d2bacf32e8b61c705))"},
+      "43": {"label": "Gyratec IX", "group": "Preamp", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 43 (gyratec_ix_probe.pcapng (sha256 a5c72e0b05f67b2e85e806b5eb2c797d918845bcc1b41e1747c59213392c2319))"},
+      "44": {"label": "VPA-76", "group": "Preamp", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 44 (vpa_76_probe.pcapng (sha256 022a69bc58c72b6f253a222170c69bf2fe9cbac688091bb206e1ecd94bccac27))"},
+      "45": {"label": "BAE 1073MP", "group": "Preamp", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 45 (bae_1073mp_probe.pcapng (sha256 bf0f6ce1982b0b22aeb713d1201267f45b48a88e87dfae17d7b07ede0e24b253))"},
+      "46": {"label": "Reel To Reel", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 46 (reel_to_reel_probe.pcapng (sha256 1f94d35c418764d1b41a9ffb300dda06737bedbee998d2966d5179820eb531cf))"},
+      "47": {"label": "RD-47", "group": "Preamp", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 47 (rd_47_probe.pcapng (sha256 3e550117bf4931849e0418a69f5ba094fa425fbb73bda898e40f3b39bb24611c))"},
+      "48": {"label": "BA-31", "group": "Preamp", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 48 (ba_31_probe.pcapng (sha256 ac26e06d8fa8a05d13e58361f45e69e24af81292a4aa20dfd9079c9f64b99ae0))"},
+      "50": {"label": "BAE 10DCF", "group": "Dynamics", "status": "confirmed", "evidence": "loaded by name from the vendor menu; the chain write then carried type 50 (bae10dcf_probe.pcapng (sha256 edd3050bbeb5e01f2283d61d1ba025c3e461f022962492c66df06ce3b6b2294e))"},
+      "51": {"label": "PowerEx", "status": "confirmed", "evidence": "loaded by name in the vendor panel; the chain write then carried type 51 (same capture)", "group": "Dynamics"}
     },
-    "chain_write": {
-      "magic_offset": 0, "magic": "0x70",
-      "opcode_offset": 4, "opcode": "0x5b",
-      "param_id_offset": 16, "param_id": "0xd7",
-      "subcmd_offset": 17, "subcmd": "0x49",
-      "strip_offset": 18,
-      "slots_offset": 19,
-      "status": "confirmed",
-      "notes": "See frame.afx_chain_write. The strip byte is the mixer channel minus one (00 for PREAMP 1, 01 for PREAMP 2). A second Master De-esser took instance 1 while instance 0 sat in the other rack.",
-      "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb) and the earlier AFX captures"
-    },
+    "chain_write": {"magic_offset": 0, "magic": "0x70", "opcode_offset": 4, "opcode": "0x5b", "param_id_offset": 16, "param_id": "0xd7", "subcmd_offset": 17, "subcmd": "0x49", "strip_offset": 18, "slots_offset": 19, "status": "confirmed", "notes": "See frame.afx_chain_write. The strip byte is the mixer channel minus one (00 for PREAMP 1, 01 for PREAMP 2). A second Master De-esser took instance 1 while instance 0 sat in the other rack.", "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_afx_strip2.pcapng (sha256 c560812f19781501fd0dbbcf9a65b5a1f617ee8344ae5cef804f4851c1dcb7cb) and the earlier AFX captures"},
     "parameters": {
       "enabled": true,
-      "write": {
-        "param_id": "0xd5",
-        "length_bias": "0x12",
-        "layout": "70 00 00 00 | <len + 0x12> 00 00 00 | 00 x8 | d5 | <len> | <type> | <inst> | <whole parameter block>",
-        "notes": "One frame carries the effect's whole block. Byte 4 is the payload length plus 0x12 on every command frame seen on this device (0x13 for a one-byte SET_PARAM, 0x5b for the chain write), so it is a length, not an opcode family.",
-        "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_params_powergate.pcapng (sha256 471e0697ee0e61533edb4e1585030c9c7220eed6fd7f63473bf6ef2baaf664e5)"
-      },
-      "state_query": {
-        "category": "0x07",
-        "subcmd": "0x10",
-        "index_flag": "0x00",
-        "layout": "index = effect type; the body is every instance back to back. An instance's report can be longer than its write block: see each effect's read_stride / read_offset.",
-        "notes": "Seen from the vendor panel for a loaded Master De-esser (index 0x1b, 8 x 13 bytes). ClearQ is the exception: index 0, not its type. Query only a type that is loaded in a rack.",
-        "evidence": "d4_afx_loaded_walk.pcapng, d4_afx_two_effects.pcapng"
-      },
+      "write": {"param_id": "0xd5", "length_bias": "0x12", "layout": "70 00 00 00 | <len + 0x12> 00 00 00 | 00 x8 | d5 | <len> | <type> | <inst> | <whole parameter block>", "notes": "One frame carries the effect's whole block. Byte 4 is the payload length plus 0x12 on every command frame seen on this device (0x13 for a one-byte SET_PARAM, 0x5b for the chain write), so it is a length, not an opcode family.", "evidence": "owner's unit, vendor panel 1.9.22 under Wine, usbmon, 2026-11-17: d4_params_powergate.pcapng (sha256 471e0697ee0e61533edb4e1585030c9c7220eed6fd7f63473bf6ef2baaf664e5)"},
+      "state_query": {"category": "0x07", "subcmd": "0x10", "index_flag": "0x00", "layout": "index = effect type; the body is every instance back to back. An instance's report can be longer than its write block: see each effect's read_stride / read_offset.", "notes": "Seen from the vendor panel for a loaded Master De-esser (index 0x1b, 8 x 13 bytes). ClearQ is the exception: index 0, not its type. Query only a type that is loaded in a rack.", "evidence": "d4_afx_loaded_walk.pcapng, d4_afx_two_effects.pcapng"},
       "effects": {
+        "2": {
+          "block_length": 18,
+          "read_stride": 19,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "attack", "label": "Attack", "offset": 0, "type": "u32", "min": 100, "max": 150000, "scale": 0.001},
+            {"key": "release", "label": "Release", "offset": 4, "type": "u32", "min": 1000, "max": 600000, "scale": 0.001},
+            {"key": "ratio", "label": "Ratio", "offset": 10, "type": "u16", "min": 100, "max": 2000, "scale": 0.01},
+            {"key": "threshold", "label": "Threshold", "offset": 15, "type": "u8", "min": 0, "max": 80},
+            {"key": "knee", "label": "Knee", "offset": 16, "type": "u8", "min": 0, "max": 30}
+          ],
+          "notes": "PowerFFC. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): powerffc_sweep.pcapng (sha256 93234e148ecc2747e745804b6fa3fe0a9633f21088c0b2fd74bc44b6247c519b)"
+        },
+        "5": {
+          "block_length": 6,
+          "read_stride": 7,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_peak_freq", "label": "Low Peak Freq", "offset": 0, "type": "u8", "min": 0, "max": 4},
+            {"key": "low_peak", "label": "Low Peak", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "dip_freq", "label": "Dip Freq", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "dip", "label": "Dip", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_peak_freq", "label": "High Peak Freq", "offset": 4, "type": "u8", "min": 0, "max": 4},
+            {"key": "high_peak", "label": "High Peak", "offset": 5, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "VMEQ-5. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): vmeq_5_sweep.pcapng (sha256 171fad9973f150dd555617020f3a7712843c16354b9c5c8dfb35beb9480463ec)"
+        },
+        "6": {
+          "block_length": 8,
+          "read_stride": 9,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_boost", "label": "Low Boost", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_atten", "label": "Low Atten", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_boost", "label": "High Boost", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_atten", "label": "High Atten", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "bandwidth", "label": "Bandwidth", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "atten_sel", "label": "Atten Sel", "offset": 7, "type": "u8", "min": 0, "max": 2}
+          ],
+          "notes": "VEQ-1A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_1a_sweep.pcapng (sha256 610c0e84fd885a68e9441a250cd63a801dea35eaffb7071801069cca25947c39)"
+        },
+        "7": {
+          "block_length": 8,
+          "read_stride": 9,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "i8", "min": -20, "max": 10},
+            {"key": "high_gain", "label": "High Gain", "offset": 1, "type": "u8", "min": 0, "max": 16},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 3, "type": "u8", "min": 0, "max": 16},
+            {"key": "low_gain", "label": "Low Gain", "offset": 5, "type": "u8", "min": 0, "max": 16},
+            {"key": "high_pass", "label": "High-pass", "offset": 6, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "BAE 1073. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1073_sweep.pcapng (sha256 c585d8f1421d99361db63894e4eb3e5ea74f50669b94036d518493ca2c7fe1ae)"
+        },
+        "8": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "output", "label": "Output", "offset": 0, "type": "i8", "min": -48, "max": 12},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 1, "type": "u8", "min": 0, "max": 4},
+            {"key": "mf_freq", "label": "MF Freq", "offset": 3, "type": "u8", "min": 0, "max": 4},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 5, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "VEQ-55A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_55a_sweep.pcapng (sha256 414159187e001153aa0e9f2b77cefc3fc46cbecad669d694e593f5e1282c0ae2)"
+        },
+        "9": {
+          "block_length": 5,
+          "read_stride": 7,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 60},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "FET-A76. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): fet_a76_sweep.pcapng (sha256 c7f392d4e1f82babcd968d0d82d04f44a225e192403ebe25b4ee88b2479e5862)"
+        },
+        "11": {
+          "block_length": 2,
+          "read_stride": 3,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_cut", "label": "Low Cut", "offset": 0, "type": "u8", "min": 0, "max": 10},
+            {"key": "high_cut", "label": "High Cut", "offset": 1, "type": "u8", "min": 0, "max": 10}
+          ],
+          "notes": "VEQ-HLF. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_hlf_sweep.pcapng (sha256 63df493d9e26044ec7bff194da81c8c0ceff13d99ef174719d9c361c64233a93)"
+        },
+        "12": {
+          "block_length": 7,
+          "read_stride": 8,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "bass", "label": "Bass", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "10_khz", "label": "10 kHz", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "mid_freq", "label": "Mid Freq", "offset": 3, "type": "u8", "min": 0, "max": 8},
+            {"key": "mid", "label": "Mid", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "line_level", "label": "Line Level", "offset": 6, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "UK-69. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): uk_69_sweep.pcapng (sha256 210e6e5557b2c07ba23e65779b71d9ea6695bcda9574520db45fe0ea916e01ab)"
+        },
+        "13": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "60_hz", "label": "60 Hz", "offset": 0, "type": "i8", "min": -5, "max": 3},
+            {"key": "presence", "label": "Presence", "offset": 1, "type": "u8", "min": 0, "max": 4},
+            {"key": "presence_freq", "label": "Presence Freq", "offset": 2, "type": "u8", "min": 0, "max": 6},
+            {"key": "10_khz", "label": "10 kHz", "offset": 3, "type": "i8", "min": -5, "max": 4},
+            {"key": "output", "label": "Output", "offset": 4, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "NEU-PEV. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): neu_pev_sweep.pcapng (sha256 3c441fe366244316b024e0a1b7ec9ed9f3b99d76691dc9e7b619baf9f7af9377)"
+        },
+        "14": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "lf_boost_freq", "label": "LF Boost Freq", "offset": 0, "type": "u8", "min": 0, "max": 7},
+            {"key": "lf_boost", "label": "LF Boost", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_droop_freq", "label": "LF Droop Freq", "offset": 2, "type": "u8", "min": 0, "max": 3},
+            {"key": "lf_droop", "label": "LF Droop", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_boost_bandwidth", "label": "HF Boost Bandwidth", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_boost_freq", "label": "HF Boost Freq", "offset": 5, "type": "u8", "min": 0, "max": 7},
+            {"key": "hf_boost", "label": "HF Boost", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_droop_freq", "label": "HF Droop Freq", "offset": 7, "type": "u8", "min": 0, "max": 5},
+            {"key": "hf_droop", "label": "HF Droop", "offset": 8, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Lang PEQ-2. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): lang_peq2_sweep.pcapng (sha256 d5a5d82dfc3c14362a749042cbc08c036ac8b614b6ea49532c5f9d38ba7910f0)"
+        },
+        "15": {
+          "block_length": 14,
+          "read_stride": 15,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_gain", "label": "Low Gain", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_freq", "label": "Low Freq", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_mid_gain", "label": "Low-Mid Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_mid_freq", "label": "Low-Mid Freq", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_mid_gain", "label": "High-Mid Gain", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_mid_freq", "label": "High-Mid Freq", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_gain", "label": "High Gain", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_freq", "label": "High Freq", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 13, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "NEU-W492. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): neu_w492_sweep.pcapng (sha256 65f5f9524bf80a701f25050faa62a0ca43170a11b60a34498459991f6ce89be7)"
+        },
+        "16": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-4K Pink. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_pink_sweep.pcapng (sha256 8a10f34a8d5e7760fca52cae11684bfc5109cc579d8486dcf98ac3c22a991bba)"
+        },
+        "17": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-4K Orange. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_orange_sweep.pcapng (sha256 07efe49dc1913f27ca04d9dadd92ff9550541b8e0f46581cc8d7ae5989b81f4c)"
+        },
+        "18": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-4K Black. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_black_sweep.pcapng (sha256 c1815cab16909b5935fb276a6ae9ca3963a210e74194d33b7ec85fbd1766f4fc)"
+        },
+        "19": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_q", "label": "HMF Q", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_q", "label": "LMF Q", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 13, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-4K Brown. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_brown_sweep.pcapng (sha256 30f23140d0abc557158adf65223f3b224180b94ac5a08107414a26ee79545724)"
+        },
+        "20": {
+          "block_length": 8,
+          "read_stride": 9,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_gain", "label": "Low Gain", "offset": 1, "type": "i8", "min": -5, "max": 5},
+            {"key": "mid_freq", "label": "Mid Freq", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 3, "type": "i8", "min": -5, "max": 5},
+            {"key": "high_freq", "label": "High Freq", "offset": 5, "type": "u8", "min": 0, "max": 2},
+            {"key": "high_gain", "label": "High Gain", "offset": 6, "type": "i8", "min": -5, "max": 5},
+            {"key": "output", "label": "Output", "offset": 7, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "NEU-W495. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): neu_w495_sweep.pcapng (sha256 4f1331d92752f2b33ecb9cb578fd4e0a07a512662faa1fa2e39c4d80b78eaf8c)"
+        },
+        "21": {
+          "block_length": 7,
+          "read_stride": 8,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_filter", "label": "Low Filter", "offset": 0, "type": "u8", "min": 0, "max": 4},
+            {"key": "high_filter", "label": "High Filter", "offset": 1, "type": "u8", "min": 0, "max": 4},
+            {"key": "80_hz", "label": "80 Hz", "offset": 2, "type": "i8", "min": -4, "max": 4},
+            {"key": "8_khz", "label": "8 kHz", "offset": 3, "type": "i8", "min": -4, "max": 4},
+            {"key": "presence", "label": "Presence", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "presence_freq", "label": "Presence Freq", "offset": 5, "type": "u8", "min": 0, "max": 6},
+            {"key": "output", "label": "Output", "offset": 6, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-STU 089. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_stu_089_sweep.pcapng (sha256 8e1f62e7d72895a79353cf8a02a44510b5240a303ea445a1c9ba53c55032a6fb)"
+        },
+        "22": {
+          "block_length": 6,
+          "read_stride": 7,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "high", "label": "High", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid", "label": "Mid", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "low", "label": "Low", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 5, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-STU 169. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_stu_169_sweep.pcapng (sha256 dd63c28c4cc522b960e5f36c28f8b6e7d60d0edb2c4521f9a2525147235c9d7f)"
+        },
+        "23": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_pass", "label": "Low-pass", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_gain", "label": "LF Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_gain", "label": "LMF Gain", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_gain", "label": "HMF Gain", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_gain", "label": "HF Gain", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-STU 900. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_stu_900_sweep.pcapng (sha256 c06c0a2f2a62de429cc33eef4c9daae3ad8c3f587aab5e2c5b76bde66aa55ede)"
+        },
+        "24": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "i8", "min": -20, "max": 10},
+            {"key": "high_gain", "label": "High Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_gain", "label": "Low Gain", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_pass", "label": "High-pass", "offset": 7, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "BAE 1023. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1023_sweep.pcapng (sha256 3c0028bdb941c5c16a207a703ca5c11b13199f7ae29bdbc4512e64de495b023b)"
+        },
+        "25": {
+          "block_length": 11,
+          "read_stride": 12,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "i8", "min": -20, "max": 10},
+            {"key": "high_gain", "label": "High Gain", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid_gain", "label": "Mid Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_gain", "label": "Low Gain", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_pass", "label": "Low-pass", "offset": 8, "type": "u8", "min": 0, "max": 5}
+          ],
+          "notes": "BAE 1084. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1084_sweep.pcapng (sha256 42fbc67bc735d6c7374d0cbe157d86de0ac4458736fae16941ffbbdbade9d860)"
+        },
+        "26": {
+          "block_length": 15,
+          "read_stride": 16,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "hp_freq", "label": "HP Freq", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "lp_freq", "label": "LP Freq", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_gain", "label": "Low Gain", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_freq", "label": "Low Freq", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "lo_mid_gain", "label": "Lo-Mid Gain", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "lo_mid_freq", "label": "Lo-Mid Freq", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_mid_gain", "label": "Hi-Mid Gain", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_mid_freq", "label": "Hi-Mid Freq", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_gain", "label": "Hi Gain", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_freq", "label": "Hi Freq", "offset": 12, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 14, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "VEQ-HA32C. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_ha32c_sweep.pcapng (sha256 698a4c8c8767bf2daf2b3cbb6a4f6838b15535a5d98c528918b01ef2e1bb69e1)"
+        },
+        "27": {
+          "block_length": 12,
+          "read_stride": 13,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 80},
+            {"key": "frequency", "label": "Frequency", "offset": 2, "type": "u16", "min": 150, "max": 20000},
+            {"key": "dry_wet", "label": "Dry/Wet", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 8, "type": "u8", "min": 10, "max": 200, "scale": 0.1},
+            {"key": "attack", "label": "Attack", "offset": 9, "type": "u8", "min": 1, "max": 200, "scale": 0.1},
+            {"key": "release", "label": "Release", "offset": 10, "type": "u8", "min": 10, "max": 200},
+            {"key": "soft_knee", "label": "Soft Knee", "offset": 11, "type": "u8", "min": 0, "max": 30}
+          ],
+          "notes": "Master De-esser. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): master_deesser_sweep.pcapng (sha256 fc00ceac775a64bc39964d80e69bdbe68c8791b937f2c226b4ac98bb01401df1)"
+        },
+        "28": {
+          "block_length": 11,
+          "read_stride": 12,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "output", "label": "Output", "offset": 0, "type": "i8", "min": -48, "max": 12},
+            {"key": "lf_freq", "label": "LF Freq", "offset": 1, "type": "u8", "min": 0, "max": 6},
+            {"key": "lmf_freq", "label": "LMF Freq", "offset": 3, "type": "u8", "min": 0, "max": 6},
+            {"key": "hmf_freq", "label": "HMF Freq", "offset": 5, "type": "u8", "min": 0, "max": 6},
+            {"key": "hf_freq", "label": "HF Freq", "offset": 7, "type": "u8", "min": 0, "max": 6}
+          ],
+          "notes": "VEQ-55B. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_55b_sweep.pcapng (sha256 50b973b9d8ce73b382925053913f7acd8b54f2770ef901ac8881ac1bea5ce03e)"
+        },
+        "29": {
+          "block_length": 3,
+          "read_stride": 5,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "output", "label": "Output", "offset": 2, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "X903. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): x903_sweep.pcapng (sha256 165922cbc33f8ac1972264abffe2893603738ad5c34d467e0152ae5a2d4c31b2)"
+        },
+        "30": {
+          "block_length": 7,
+          "read_stride": 8,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input_level", "label": "Input Level", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output_level", "label": "Output Level", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 5, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Gyratec X. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): gyratec_x_sweep.pcapng (sha256 916537e1772c34b07656df96da2c555ede0e3d538a8e0a32f2676cc4abc319ad)"
+        },
+        "31": {
+          "block_length": 6,
+          "read_stride": 7,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 10},
+            {"key": "recovery", "label": "Recovery", "offset": 3, "type": "u8", "min": 0, "max": 10},
+            {"key": "output_attenuator", "label": "Output Attenuator", "offset": 4, "type": "u8", "min": 0, "max": 5}
+          ],
+          "notes": "Liverpool. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): liverpool_sweep.pcapng (sha256 679a6fbe65cb98ddb0cba672526680d36febc70a2cbcaee48111a1e80bfb7e38)"
+        },
+        "32": {
+          "block_length": 5,
+          "read_stride": 7,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 4, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Tube176. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): tube_176_sweep.pcapng (sha256 7056d6373c29b3efe1be0e10e9dc9c8abdf3de2d0b5c8089c42b40ab7754d64b)"
+        },
+        "33": {
+          "block_length": 3,
+          "read_stride": 5,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "compression", "label": "Compression", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "output_gain", "label": "Output Gain", "offset": 2, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "VCA160. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): vca160_sweep.pcapng (sha256 a5bc246e23ebf4adead9a4efdb24cc3077d474f105670c2316e3b64034b201cc)"
+        },
+        "34": {
+          "block_length": 4,
+          "read_stride": 6,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "recovery_time", "label": "Recovery Time", "offset": 2, "type": "u8", "min": 0, "max": 4}
+          ],
+          "notes": "Stay-Levin. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): stay_levin_sweep.pcapng (sha256 df65a83010e5a278975e708ebeeb3d80d94ea38f05c3d70b00735aa0914ef599)"
+        },
+        "35": {
+          "block_length": 5,
+          "read_stride": 6,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "volume", "label": "Volume", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "release_time", "label": "Release Time", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "trim", "label": "Trim", "offset": 3, "type": "i8", "min": -24, "max": 24}
+          ],
+          "notes": "ALT-436C. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): alt_436c_sweep.pcapng (sha256 c5b6655aa19592c8cf119e028a09213cb1ddfe4565af7aed025eb557ccfc8f56)"
+        },
+        "36": {
+          "block_length": 4,
+          "read_stride": 6,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "gain_reduction", "label": "Gain Reduction", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "SMT-100A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): smt_100a_sweep.pcapng (sha256 d2cc7d9fbe7ac4e7793931af270648198e8238efb9097f6b3da977f1cb4894d3)"
+        },
+        "37": {
+          "block_length": 5,
+          "read_stride": 7,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 60},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 60},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "FET-A78. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): fet_a78_sweep.pcapng (sha256 889c913e0ae553a576710cf0a75adf273eb18da0e09c960785bf161765b3bd6a)"
+        },
+        "38": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "mode", "label": "Mode", "offset": 2, "type": "u8", "min": 0, "max": 2}
+          ],
+          "notes": "BA-6A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): ba_6a_sweep.pcapng (sha256 e9b3fc0e36ee48d8c09f9e624b8b1afb8dc9749ffaed721eaf2f7921d29db023)"
+        },
         "39": {
           "block_length": 9,
           "read_stride": 10,
@@ -287,6 +888,156 @@
           "defaults": "5a 00 64 00 32 00 00 00 00",
           "notes": "PowerGate. Each knob moved one notch up and back changed exactly one field; full sweeps gave the limits, which match the numbers the vendor panel displayed at both ends (120 / 20 / 75.0 and 0.1 / 1000 and 1 / 5000 / 12 and -24). Units are not shown by the panel and are not claimed here. The panel's ON/OFF switch is the bypass frame (frame.afx_bypass), not part of this block.",
           "evidence": "d4_params_powergate.pcapng (sha256 471e0697ee0e61533edb4e1585030c9c7220eed6fd7f63473bf6ef2baaf664e5), d4_params_powergate_sweep2.pcapng (sha256 c1f870d55d9d5330d1e5fc7f31f1d9a1e5d0ea1c0d1bd55eb91902eb405a4475)"
+        },
+        "41": {
+          "block_length": 4,
+          "read_stride": 6,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input_gain", "label": "Input Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "time_constant", "label": "Time Constant", "offset": 2, "type": "u8", "min": 0, "max": 5},
+            {"key": "output_gain", "label": "Output Gain", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Tubechild670. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): tubechild670_sweep.pcapng (sha256 1f7f0ca180a04f6b7d38bc09f76223814c21319a93e32fb0ff7923af7691506c)"
+        },
+        "42": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "detector_high_pass", "label": "Detector High-pass", "offset": 5, "type": "u8", "min": 0, "max": 10},
+            {"key": "detector_band", "label": "Detector Band", "offset": 6, "type": "u8", "min": 0, "max": 10}
+          ],
+          "notes": "Impresser. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): impresser_sweep.pcapng (sha256 698398731fa64eaad30bc7209bf64b587ce3dd7181d297fe8c72c120c97efdb7)"
+        },
+        "43": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "phase", "label": "Phase", "offset": 2, "type": "u8", "min": 0, "max": 1},
+            {"key": "low_cut", "label": "Low-cut", "offset": 3, "type": "u8", "min": 0, "max": 2}
+          ],
+          "notes": "Gyratec IX. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): gyratec_ix_sweep.pcapng (sha256 cca1278c867936b64ebce32292eca84325b9d39e5cc8c278c3b20843ba6cf6dc)"
+        },
+        "44": {
+          "block_length": 4,
+          "read_stride": 5,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "warmth", "label": "Warmth", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_boost", "label": "High Boost", "offset": 1, "type": "u8", "min": 0, "max": 1},
+            {"key": "low_cut", "label": "Low Cut", "offset": 2, "type": "u8", "min": 0, "max": 3},
+            {"key": "output", "label": "Output", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "VPA-76. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): vpa_76_sweep.pcapng (sha256 7dc5b29fce0c771d59b22524f39d85ecf8279511ba32160a96aae935a0cf29eb)"
+        },
+        "45": {
+          "block_length": 3,
+          "read_stride": 4,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "BAE 1073MP. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1073mp_sweep.pcapng (sha256 016c247485e37849250d2ec53acc944de9590fa1f4e66e21706c9e027bf05337)"
+        },
+        "46": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "input", "label": "Input", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "wow_flutter", "label": "Wow & Flutter", "offset": 5, "type": "u8", "min": 0, "max": 20},
+            {"key": "hiss", "label": "Hiss", "offset": 6, "type": "u8", "min": 0, "max": 20},
+            {"key": "output", "label": "Output", "offset": 7, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Reel To Reel. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): reel_to_reel_sweep.pcapng (sha256 d97268b8d11c3529313cbf0519662f5e6b4ba8adcada78b946406e93fefd384f)"
+        },
+        "47": {
+          "block_length": 2,
+          "read_stride": 3,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "voltage_gain", "label": "Voltage Gain", "offset": 0, "type": "u8", "min": 10, "max": 100},
+            {"key": "output_trim", "label": "Output Trim", "offset": 1, "type": "u8", "min": 10, "max": 100}
+          ],
+          "notes": "RD-47. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): rd_47_sweep.pcapng (sha256 bf91547e5fc1ea5f5f807abbed7e7da8280f94e669497de76fe193240c1ccd8b)"
+        },
+        "48": {
+          "block_length": 2,
+          "read_stride": 3,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 0, "type": "u8", "min": 10, "max": 100},
+            {"key": "trim", "label": "Trim", "offset": 1, "type": "u8", "min": 10, "max": 100}
+          ],
+          "notes": "BA-31. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): ba_31_sweep.pcapng (sha256 a72652e40cc31da7ea3aaa6f801cd6b57730c9fac5d8dfb9cd9e14155f4b96d1)"
+        },
+        "50": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "read_layout": "per instance: one flag byte, the block the write frame carries, then padding up to read_stride (measured with this project's own cat 0x07 read; instance 0 held the block the vendor panel last wrote)",
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain_make_up", "label": "Gain Make-up", "offset": 0, "type": "u8", "min": 0, "max": 20},
+            {"key": "attack", "label": "Attack", "offset": 1, "type": "u8", "min": 0, "max": 5},
+            {"key": "recovery", "label": "Recovery", "offset": 2, "type": "u8", "min": 0, "max": 5},
+            {"key": "ratio", "label": "Ratio", "offset": 3, "type": "u8", "min": 0, "max": 5},
+            {"key": "bypass_filter", "label": "Bypass Filter", "offset": 5, "type": "u8", "min": 0, "max": 4},
+            {"key": "limiter_threshold", "label": "Limiter Threshold", "offset": 6, "type": "u8", "min": 0, "max": 21},
+            {"key": "limiter_recovery", "label": "Limiter Recovery", "offset": 7, "type": "u8", "min": 0, "max": 5}
+          ],
+          "notes": "BAE 10DCF. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged.",
+          "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae10dcf_sweep.pcapng (sha256 b62ca93776ae92df9396f74e8b4d51a63b8daa6629e33203f7306ddb4f091584)"
+        },
+        "51": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 80},
+            {"key": "range", "label": "Range", "offset": 1, "type": "u8", "min": 0, "max": 80},
+            {"key": "attack", "label": "Attack", "offset": 2, "type": "u16", "min": 1, "max": 750, "scale": 0.1},
+            {"key": "decay", "label": "Decay", "offset": 4, "type": "u16", "min": 1, "max": 1000},
+            {"key": "ratio", "label": "Ratio", "offset": 6, "type": "u16", "min": 100, "max": 2000, "scale": 0.01},
+            {"key": "gain", "label": "Gain", "offset": 8, "type": "i8", "min": -24, "max": 12}
+          ],
+          "notes": "PowerEx. Same method as the other effects; raw units.",
+          "evidence": "d4_params_powerex*.pcapng (owner's unit, 2026-11-17)"
         }
       }
     },
@@ -295,12 +1046,145 @@
       "strips": [0, 1, 2, 3],
       "max_slots": 4,
       "effects": {
-        "27": {"instances": [0, 1]},
-        "39": {"instances": [0]},
-        "51": {"instances": [0]}
+        "2": {
+          "instances": [0, 1]
+        },
+        "5": {
+          "instances": [0, 1]
+        },
+        "6": {
+          "instances": [0, 1]
+        },
+        "7": {
+          "instances": [0, 1]
+        },
+        "8": {
+          "instances": [0, 1]
+        },
+        "9": {
+          "instances": [0, 1]
+        },
+        "11": {
+          "instances": [0, 1]
+        },
+        "12": {
+          "instances": [0, 1]
+        },
+        "13": {
+          "instances": [0, 1]
+        },
+        "14": {
+          "instances": [0, 1]
+        },
+        "15": {
+          "instances": [0, 1]
+        },
+        "16": {
+          "instances": [0, 1]
+        },
+        "17": {
+          "instances": [0, 1]
+        },
+        "18": {
+          "instances": [0, 1]
+        },
+        "19": {
+          "instances": [0, 1]
+        },
+        "20": {
+          "instances": [0, 1]
+        },
+        "21": {
+          "instances": [0, 1]
+        },
+        "22": {
+          "instances": [0, 1]
+        },
+        "23": {
+          "instances": [0, 1]
+        },
+        "24": {
+          "instances": [0, 1]
+        },
+        "25": {
+          "instances": [0, 1]
+        },
+        "26": {
+          "instances": [0, 1]
+        },
+        "27": {
+          "instances": [0, 1]
+        },
+        "28": {
+          "instances": [0, 1]
+        },
+        "29": {
+          "instances": [0, 1]
+        },
+        "30": {
+          "instances": [0, 1]
+        },
+        "31": {
+          "instances": [0, 1]
+        },
+        "32": {
+          "instances": [0, 1]
+        },
+        "33": {
+          "instances": [0, 1]
+        },
+        "34": {
+          "instances": [0, 1]
+        },
+        "35": {
+          "instances": [0, 1]
+        },
+        "36": {
+          "instances": [0, 1]
+        },
+        "37": {
+          "instances": [0, 1]
+        },
+        "38": {
+          "instances": [0, 1]
+        },
+        "39": {
+          "instances": [0, 1]
+        },
+        "41": {
+          "instances": [0, 1]
+        },
+        "42": {
+          "instances": [0, 1]
+        },
+        "43": {
+          "instances": [0, 1]
+        },
+        "44": {
+          "instances": [0, 1]
+        },
+        "45": {
+          "instances": [0, 1]
+        },
+        "46": {
+          "instances": [0, 1]
+        },
+        "47": {
+          "instances": [0, 1]
+        },
+        "48": {
+          "instances": [0, 1]
+        },
+        "50": {
+          "instances": [0, 1]
+        },
+        "51": {
+          "instances": [0, 1]
+        }
       },
       "verification": "This project's WebUI server, 2026-11-17, each step confirmed by a fresh cat 0x19 readback: Master De-esser on strip 0 (instance 0) and strip 1 (instance 1), PowerGate and PowerEx on strip 1, removals from the middle and the front; a third De-esser was refused because the device reported no free instance; strips 2 and 3 loaded and removed one effect each. Strips 2 and 3 rest on these trials, not on a vendor capture. All racks ended empty.",
-      "notes": "Only what was captured or verified on this device. ClearQ is not loadable: the vendor follows its load with five parameter frames (opcode 0x1c) that this project does not send; it can still be removed. max_slots 4 is the Premium pack's FX instances per strip in the manual; three were seen loaded."
+      "notes": "Only what was captured or verified on this device. Not loadable from here: ClearQ, the guitar amp and the cabinet (their controls are not mapped; they can still be removed). A freshly loaded instance keeps the settings the device holds for it, which can differ from the vendor panel's defaults. Instances 0 and 1 are verified; the device has more. max_slots 4 is the Premium pack's FX instances per strip in the manual; three were seen loaded.",
+      "verification_2026_11_17_all_effects": "This project's WebUI server with the vendor software closed: each of the 45 loadable effects was loaded into racks 1 and 2 (instances 0 and 1), its settings read, one control changed and restored on each instance with the other instance checked unchanged, then removed. Instance 0 held exactly the block the vendor panel had last written. All racks ended empty."
     },
     "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
   },
