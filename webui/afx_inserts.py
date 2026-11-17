@@ -55,6 +55,9 @@ class InsertRack:
             'editable_channels': [channel for channel in spec['mixer_channels']
                                   if spec['record_index_for_channel'][str(channel)] in writes['strips']],
             'racks': racks,
+            'mapped_types': sorted(int(kind) for kind in
+                                   ((spec.get('parameters') or {}).get('effects') or {})
+                                   if (spec.get('parameters') or {}).get('enabled')),
             'effects': [{'type': int(kind), 'label': labels.get(kind, {}).get('label', f'type {kind}'),
                          'group': labels.get(kind, {}).get('group', '')}
                         for kind in writes['effects']],
@@ -104,6 +107,79 @@ class InsertRack:
         except TimeoutError:
             future.cancel()
             raise RuntimeError('The rack change timed out; check the rack before retrying') from None
+
+    # ---- effect parameters -------------------------------------------
+    def _read_block(self, transport, type_id, instance, effect):
+        profile = self.device.profile
+        response = transport.query(
+            protocol.build_afx_state_query(profile, type_id),
+            lambda data: protocol.is_afx_state_response(profile, data, type_id), timeout=1.5)
+        if response is None:
+            raise RuntimeError('The device did not return the effect settings')
+        body = protocol.readback_body(profile, response)
+        # The device reports each instance as read_stride bytes; the writable
+        # block sits read_offset bytes in (PowerGate: one leading on/off flag).
+        length = int(effect['block_length'])
+        start = instance * int(effect['read_stride']) + int(effect['read_offset'])
+        block = bytes(body[start:start + length])
+        if len(block) != length:
+            raise RuntimeError('The effect settings came back too short')
+        return block
+
+    def _describe(self, effect, type_id, instance, block, spec):
+        values = protocol.afx_block_get(effect, block)
+        return {'ok': True, 'type': type_id, 'instance': instance,
+                'label': spec.get('type_labels', {}).get(str(type_id), {}).get('label', f'type {type_id}'),
+                'block': block.hex(' '),
+                'fields': [{**{key: field[key] for key in ('key', 'label', 'min', 'max')},
+                            'scale': field.get('scale', 1), 'unit': field.get('unit', ''),
+                            'value': values[field['key']]} for field in effect['fields']]}
+
+    def _slot(self, transport, spec, channel, slot):
+        index = spec.get('record_index_for_channel', {}).get(str(channel))
+        if type(channel) is not int or index is None:
+            raise ValueError('That channel has no insert rack')
+        chain = self._read_chain(transport, int(index))
+        if type(slot) is not int or not 0 <= slot < len(chain):
+            raise ValueError('There is no effect in that slot')
+        type_id, instance = chain[slot]
+        effect = protocol.afx_parameter_effect(self.device.profile, type_id)
+        if effect is None:
+            raise ValueError('The controls of this effect are not mapped yet')
+        return type_id, instance, effect
+
+    def parameters(self, channel, slot):
+        spec = self._spec()
+        if spec is None:
+            raise ValueError('Insert editing is not available for this device')
+
+        def work(transport):
+            type_id, instance, effect = self._slot(transport, spec, channel, slot)
+            block = self._read_block(transport, type_id, instance, effect)
+            return self._describe(effect, type_id, instance, block, spec)
+        return self._run(work)
+
+    def set_parameter(self, channel, slot, key, value):
+        spec = self._spec()
+        if spec is None:
+            raise ValueError('Insert editing is not available for this device')
+        if self.failure:
+            raise RuntimeError(self.failure)
+
+        def work(transport):
+            type_id, instance, effect = self._slot(transport, spec, channel, slot)
+            before = self._read_block(transport, type_id, instance, effect)
+            after = protocol.afx_block_set(effect, before, key, value)
+            if after != before:
+                transport.write(protocol.build_afx_parameter_write(
+                    self.device.profile, type_id, instance, after))
+                time.sleep(0.15)
+                if self._read_block(transport, type_id, instance, effect) != after:
+                    self.failure = ('An effect setting did not read back as written. Editing is off '
+                                    'until the server restarts; check the effect in the vendor panel.')
+                    raise RuntimeError(self.failure)
+            return self._describe(effect, type_id, instance, after, spec)
+        return self._run(work)
 
     def change(self, channel, operation, slot=None, type_id=None):
         spec = self._spec()

@@ -2328,3 +2328,20 @@ stay private.
 - **Not captured.** Zen Go bypass, parameter frames (five opcode-`0x1c`
   frames follow a ClearQ load on the Discrete 4, undecoded), reorder, and
   linked racks.
+- **Command frame rule (both devices, 2026-11-17).** In every `0x70` frame
+  byte 16 is a parameter id, byte 17 the payload length, and byte 4 the
+  payload length plus `0x12`. So `0x13` is a one-byte SET_PARAM, `0x16` the
+  four-byte mixer strip, `0x23` / `0x5b` the chain writes, and the values
+  upstream recorded as separate parameter opcodes (`0x1c`, `0x20`, `0x7c`)
+  are lengths of one frame.
+- **Effect parameters.** Write: `d5 | len | type | inst | block`, the whole
+  block every time. Read: category `0x07`; on the Discrete 4 index = type
+  and the body holds every instance back to back, on the Zen Go index =
+  `0x80000000 | type` (byte 4 `0x11`; `0x10` for ClearQ). An instance's
+  report can carry extra bytes around the writable block: PowerGate on the
+  Discrete 4 reports ten bytes per instance, one flag then the nine-byte
+  block. ClearQ is written one band at a time (`d5 0a 01 <inst> <band> ...`).
+- **Vendor loads that send parameters.** On the Zen Go: ClearQ, PowerFFC,
+  Auraverb, FET-A76, FET-A78, Comp-4K-Strip, BAE-1073MP, Guitar Amp (the
+  model index is in its block) and Guitar Cabinet (seven frames, the large
+  ones 246 bytes). All other loads are a chain write alone.

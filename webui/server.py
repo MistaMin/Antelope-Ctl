@@ -2086,6 +2086,31 @@ def api_afx_inserts_change(change: InsertChange):
         return _bad(str(error))
 
 
+class InsertParameter(BaseModel):
+    channel: StrictInt
+    slot: StrictInt
+    key: str
+    value: StrictInt
+
+
+@app.get("/api/afx-inserts/parameters")
+def api_afx_insert_parameters(channel: int, slot: int):
+    """Mapped settings of the effect in one rack slot, read from the device."""
+    try:
+        return AFX_INSERTS.parameters(channel, slot)
+    except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
+        return _bad(str(error))
+
+
+@app.post("/api/afx-inserts/parameters")
+def api_afx_insert_parameter_set(change: InsertParameter):
+    """Change one mapped setting: whole-block write, verified by readback."""
+    try:
+        return AFX_INSERTS.set_parameter(change.channel, change.slot, change.key, change.value)
+    except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
+        return _bad(str(error))
+
+
 class AfxChainTestChange(BaseModel):
     channel: StrictInt = 0
     operation: str

@@ -54,6 +54,33 @@ class InsertChainTests(unittest.TestCase):
             with self.assertRaises(protocol.ConstraintError):
                 protocol.build_afx_insert_chain(profile, strip, slots)
 
+    def test_discrete_4_powergate_parameter_frames_match_capture(self):
+        profile = load('discrete_4_a270')
+        effect = protocol.afx_parameter_effect(profile, 39)
+        defaults = bytes.fromhex('5a0064003200000000')
+        self.assertEqual(protocol.afx_block_get(effect, defaults),
+                         {'threshold': 90, 'range': 0, 'attack': 100, 'decay': 50, 'hold': 0, 'gain': 0})
+        cases = [('threshold', 91, '27 00 5b 00 64 00 32 00 00 00 00'),
+                 ('attack', 110, '27 00 5a 00 6e 00 32 00 00 00 00'),
+                 ('hold', 40, '27 00 5a 00 64 00 32 00 28 00 00'),
+                 ('range', 1, '27 00 5a 01 64 00 32 00 00 00 00'),
+                 ('decay', 60, '27 00 5a 00 64 00 3c 00 00 00 00'),
+                 ('gain', 1, '27 00 5a 00 64 00 32 00 00 00 01')]
+        for key, value, expected in cases:
+            packet = protocol.build_afx_parameter_write(
+                profile, 39, 0, protocol.afx_block_set(effect, defaults, key, value))
+            self.assertEqual(packet[:5].hex(' '), '70 00 00 00 1d')
+            self.assertEqual(packet[16:18].hex(' '), 'd5 0b')
+            self.assertEqual(packet[18:29].hex(' '), expected)
+        self.assertEqual(protocol.afx_block_get(
+            effect, protocol.afx_block_set(effect, defaults, 'gain', -24))['gain'], -24)
+        for key, value in (('gain', 13), ('attack', 0), ('hold', 5001), ('unknown', 1)):
+            with self.assertRaises(protocol.ConstraintError):
+                protocol.afx_block_set(effect, defaults, key, value)
+        self.assertEqual(protocol.build_afx_state_query(profile, 39)[:16].hex(' '),
+                         '74 00 00 00 10 00 00 00 07 00 00 00 27 00 00 00')
+        self.assertIsNone(protocol.afx_parameter_effect(profile, 27))
+
     def test_orion_has_no_insert_contract(self):
         self.assertIsNone(protocol.afx_insert_writes(load('orion_studio_sc')))
 
