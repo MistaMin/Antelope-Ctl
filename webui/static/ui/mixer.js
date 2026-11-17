@@ -724,7 +724,19 @@ function renderInsertRacks() {
     add.setAttribute('aria-label', `Add effect to channel ${channel + 1}`);
     add.disabled = !editable || rows.length >= state.max_slots;
     add.append(new Option(state.editable_channels.includes(channel) ? 'Add effect…' : 'Not editable yet', ''));
-    state.effects.forEach(effect => add.append(new Option(effect.label, effect.type)));
+    const groups = new Map();
+    [...state.effects].sort((a, b) => a.label.localeCompare(b.label)).forEach(effect => {
+      const key = effect.group || '';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(new Option(effect.label, effect.type));
+    });
+    groups.forEach((options, key) => {
+      if (!key) { add.append(...options); return; }
+      const group = document.createElement('optgroup');
+      group.label = key;
+      group.append(...options);
+      add.append(group);
+    });
     add.addEventListener('change', () => {
       if (add.value) changeInsertRack({channel, operation: 'load', type: +add.value});
     });

@@ -55,7 +55,8 @@ class InsertRack:
             'editable_channels': [channel for channel in spec['mixer_channels']
                                   if spec['record_index_for_channel'][str(channel)] in writes['strips']],
             'racks': racks,
-            'effects': [{'type': int(kind), 'label': labels.get(kind, {}).get('label', f'type {kind}')}
+            'effects': [{'type': int(kind), 'label': labels.get(kind, {}).get('label', f'type {kind}'),
+                         'group': labels.get(kind, {}).get('group', '')}
                         for kind in writes['effects']],
         }
 
