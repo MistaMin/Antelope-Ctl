@@ -154,8 +154,13 @@ class InsertChainTests(unittest.TestCase):
     def test_zen_go_shares_the_discrete_4_effect_maps(self):
         zen, d4 = load('zen_go_sc'), load('discrete_4_a270')
         effects = zen['afx_inserts']['parameters']['effects']
-        self.assertEqual(len(effects), 47)
+        self.assertEqual(len(effects), 60)
+        own = {'53', '54', '59', '65', '66', '67', '68', '69', '70', '71', '73', '74', '78'}  # Zen-Go-only effects
+        self.assertEqual(protocol.afx_block_get(effects['54'], bytes.fromhex('21a00014320132'))['feedback'], -96)
         for kind, effect in effects.items():
+            if kind in own:
+                self.assertEqual((effect['read_offset'], effect['read_stride']), (1, effect['block_length'] + 1), kind)
+                continue
             self.assertEqual(effect['fields'], d4['afx_inserts']['parameters']['effects'][kind]['fields'], kind)
             self.assertEqual(effect.get('read_offset'), {'1': 0, '3': None}.get(kind, 1))
         # The Zen Go's read is tagged and its sub-command differs; the write frame is the same.
