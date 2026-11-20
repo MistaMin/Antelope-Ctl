@@ -1159,12 +1159,15 @@
         },
         "86": {
           "instances": [0]
+        },
+        "64": {
+          "instances": [0]
         }
       },
       "verification": "This project's WebUI server, 2026-11-17, fw 05.04, each step confirmed by a fresh cat 0x19 readback: strip 1 loaded PowerGate, Master De-esser (took instance 1) and PowerEx, then removed them from the middle and the front; strips 2 and 3 loaded and removed one effect each; strip 0 had PowerGate appended to the owner's three-effect rack and removed again, leaving ClearQ / SMT-100A / Master De-esser as before. Strips 0, 2 and 3 rest on these trials, not on a vendor capture.",
       "notes": "Loadable = every effect whose vendor load, captured in the batch below, was a chain write and nothing else. ClearQ and the Guitar Amp are loaded the way the vendor panel did it: the chain write, then the default-settings frames in load_defaults (ClearQ: five band frames, captured to instance 1, batch frames 17-22; amp: the Darkface 65 block, batch frames 322-323). ClearQ's defaults are read back and compared on instance 0; the amp's read is not captured. Neither load has been run by this project yet. Not loadable yet: Auraverb, Comp-4K-Strip and Guitar Cabinet, whose loads are followed by parameter frames this project does not send (the cabinet's are impulse-response data computed by the vendor software). Instance 0 only, except ClearQ, Master De-esser and SMT-100A where instance 1 was also seen. Removing works for any identified effect. max_slots 4 is one more than the fullest rack seen.",
       "batch_evidence": "owner's unit fw 05.04, vendor panel 1.1.26 under Wine, 2026-11-17: all 92 menu entries loaded one at a time by script, each name checked against the panel's rack label; usbmon captures zengo_batch_load.pcapng (sha256 b90ffd5b6443635f92606209a10c4b4c29199e5caa376c216cb5533d84b3abe4), zengo_batch_load_rerun.pcapng (18e7a281522fc920023827b8433917eec45644c0e36fad8e1aa3040cfbab47c4), zengo_batch_load_rerun2.pcapng (f8eacbe5a3eecf0c861c655f8f9e16d7c60229a88c33c97d4fc300478612b67c)",
-      "verification_2026_11_20_zen_only_effects": "2026-11-20, this project's WebUI server with the vendor software closed (fw 05.04): each of the 13 Zen-only mapped effects (types 53, 54, 59, 65, 66, 67, 68, 69, 70, 71, 73, 74, 78) was loaded alone into the empty channel 3 rack, its settings read, every mapped control moved by one raw step and put back with each write confirmed by readback, then removed. 84 controls, all passed; the owner's racks were unchanged afterwards. A freshly loaded instance held the device's own stored values (often zeros), not the vendor panel's defaults."
+      "verification_2026_11_20_zen_only_effects": "2026-11-20, this project's WebUI server with the vendor software closed (fw 05.04): each of the 22 Zen-only mapped effects (types 53, 54, 59, 63, 64, 65, 66, 67, 68, 69, 70, 71, 73, 74, 75, 77, 78, 80, 82, 83, 85, 86) was loaded alone into the empty channel 3 rack, its settings read, every mapped control moved by one step (one raw unit; 1/100 of the range for float controls) and put back with each write confirmed by readback, then removed. 170 controls, all passed; the owner's racks were unchanged afterwards. A freshly loaded instance held the device's own stored values (often zeros or the control minimums), not the vendor panel's defaults."
     },
     "evidence": "owner's unit fw 05.04, usbmon capture panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29), 2026-11-17; public manual for the channel placement",
     "parameters": {
@@ -1906,6 +1909,43 @@
           "notes": "Opto 2A. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 0-1 (probably the Limit/Compress and meter switches) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
           "evidence": "unattended run 2026-11-17 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): opto_2a_probe.pcapng (sha256 47caa6ac7c90a4c4505f1f3decfc5a2202fe865b6b3d621e48a6577d3c6341ff), opto_2a_sweep.pcapng (sha256 18ce5d85035441a74353fbeac701cbbeea75cc14aca7624282bde2a3a76722de)"
         },
+        "63": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "make_up", "label": "Make Up", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "rate", "label": "Rate", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 3, "type": "u8", "min": 0, "max": 5},
+            {"key": "release", "label": "Release", "offset": 4, "type": "u8", "min": 0, "max": 4},
+            {"key": "ratio", "label": "Ratio", "offset": 5, "type": "u8", "min": 0, "max": 2},
+            {"key": "sc_filter", "label": "SC Filter", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "mix", "label": "Mix", "offset": 9, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Comp-4K-Bus. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 6 and 8 (probably the In and Auto Fade buttons) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): comp_4k_bus_probe.pcapng (sha256 cd5a5d2197d38ecdc457fbdb11b146507296640011e307f64ddd2b51b2941a2e), comp_4k_bus_sweep.pcapng (sha256 a9db39c6dd4edd74b35e670e69f2bff6db3d5013b65691590a06d813ba5d3300)"
+        },
+        "64": {
+          "block_length": 14,
+          "read_stride": 15,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "gain", "label": "Gain", "offset": 3, "type": "i8", "min": -20, "max": 20},
+            {"key": "comp_threshold", "label": "Comp Threshold", "offset": 4, "type": "u8", "min": 0, "max": 100},
+            {"key": "comp_ratio", "label": "Comp Ratio", "offset": 5, "type": "u8", "min": 0, "max": 100},
+            {"key": "comp_release", "label": "Comp Release", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "exp_threshold", "label": "Exp Threshold", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "exp_range", "label": "Exp Range", "offset": 8, "type": "u8", "min": 0, "max": 100},
+            {"key": "exp_release", "label": "Exp Release", "offset": 9, "type": "u8", "min": 0, "max": 100},
+            {"key": "low_pass", "label": "Low-pass", "offset": 10, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_pass", "label": "High-pass", "offset": 11, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Comp-4K-Strip. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 0-2, 12 and 13 (the Fast Atk, Exp/Gate, Dyn SC, Pre Dyn and On buttons are on the panel) did not answer the wheel. The vendor load is followed by one ordinary parameter frame with the panel defaults. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): comp_4k_strip_probe.pcapng (sha256 b3cd665e63db9032ef0751be4d091864ee04cfbe4884e05d32ae1c81b366cd98), comp_4k_strip_sweep.pcapng (sha256 22608316386e76a34094fb15d4b062048447be2a3dd9c0916c827c291b0ed1da)"
+        },
         "65": {
           "block_length": 9,
           "read_stride": 10,
@@ -2063,6 +2103,67 @@
           "notes": "VEQ56. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
           "evidence": "unattended run 2026-11-17 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): veq56_probe.pcapng (sha256 b4431fd1d361efbb4d48cf3c17073ad00615253b08e48a2521107bdb2fff32f6), veq56_sweep.pcapng (sha256 9e4c864cb85ef1ca72bc74a9fe807a2fff40e05d0c66af0721c3612e4521660b)"
         },
+        "75": {
+          "block_length": 104,
+          "read_stride": 105,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "punch", "label": "Punch", "offset": 0, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "body", "label": "Body", "offset": 4, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "speed", "label": "Speed", "offset": 8, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "character", "label": "Character", "offset": 12, "type": "f32", "min": 0.0, "max": 3.0},
+            {"key": "boost_freq", "label": "Boost Freq", "offset": 16, "type": "f32", "min": 0.0, "max": 100.0},
+            {"key": "boost_gain", "label": "Boost Gain", "offset": 20, "type": "f32", "min": -24.0, "max": 24.0},
+            {"key": "centre_knob", "label": "Centre Knob", "offset": 24, "type": "f32", "min": 0.0, "max": 100.0},
+            {"key": "mod", "label": "Mod", "offset": 28, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "filter_freq", "label": "Filter Freq", "offset": 32, "type": "f32", "min": 0.0, "max": 100.0},
+            {"key": "filter_q", "label": "Filter Q", "offset": 36, "type": "f32", "min": 0.01, "max": 1.0},
+            {"key": "filter_mix", "label": "Filter Mix", "offset": 40, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "morph_amount", "label": "Morph Amount", "offset": 60, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "morph_mod", "label": "Morph Mod", "offset": 64, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "bias_amount", "label": "Bias Amount", "offset": 68, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "bias_mod", "label": "Bias Mod", "offset": 72, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "pf_freq", "label": "PF Freq", "offset": 76, "type": "f32", "min": 0.0, "max": 100.0},
+            {"key": "pf_mod", "label": "PF Mod", "offset": 80, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "pf_q", "label": "PF Q", "offset": 84, "type": "f32", "min": 0.01, "max": 1.0},
+            {"key": "pf_mix", "label": "PF Mix", "offset": 88, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "mix", "label": "Mix", "offset": 96, "type": "f32", "min": 0.0, "max": 1.0},
+            {"key": "volume", "label": "Volume", "offset": 100, "type": "f32", "min": 0.0, "max": 1.0}
+          ],
+          "notes": "Instinct Synergy. Each listed control was wheeled to both ends in the vendor panel and moved only its own float32 value; min/max are the raw limits seen. Raw units: no physical unit is claimed. The block is 26 little-endian float32 values. The wheel kept turning for seconds after each value stopped at its limit, so min/max are where the panel clamps. Centre Knob is the large unlabelled knob in the middle of the panel. The values at offsets 44 (1.0), 48, 52, 56 and 92 (0.0) never changed in either capture; the panel also has switches and buttons the wheel did not reach, and which value belongs to which is not known. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-17 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): instinct_probe.pcapng (sha256 e0671d515b3bf4b9490d1bf9cb06179fe9816356d1750f234062cd19bc1cc95d), instinct_sweep.pcapng (sha256 16e461d3e843b7481efdbabba9640394f5d4d7778de9bb4f461f6519cdbc2760)"
+        },
+        "77": {
+          "block_length": 21,
+          "read_stride": 22,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "low_freq", "label": "Low Freq", "offset": 0, "type": "u8", "min": 0, "max": 10},
+            {"key": "low_mode", "label": "Low Mode", "offset": 1, "type": "u8", "min": 0, "max": 2},
+            {"key": "low_q", "label": "Low Q", "offset": 2, "type": "u8", "min": 0, "max": 39},
+            {"key": "low_level", "label": "Low Level", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "lo_mid_freq", "label": "Lo Mid Freq", "offset": 4, "type": "u8", "min": 0, "max": 10},
+            {"key": "lo_mid_mode", "label": "Lo Mid Mode", "offset": 5, "type": "u8", "min": 0, "max": 2},
+            {"key": "lo_mid_q", "label": "Lo Mid Q", "offset": 6, "type": "u8", "min": 0, "max": 39},
+            {"key": "lo_mid_level", "label": "Lo Mid Level", "offset": 7, "type": "u8", "min": 0, "max": 100},
+            {"key": "mid_freq", "label": "Mid Freq", "offset": 8, "type": "u8", "min": 0, "max": 10},
+            {"key": "mid_mode", "label": "Mid Mode", "offset": 9, "type": "u8", "min": 0, "max": 2},
+            {"key": "mid_q", "label": "Mid Q", "offset": 10, "type": "u8", "min": 0, "max": 39},
+            {"key": "mid_level", "label": "Mid Level", "offset": 11, "type": "u8", "min": 0, "max": 100},
+            {"key": "hi_mid_freq", "label": "Hi Mid Freq", "offset": 12, "type": "u8", "min": 0, "max": 10},
+            {"key": "hi_mid_mode", "label": "Hi Mid Mode", "offset": 13, "type": "u8", "min": 0, "max": 2},
+            {"key": "hi_mid_level", "label": "Hi Mid Level", "offset": 15, "type": "u8", "min": 0, "max": 100},
+            {"key": "high_freq", "label": "High Freq", "offset": 16, "type": "u8", "min": 0, "max": 10},
+            {"key": "high_mode", "label": "High Mode", "offset": 17, "type": "u8", "min": 0, "max": 2},
+            {"key": "high_q", "label": "High Q", "offset": 18, "type": "u8", "min": 0, "max": 39},
+            {"key": "high_level", "label": "High Level", "offset": 19, "type": "u8", "min": 0, "max": 100},
+            {"key": "trim", "label": "Trim", "offset": 20, "type": "u8", "min": 0, "max": 39}
+          ],
+          "notes": "Gyratec XIV. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Byte 14 (by position the Hi Mid Q knob) was missed by the probe grid and has no sweep; the Bypass switch is not in this block. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): gyratec_xiv_probe.pcapng (sha256 0cb27b1d9a01f0f828d2e32d695bf06a66b43aa0aba3312105e58bea32c7fae1), gyratec_xiv_sweep.pcapng (sha256 3dc914b80897936df2e9b2d3179cb7b5c1884b7cbf32306596ce7dc031e03232)"
+        },
         "78": {
           "block_length": 8,
           "read_stride": 9,
@@ -2076,6 +2177,84 @@
           ],
           "notes": "BBD Chorus. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 4-7 (type selector, vibrato/chorus and other switches) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
           "evidence": "unattended run 2026-11-17 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): bbd_chorus_probe.pcapng (sha256 b131e3604c48ed5d6628aba76eb911655fc18c4e37f706a6bf04077fb64177b1), bbd_chorus_sweep.pcapng (sha256 b14bfa2ce3552fb27601523ce77f705de37e4267e990b55cbfc4518b26d4147b)"
+        },
+        "80": {
+          "block_length": 10,
+          "read_stride": 11,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "output_gain", "label": "Output Gain", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 3, "type": "u8", "min": 0, "max": 2},
+            {"key": "compr_recovery", "label": "Compr Recovery", "offset": 4, "type": "u8", "min": 0, "max": 7},
+            {"key": "ratio", "label": "Ratio", "offset": 5, "type": "u8", "min": 0, "max": 5},
+            {"key": "compr_gain", "label": "Compr Gain", "offset": 6, "type": "u8", "min": 0, "max": 100},
+            {"key": "green_threshold", "label": "Green Threshold", "offset": 7, "type": "u8", "min": 0, "max": 10},
+            {"key": "green_recovery", "label": "Green Recovery", "offset": 8, "type": "u8", "min": 0, "max": 6}
+          ],
+          "notes": "NEU-473A. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. \"Green\" = the two green knobs of the left section, whose function label is not on the panel picture. Bytes 1, 2 and 9 (Bypass, Expander, De-ess and Bass Cut switches are on the panel) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): neu_473a_probe.pcapng (sha256 16cefd0fc581eb32d381d9f659e3f0b6d3416b29acddc80787a772be3452eb80), neu_473a_sweep.pcapng (sha256 429c01ebdcdbebb7457e04bba811e8169c501be9a0805e2b326890443a669e75)"
+        },
+        "82": {
+          "block_length": 12,
+          "read_stride": 13,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "limit_threshold", "label": "Limit Threshold", "offset": 0, "type": "u8", "min": 0, "max": 22},
+            {"key": "limit_recovery", "label": "Limit Recovery", "offset": 1, "type": "u8", "min": 0, "max": 5},
+            {"key": "comp_threshold", "label": "Comp Threshold", "offset": 4, "type": "u8", "min": 0, "max": 15},
+            {"key": "comp_recovery", "label": "Comp Recovery", "offset": 5, "type": "u8", "min": 0, "max": 6},
+            {"key": "gain", "label": "Gain", "offset": 6, "type": "u8", "min": 0, "max": 10},
+            {"key": "ratio", "label": "Ratio", "offset": 7, "type": "u8", "min": 0, "max": 5},
+            {"key": "hpf", "label": "HPF", "offset": 8, "type": "u8", "min": 0, "max": 14}
+          ],
+          "notes": "Diode609. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 2, 3 and 9-11 (limit/compress in-out, attack and SC preview switches) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): diode609_probe.pcapng (sha256 ef26f7e128588b5e8570041d81f7600d125df2b9659e695994612f55448d0c23), diode609_sweep.pcapng (sha256 826663aa11c568101e4735146802ceb274dbbddfc347bfc7a6b2a66c261ae67d)"
+        },
+        "83": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "threshold", "label": "Threshold", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "range", "label": "Range", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "release", "label": "Release", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "output", "label": "Output", "offset": 3, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Drum-All-Nite. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 4-8 (the three mode switches are on the panel) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): drum_all_nite_probe.pcapng (sha256 a50d4c3e76d5c0ee5c864b70dc9937cacab3843234ddee9dc1cbb4b08ffce5da), drum_all_nite_sweep.pcapng (sha256 baa1da18f45d094e05331205a5470290f98612df0204ab7f241a6c0125f5ccd3)"
+        },
+        "85": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "release", "label": "Release", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "range", "label": "Range", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 4, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Brainiac. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 5-8 (Lin/Log, mode and the Range/Duck buttons) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): brainiac_probe.pcapng (sha256 aeae38b810651cd1922831a57b1976d2a1dae9aa191d8a7e757640dfb930644e), brainiac_sweep.pcapng (sha256 2b4da6e63fd054fd96a69ea9c47cf8613b1fdd61d28e8982b71e7da962eafae9)"
+        },
+        "86": {
+          "block_length": 9,
+          "read_stride": 10,
+          "read_offset": 1,
+          "status": "confirmed",
+          "fields": [
+            {"key": "release", "label": "Release", "offset": 0, "type": "u8", "min": 0, "max": 100},
+            {"key": "attack", "label": "Attack", "offset": 1, "type": "u8", "min": 0, "max": 100},
+            {"key": "range", "label": "Range", "offset": 2, "type": "u8", "min": 0, "max": 100},
+            {"key": "ratio", "label": "Ratio", "offset": 3, "type": "u8", "min": 0, "max": 100},
+            {"key": "threshold", "label": "Threshold", "offset": 4, "type": "u8", "min": 0, "max": 100}
+          ],
+          "notes": "Gate Keeper. Each listed control was wheeled to both ends in the vendor panel and moved only its own byte; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes 5-8 (Lin/Log and mode switches) did not answer the wheel. Unmapped bytes are written back unchanged. Read layout on this device: loaded alone into an empty rack through this project's server, the cat 0x07 reply was one flag byte then the block and nothing else (one instance per reply)",
+          "evidence": "unattended run 2026-11-20 (owner's unit, fw 05.04, vendor panel under Wine, usbmon): gate_keeper_probe.pcapng (sha256 a7d9ac9c421ba467409d2dc87c2bd1e78035f518d0a04041d98a834c79bcdbc2), gate_keeper_sweep.pcapng (sha256 6b05db14affdc0ae100c6d4a26a6f7494b8613102c2b465ca2d0e668e6c1edd7)"
         }
       }
     }

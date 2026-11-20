@@ -386,6 +386,12 @@ by default, and `build_readback_query()` applies the same guard. A layout
 derived from an application schema still needs a device capture before its
 outer index can be used.
 
+The fields of an effect's parameter block (`afx_inserts.parameters.effects.<type>.fields`)
+are a separate, smaller codec (`protocol.afx_block_get()` / `afx_block_set()`):
+`u8`/`i8`, `u16`/`i16`, `u32`/`i32` and `f32` (little-endian float32), each with
+raw `min`/`max`. An `f32` field takes an integer or a float and is range-checked
+after rounding to float32; integer fields refuse a float.
+
 `frame.link_command.readback` separately maps an input link command to safe
 `link_table` layouts. `post_write_pair_counts` schedules a diagnostic read
 after a matching input-link write without assigning the returned bytes to

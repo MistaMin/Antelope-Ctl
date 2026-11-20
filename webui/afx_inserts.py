@@ -139,6 +139,8 @@ class InsertRack:
                 'block': block.hex(' '),
                 'fields': [{**{key: field[key] for key in ('key', 'label', 'min', 'max')},
                             'scale': field.get('scale', 1), 'unit': field.get('unit', ''),
+                            # Knob step: integers move by one; a float field by 1/100 of its range.
+                            'step': (field['max'] - field['min']) / 100 if field['type'] == 'f32' else 1,
                             'value': values[field['key']]} for field in effect['fields']]}
 
     def _slot(self, transport, spec, channel, slot):
@@ -188,7 +190,7 @@ class InsertRack:
             before = self._read_block(transport, type_id, instance, effect)
             # A block whose mapped fields are out of range means the read layout is
             # wrong for this effect; writing it back would shift every setting.
-            if any(not field['min'] <= value <= field['max'] for field, value in
+            if any(not protocol.afx_field_in_range(field, value) for field, value in
                    zip(effect['fields'], protocol.afx_block_get(effect, before).values())):
                 raise RuntimeError('The effect settings read back out of range; nothing was changed')
             after = protocol.afx_block_set(effect, before, key, value)

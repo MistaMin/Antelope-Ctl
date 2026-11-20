@@ -151,11 +151,42 @@ class InsertChainTests(unittest.TestCase):
         self.assertEqual(packet[4], 0x14 + 0x12)
         self.assertEqual(packet[16:20].hex(' '), 'd5 14 02 00')
 
+    def test_float_fields_round_trip_and_refuse_bad_values(self):
+        zen = load('zen_go_sc')
+        effect = protocol.afx_parameter_effect(zen, 75)   # Instinct: 26 little-endian float32 values
+        half, zero = '0000003f', '00000000'
+        # instinct_probe.pcapng: the block before the first control was moved.
+        block = bytes.fromhex(half * 4 + '0000c842' + half + zero + half + '0000c442' + half * 2 + '0000803f'
+                              + zero * 3 + half * 4 + '0000c442' + half * 3 + zero + half * 2)
+        values = protocol.afx_block_get(effect, block)
+        self.assertEqual((values['punch'], values['boost_freq'], values['filter_freq'], values['centre_knob']),
+                         (0.5, 100.0, 98.0, 0.0))
+        changed = protocol.afx_block_set(effect, block, 'punch', 0.51)
+        self.assertEqual((changed[:4].hex(), changed[4:]), ('5c8f023f', block[4:]))   # the frame the panel sent
+        # What is read back (0.50999999...) encodes to the same bytes, and an int is taken as a float.
+        self.assertEqual(protocol.afx_block_set(effect, block, 'punch', protocol.afx_block_get(effect, changed)['punch']), changed)
+        self.assertEqual(protocol.afx_block_set(effect, block, 'volume', 1)[100:].hex(), '0000803f')
+        packet = protocol.build_afx_parameter_write(zen, 75, 0, changed)
+        self.assertEqual((packet[4], packet[16:24].hex(' ')), (0x7c, 'd5 6a 4b 00 5c 8f 02 3f'))
+        # float32(0.01) is below the double 0.01: the lower limit itself must still be in range.
+        lowest = protocol.afx_block_set(effect, block, 'filter_q', 0.01)
+        protocol.build_afx_parameter_write(zen, 75, 0, lowest)
+        for key, value in (('punch', 1.01), ('punch', -0.01), ('filter_q', 0.009), ('punch', float('nan')),
+                           ('punch', float('inf')), ('punch', 1e40), ('punch', '0.5'), ('punch', True)):
+            with self.assertRaises(protocol.ConstraintError, msg=(key, value)):
+                protocol.afx_block_set(effect, block, key, value)
+        with self.assertRaises(protocol.ConstraintError):   # a block holding an out-of-range float is not sent
+            protocol.build_afx_parameter_write(zen, 75, 0, bytes.fromhex('0000c07f') + block[4:])
+        gate = protocol.afx_parameter_effect(load('discrete_4_a270'), 39)
+        with self.assertRaises(protocol.ConstraintError):   # integer fields still refuse a float
+            protocol.afx_block_set(gate, bytes.fromhex('5a0064003200000000'), 'threshold', 91.0)
+
     def test_zen_go_shares_the_discrete_4_effect_maps(self):
         zen, d4 = load('zen_go_sc'), load('discrete_4_a270')
         effects = zen['afx_inserts']['parameters']['effects']
-        self.assertEqual(len(effects), 60)
-        own = {'53', '54', '59', '65', '66', '67', '68', '69', '70', '71', '73', '74', '78'}  # Zen-Go-only effects
+        self.assertEqual(len(effects), 69)
+        own = {'53', '54', '59', '63', '64', '65', '66', '67', '68', '69', '70', '71', '73', '74', '75', '77', '78',
+               '80', '82', '83', '85', '86'}  # Zen-Go-only effects
         self.assertEqual(protocol.afx_block_get(effects['54'], bytes.fromhex('21a00014320132'))['feedback'], -96)
         for kind, effect in effects.items():
             if kind in own:
