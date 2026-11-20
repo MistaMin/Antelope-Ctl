@@ -19,6 +19,7 @@ v3 adds two new areas, both still profile-driven:
 """
 import json
 import math
+import struct
 
 
 def load_profile(path: str) -> dict:
@@ -2506,7 +2507,22 @@ def build_afx_insert_chain(profile: dict, strip: int, slots) -> bytes:
 
 
 _AFX_FIELD_TYPES = {'u8': (1, False), 'i8': (1, True), 'u16': (2, False), 'i16': (2, True),
-                    'u32': (4, False), 'i32': (4, True)}
+                    'u32': (4, False), 'i32': (4, True), 'f32': (4, True)}  # f32: little-endian float32
+
+
+def _afx_f32(value) -> float:
+    return struct.unpack('<f', struct.pack('<f', value))[0]
+
+
+def afx_field_in_range(field: dict, value) -> bool:
+    """Whether ``value`` is inside a mapped field's min..max (false for NaN/inf)."""
+    if field['type'] != 'f32':
+        return int(field['min']) <= value <= int(field['max'])
+    # Compared as stored: float32(0.01) is slightly below the double 0.01.
+    try:
+        return _afx_f32(field['min']) <= _afx_f32(value) <= _afx_f32(field['max'])
+    except (OverflowError, struct.error):
+        return False
 
 
 def afx_parameter_effect(profile: dict, type_id: int):
@@ -2523,23 +2539,26 @@ def afx_block_get(effect: dict, block: bytes) -> dict:
     for field in effect['fields']:
         width, signed = _AFX_FIELD_TYPES[field['type']]
         offset = int(field['offset'])
-        out[field['key']] = int.from_bytes(block[offset:offset + width], 'little', signed=signed)
+        raw = block[offset:offset + width]
+        out[field['key']] = (struct.unpack('<f', raw)[0] if field['type'] == 'f32'
+                             else int.from_bytes(raw, 'little', signed=signed))
     return out
 
 
-def afx_block_set(effect: dict, block: bytes, key: str, value: int) -> bytes:
+def afx_block_set(effect: dict, block: bytes, key: str, value) -> bytes:
     """Return ``block`` with one mapped field changed; refuses out-of-range values."""
     field = next((item for item in effect['fields'] if item['key'] == key), None)
     if field is None:
         raise ConstraintError(f'"{key}" is not a mapped control of this effect')
-    if type(value) is not int or not int(field['min']) <= value <= int(field['max']):
+    real = field['type'] == 'f32'
+    if type(value) not in ((int, float) if real else (int,)) or not afx_field_in_range(field, value):
         raise ConstraintError(f'{field["label"]} must be {field["min"]}..{field["max"]} (raw units)')
     if len(block) != int(effect['block_length']):
         raise ConstraintError('parameter block has an unexpected length')
     width, signed = _AFX_FIELD_TYPES[field['type']]
     offset = int(field['offset'])
     out = bytearray(block)
-    out[offset:offset + width] = value.to_bytes(width, 'little', signed=signed)
+    out[offset:offset + width] = struct.pack('<f', value) if real else value.to_bytes(width, 'little', signed=signed)
     return bytes(out)
 
 
@@ -2629,7 +2648,7 @@ def build_afx_parameter_writes(profile: dict, type_id: int, instance: int, block
         raise ConstraintError('parameter block has an unexpected length')
     for field in effect['fields']:
         value = afx_block_get(effect, block)[field['key']]
-        if not int(field['min']) <= value <= int(field['max']):
+        if not afx_field_in_range(field, value):
             raise ConstraintError(f'{field["label"]} = {value} is outside {field["min"]}..{field["max"]}')
     if not effect.get('bands'):
         return [_afx_parameter_frame(profile, type_id, instance, block)]

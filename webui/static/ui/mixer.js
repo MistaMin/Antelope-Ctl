@@ -793,6 +793,7 @@ function renderInsertParams() {
       + '<input type="range" step="1"><output></output>';
     cell.querySelector('.insert-knob-label').textContent = field.label;
     const input = cell.querySelector('input');
+    input.step = field.step || 1;
     input.min = field.min; input.max = field.max; input.value = field.value;
     input.setAttribute('aria-label', field.label);
     const changed = () => { paint(+input.value); queueInsertParam(field.key, +input.value); };

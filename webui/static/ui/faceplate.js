@@ -8,7 +8,8 @@ const FACEPLATE_FILES = new Map();   // path -> promise of parsed JSON, or null
 
 function insertParamText(field, value) {
   const scale = Number(field.scale) || 1;
-  const shown = scale === 1 ? String(value) : (value * scale).toFixed(String(scale).split('.')[1]?.length || 0);
+  // toFixed(4) drops float32 noise (0.51 is stored as 0.50999999...); integers are unchanged.
+  const shown = scale === 1 ? String(+Number(value).toFixed(4)) : (value * scale).toFixed(String(scale).split('.')[1]?.length || 0);
   return field.unit ? `${shown} ${field.unit}` : shown;
 }
 
@@ -40,9 +41,11 @@ async function loadFaceplate(type) {
 }
 
 // Vertical drag (shift = fine) and one step per wheel notch, on a range input.
+// field.step is below 1 for a float field; the range input snaps to its own step.
 function insertKnobGestures(cell, body, input, field, changed) {
   const span = (field.max - field.min) || 1;
   const clamp = value => Math.max(field.min, Math.min(field.max, value));
+  const step = field.step || 1;
   body.addEventListener('pointerdown', event => {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -51,7 +54,7 @@ function insertKnobGestures(cell, body, input, field, changed) {
     const move = next => {
       if (next.pointerId !== id) return;
       const perPixel = span / (next.shiftKey ? 1200 : 240);
-      input.value = Math.round(clamp(startValue + (startY - next.clientY) * perPixel));
+      input.value = Math.round(clamp(startValue + (startY - next.clientY) * perPixel) / step) * step;
       changed();
     };
     const done = next => {
@@ -66,7 +69,7 @@ function insertKnobGestures(cell, body, input, field, changed) {
   });
   cell.addEventListener('wheel', event => {
     event.preventDefault();
-    input.value = clamp(+input.value - Math.sign(event.deltaY));
+    input.value = clamp(+input.value - Math.sign(event.deltaY) * step);
     changed();
   }, {passive: false});
 }
@@ -116,7 +119,7 @@ function faceplateControl(face, control, field, onChange) {
       if (input.checked !== on) { input.checked = on; changed(); }
     }, {passive: false});
   } else {
-    input.type = 'range'; input.step = 1;
+    input.type = 'range'; input.step = field.step || 1;
     input.min = field.min; input.max = field.max; input.value = field.value;
     input.addEventListener('input', changed);
     insertKnobGestures(cell, body, input, field, changed);
