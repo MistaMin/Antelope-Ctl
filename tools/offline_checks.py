@@ -29,6 +29,8 @@ PYTHON_MODULES = (
     "tools.test_link_transition_capture",
     "tools.test_surround",
     "tools.test_meter_sources",
+    "tools.test_device_worker",
+    "tools.test_transport",
     "tools.test_offline_checks",
 )
 NODE_CHECKS = (

@@ -47,9 +47,10 @@ from webui.afx_test import MemoryCatTest
 from webui.afx_inserts import InsertRack
 
 from fastapi import FastAPI
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, StrictInt
+from pydantic import BaseModel, StrictFloat, StrictInt
 import uvicorn
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -484,6 +485,14 @@ class Device:
         """Queue fn(transport). At most one queued function runs per fast
         state cycle, so a burst of controls cannot starve meter updates."""
         self.cmds.put(fn)
+
+    def _discard_queued(self):
+        """Forget commands queued while offline: reconnecting must not replay them."""
+        try:
+            while True:
+                self.cmds.get_nowait()   # a stop sentinel may go too: _stop is already set
+        except queue.Empty:
+            pass
 
     def get(self):
         with self._lock:
@@ -1211,8 +1220,9 @@ class Device:
             if transport is None:
                 try:
                     transport = open_transport(self.vid, self.pid, self.report_size)
-                except SystemExit:
+                except (SystemExit, OSError):
                     self._publish({"online": False})
+                    self._discard_queued()
                     if self._stop.wait(2.0):
                         break
                     continue
@@ -1220,6 +1230,8 @@ class Device:
                     self._drop_transport(transport)
                     transport = None
                     break
+                # Also covers the retry wait and a transport dropped mid-command.
+                self._discard_queued()
                 with self._lock:
                     self._transport = transport
                     self.connection_generation += 1
@@ -1773,6 +1785,9 @@ AFX_INSERTS = InsertRack(DEV)
 # ---------------------------------------------------------------- HTTP / SSE
 
 app = FastAPI(title="antelope-ctl webui")
+# A page on another site can point its own name at 127.0.0.1 (DNS rebinding);
+# the Host header check (port ignored) refuses those requests with 400.
+app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost"])
 @app.exception_handler(proto.ConstraintError)
 def _constraint_refused(request, error):
     """A profile bound refused the request: that is the caller's error, not a server fault."""
@@ -2111,7 +2126,7 @@ class InsertParameter(BaseModel):
     channel: StrictInt
     slot: StrictInt
     key: str
-    value: StrictInt
+    value: StrictInt | StrictFloat   # float only for an f32 field; the codec refuses it elsewhere
 
 
 @app.get("/api/afx-inserts/parameters")
