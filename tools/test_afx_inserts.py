@@ -29,7 +29,7 @@ class FakeDevice:
     def __init__(self, profile):
         self.profile, self.snapshot, self.structured, self.rb_ver = profile, {'online': True}, {}, 0
         self._lock, self._transport = threading.RLock(), self
-        self.racks, self.written, self.deaf = {}, [], False
+        self.racks, self.written, self.deaf, self.active = {}, [], False, 1
         self.clearq = bytearray(36 * 8)
 
     def submit(self, work):
@@ -41,6 +41,8 @@ class FakeDevice:
             return
         if packet[16] == 0xd7:
             self.racks[packet[18]] = packet[19:35]
+        elif packet[16] == 0x98:
+            self.active = packet[19]
         elif packet[16] == 0xd5 and packet[18] == 1:   # one band: <inst> <band> <7 bytes>
             start = packet[19] * 36 + packet[20] * 7
             self.clearq[start:start + 7] = packet[21:28]
@@ -48,7 +50,7 @@ class FakeDevice:
     def query(self, request, accept, timeout):
         category, index = request[8], request[12]
         body = {0x19: bytes(self.racks.get(index, b'')), 0x15: bytes([1, 8, 3, 1, 4, 1]), 0x0b: b'',
-                0x07: bytes(self.clearq) if index == 0 else bytes([1]) + bytes(16)}[category]
+                0x07: bytes(self.clearq) if index == 0 else bytes([self.active]) + bytes(16)}[category]
         reply = (bytes([0x75]) + bytes(7) + bytes([category, 0, 0, 0]) + request[12:16] + body).ljust(320, b'\0')
         return reply if accept(reply) else None
 
@@ -289,6 +291,27 @@ class InsertChainTests(unittest.TestCase):
         for key, value in (('model', 11), ('output', 13), ('volume', 50)):
             with self.assertRaises(protocol.ConstraintError):
                 protocol.afx_block_set(effect, block, key, value)
+
+    def test_zen_go_bypass_frame_and_readback(self):
+        zen = load('zen_go_sc')
+        # bypass_veq56.pcapng: 70 00 00 00 14 .. | 98 00 4a 00, then 98 00 4a 01.
+        frame = protocol.build_afx_bypass(zen, 74, False)
+        self.assertEqual((frame[:5].hex(' '), frame[16:20].hex(' '), any(frame[20:])), ('70 00 00 00 14', '98 00 4a 00', False))
+        with self.assertRaises(protocol.ConstraintError):   # not captured on the Discrete 4
+            protocol.build_afx_bypass(load('discrete_4_a270'), 74, False)
+        device = FakeDevice(zen)
+        device.racks[2] = bytes([74, 0])
+        rack = InsertRack(device)
+        active = lambda result: next(field['value'] for field in result['fields'] if field['key'] == 'active')
+        self.assertEqual(active(rack.parameters(2, 0)), 1)
+        self.assertEqual(active(rack.set_parameter(2, 0, 'active', 0)), 0)
+        self.assertEqual(device.written[-1][16:20].hex(' '), '98 00 4a 00')
+        with self.assertRaises(ValueError):
+            rack.set_parameter(2, 0, 'active', 2)
+        device.deaf = True   # a write the device ignores must stop editing
+        with self.assertRaises(RuntimeError):
+            rack.set_parameter(2, 0, 'active', 1)
+        self.assertIsNotNone(rack.failure)
 
     def test_rack_loads_and_edits_clearq_like_the_vendor_panel(self):
         device = FakeDevice(load('discrete_4_a270'))

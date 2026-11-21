@@ -18,6 +18,7 @@ Detailed status per feature: [linux-parity-plan.md](linux-parity-plan.md).
 | AFX racks: show, load, remove effects | yes | yes (63 of 72 types loadable) |
 | Effect settings (knobs) | 45 effects + ClearQ | the same 45 + ClearQ + 22 Zen-Go-only effects |
 | Effect switches and selectors | not captured | 85 on 38 effects (shown as plain controls) |
+| Effect bypass | not captured | yes, read back from the device (first instance) |
 | Guitar amp | load / remove only | model, output level, Bright |
 | Effect faceplates in the WebUI | 47 layouts, own artwork | same layouts; the 22 Zen-Go-only effects show plain controls |
 

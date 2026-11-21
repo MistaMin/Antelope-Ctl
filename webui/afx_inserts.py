@@ -132,8 +132,18 @@ class InsertRack:
             raise RuntimeError('The effect settings came back too short')
         return block
 
+    def _active(self, spec, effect, instance):
+        """1 active / 0 bypassed from the last reply's flag byte, or None where bypass is not captured."""
+        if not spec['parameters'].get('bypass') or instance or int(effect.get('read_offset', 0)) < 1:
+            return None
+        return self.last_reply[int(effect['read_offset']) - 1]
+
     def _describe(self, effect, type_id, instance, block, spec):
         values = protocol.afx_block_get(effect, block)
+        active = self._active(spec, effect, instance)
+        # Bypass is its own command, not a block byte; shown as one more 0/1 control.
+        extra = [] if active is None else [{'key': 'active', 'label': 'Active', 'min': 0, 'max': 1, 'scale': 1,
+                                            'unit': '', 'step': 1, 'value': active}]
         return {'ok': True, 'type': type_id, 'instance': instance,
                 'label': spec.get('type_labels', {}).get(str(type_id), {}).get('label', f'type {type_id}'),
                 'block': block.hex(' '),
@@ -141,7 +151,7 @@ class InsertRack:
                             'scale': field.get('scale', 1), 'unit': field.get('unit', ''),
                             # Knob step: integers move by one; a float field by 1/100 of its range.
                             'step': (field['max'] - field['min']) / 100 if field['type'] == 'f32' else 1,
-                            'value': values[field['key']]} for field in effect['fields']]}
+                            'value': values[field['key']]} for field in effect['fields']] + extra}
 
     def _slot(self, transport, spec, channel, slot):
         index = spec.get('record_index_for_channel', {}).get(str(channel))
@@ -188,6 +198,17 @@ class InsertRack:
             if effect.get('editable') is False:
                 raise ValueError('The settings of this effect cannot be read back yet, so they are not edited')
             before = self._read_block(transport, type_id, instance, effect)
+            if key == 'active' and self._active(spec, effect, instance) is not None:
+                if value not in (0, 1) or type(value) is not int:
+                    raise ValueError('Active must be 0 or 1')
+                transport.write(protocol.build_afx_bypass(self.device.profile, type_id, value))
+                time.sleep(0.15)
+                if (self._read_block(transport, type_id, instance, effect) != before
+                        or self._active(spec, effect, instance) != value):
+                    self.failure = ('The bypass state did not read back as written. Editing is off '
+                                    'until the server restarts; check the effect in the vendor panel.')
+                    raise RuntimeError(self.failure)
+                return self._describe(effect, type_id, instance, before, spec)
             # A block whose mapped fields are out of range means the read layout is
             # wrong for this effect; writing it back would shift every setting.
             if any(not protocol.afx_field_in_range(field, value) for field, value in
