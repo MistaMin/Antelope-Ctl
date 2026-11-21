@@ -402,7 +402,10 @@ class MeterSourceTests(unittest.TestCase):
         features = self.server.features_for(str(path), self.zen_profile)
         routing = features['routing']
         self.assertTrue(routing['writable'])
-        self.assertEqual(len(routing['destinations']), 1)
+        # the mixer map first, then Record 1-8, S/PDIF out and the rack inputs
+        self.assertEqual([item['id'] for item in routing['destinations']], [6, 3, 4, 5])
+        self.assertEqual([item['write_destinations'] for item in routing['destinations'][1:]],
+                         [[3], [4], [5]])
         self.assertEqual(routing['destinations'][0]['id'], 6)
         self.assertEqual(routing['destinations'][0]['channels'], 16)
         self.assertEqual(routing['destinations'][0]['write_destinations'],
@@ -413,14 +416,15 @@ class MeterSourceTests(unittest.TestCase):
         features = self.server.features_for(str(path), self.zen_profile)
         fake_device = mock.Mock()
         fake_device.routing_json.return_value = {
-            str(dest): [] for dest in (3, 5, 6, 7, 8, 9)
+            str(dest): [] for dest in (3, 4, 5, 6, 7, 8, 9)
         }
         with mock.patch.object(self.server, 'PROFILE', self.zen_profile), \
                 mock.patch.object(self.server, 'UI_FEATURES', features), \
                 mock.patch.object(self.server, 'DEV', fake_device):
             payload = self.server.api_routing()
-        self.assertEqual([item['id'] for item in payload['dests']], [6])
-        self.assertEqual(set(payload['current']), {'6'})
+        self.assertEqual([item['id'] for item in payload['dests']], [6, 3, 4, 5])
+        self.assertEqual(set(payload['current']), {'3', '4', '5', '6'})   # mirrors 7-9 stay hidden
+        self.assertNotIn('loopback_hp1', payload['dests'][3]['sources'])
 
     def test_zen_go_logical_route_writes_all_four_mirrors(self):
         class FakeTransport:
@@ -437,11 +441,11 @@ class MeterSourceTests(unittest.TestCase):
             device.routing[dest] = [(0x03, index) for index in range(32)]
         transport_obj = FakeTransport()
         with mock.patch.object(self.server, 'UI_FEATURES', features):
-            device._set_routing_source(transport_obj, 6, 0, (0x00, 0))
+            device._set_routing_source(transport_obj, 6, 4, (0x00, 0))
 
         self.assertEqual([packet[18] for packet in transport_obj.writes],
                          [6, 7, 8, 9])
-        self.assertEqual([packet[19:21] for packet in transport_obj.writes],
+        self.assertEqual([packet[27:29] for packet in transport_obj.writes],
                          [bytes((0x00, 0))] * 4)
 
     def test_device_stop_closes_transport_and_wakes_worker(self):
@@ -476,6 +480,238 @@ class MeterSourceTests(unittest.TestCase):
         self.assertEqual(packet[4], 0x13)
         self.assertEqual(packet[16:19], bytes((0x49, 0, 0x0c)))
         self.assertIsNone(self.server._mixer_surface_packet(self.zen_profile, 2))
+
+
+# Zen Go vendor panel run of 2026-11-21: every payload below is a frame the
+# panel sent, every body a reply the device gave (zen_panel/live.log).
+ZEN_MIX0 = ('00 20 5a 20 5a 20 00 02 00 3e 00 02 00 3e 5a 02 5a 3e' + ' 00 02 00 3e' * 12
+            + ' 60 00 20 60 20 60 20' + ' 60 02 60 3e' * 15)         # cat 04 index 0 at connect
+ZEN_REVERB = '00 51 64 00 64 0b 0d 18 42 32 01 ff' + ' 51 64 00 64 0b 0d 18 42 32 00 ff' * 2
+ZEN_ROUTES = {3: '03 03 00 03 01 01 00 01 01 02 00 02 01 08 00 08 00',
+              4: '04 02 00 02 01', 5: '05 00 00 00 01 01 00 01 01'}
+ZEN_ROUTES.update({dest: f'{dest:02x} 00 00 00 01 03 02 03 03 02 00 02 01 0a 00 0a 01'
+                         + ' 08 00' * 24 for dest in (6, 7, 8, 9)})
+
+
+def zen_payload(packet):
+    return f'{packet[4]:02x} | ' + packet[16:].rstrip(b'\0').hex(' ')
+
+
+class ZenGoPanelTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.path = Path(__file__).resolve().parents[1] / 'profiles/zen_go_sc.json'
+        cls.zen = json.loads(cls.path.read_text())
+        cls.profile_orion = json.loads(cls.path.with_name('orion_studio_sc.json').read_text())
+        cls.server = load_server_without_web_or_hid_boundaries()
+
+    def setUp(self):
+        """A Zen Go server whose commands run at once on a recording transport."""
+        server, zen = self.server, self.zen
+        self.device = server.Device(zen)
+        self.sent = []
+        transport_obj = types.SimpleNamespace(write=self.sent.append)
+        patches = [
+            mock.patch.object(server, 'PROFILE', zen),
+            mock.patch.object(server, 'UI_FEATURES', server.features_for(str(self.path), zen)),
+            mock.patch.object(server, 'DEV', self.device),
+            mock.patch.object(self.device, 'submit', side_effect=lambda fn: fn(transport_obj)),
+            mock.patch.object(server, '_bad', side_effect=lambda msg: {'ok': False, 'error': msg}),
+        ]
+        for patch in patches:
+            patch.start()
+            self.addCleanup(patch.stop)
+        self.device.mixer = {mix: protocol.parse_mixer_record(zen, bytes.fromhex(ZEN_MIX0))
+                             for mix in (0, 1)}
+        self.device.auraverb = {0: protocol.parse_auraverb_record(zen, bytes.fromhex(ZEN_REVERB))}
+        self.device.routing = {dest: protocol.parse_routing_record(
+            zen, bytes.fromhex(body).ljust(80, b'\0'))[1] for dest, body in ZEN_ROUTES.items()}
+
+    def call(self, api, **fields):
+        del self.sent[:]
+        result = api(types.SimpleNamespace(**fields))
+        return result, [zen_payload(packet) for packet in self.sent]
+
+    def state(self, **bytes_at):
+        report = bytearray(320)
+        report[0] = 0x73
+        for offset, value in bytes_at.items():
+            report[int(offset[1:])] = value
+        self.device.snapshot = {'online': True, 'buses': self.device._parse_buses(bytes(report))}
+        return bytes(report)
+
+    def test_output_status_is_a_bit_field_and_dim_cannot_release_mute(self):
+        zen = self.zen
+        # 29:02>03 (mute after dim), 29:01>09 (muted, trim index 1), 31:01>02 (dim replaced mute)
+        for raw, mute, dim in ((0x03, 1, 1), (0x09, 1, 0), (0x31, 1, 0), (0x02, 0, 1), (0x00, 0, 0)):
+            state = protocol.parse_bus_state(zen, self.state(o29=raw), 0)
+            self.assertEqual((state['mute'], state['dim']), (mute, dim), hex(raw))
+        self.assertEqual(protocol.protected_mute_buses(zen), [0, 1, 2])
+        toggle = self.server.api_bus_toggle
+        for raw in (0x01, 0x03, 0x09):               # muted: dim on AND dim off would un-mute
+            self.state(o29=raw, o31=raw & 3, o33=raw & 3)
+            for bus in (0, 1, 2):
+                for on in (True, False):
+                    result, sent = self.call(toggle, bus=bus, param='dim', on=on)
+                    self.assertEqual((result['ok'], sent), (False, []))
+            self.assertEqual(self.call(toggle, bus=0, param='mono', on=True)[1], [])
+        self.device.snapshot = {'online': True}       # state not read yet: refused too
+        self.assertEqual(self.call(toggle, bus=0, param='dim', on=False)[1], [])
+        self.state(o29=0x02)                          # dimmed, not muted: 66 00 00 as captured
+        self.assertEqual(self.call(toggle, bus=0, param='dim', on=False)[1], ['13 | 66'])
+        self.assertEqual(self.call(toggle, bus=1, param='dim', on=True)[1], ['13 | 66 01 01'])
+        self.state(o29=0x03)                          # an explicit mute write is always allowed
+        self.assertEqual(self.call(toggle, bus=0, param='mute', on=False)[1], ['13 | 48'])
+        self.assertEqual(self.call(self.server.api_bus, bus=2, level=2)[1], ['13 | 47 02 02'])
+        # the rule is the shared helper the CLI uses as well
+        self.assertTrue(protocol.bus_flag_may_release_mute(zen, 1, 'bus_dim', {'mute': True}))
+        self.assertTrue(protocol.bus_flag_may_release_mute(zen, 1, 'bus_dim', None))
+        self.assertFalse(protocol.bus_flag_may_release_mute(zen, 1, 'bus_dim', {'mute': False}))
+        self.assertFalse(protocol.bus_flag_may_release_mute(zen, 1, 'bus_mute', {'mute': True}))
+        written = []
+        hid = types.SimpleNamespace(write=written.append,
+                                    read_one=lambda magic, timeout: self.state(o31=0x03))
+        args = types.SimpleNamespace(bus='1', state='off', timeout=0.1, force=False)
+        with mock.patch.object(cli, 'get_transport', return_value=hid), \
+                mock.patch.object(cli.time, 'sleep'):
+            with self.assertRaises(SystemExit):          # CLI set-bus-dim hp1 off while muted
+                cli.cmd_set_bus_dim(args, zen)
+            self.assertEqual(written, [])
+            cli.cmd_set_bus_mute(args, zen)              # the explicit un-mute still goes out
+        self.assertEqual([zen_payload(packet) for packet in written], ['13 | 48 01'])
+
+    def test_mixer_strip_byte_is_the_strip_number(self):
+        mix = self.server.api_mix
+        none = dict(fader=None, pan=None, send=None, send_pan=None, mute=None, solo=None)
+        # HP2 page strip 16: pan to 0x3c then S, strip 9: fader 2; MONITOR page strip 16: fader 1
+        self.assertEqual(self.call(mix, **{**none, 'mix': 1, 'channel': 15, 'pan': 28, 'solo': True})[1],
+                         ['16 | d4 04 01 10 00 bc'])
+        self.assertEqual(self.call(mix, **{**none, 'mix': 1, 'channel': 8, 'fader': 2})[1],
+                         ['16 | d4 04 01 09 02 02'])
+        self.assertEqual(self.call(mix, **{**none, 'mix': 0, 'channel': 15, 'fader': 1})[1],
+                         ['16 | d4 04 00 10 01 3e'])
+
+    def test_reverb_send_is_its_own_frame(self):
+        mix = self.server.api_mix
+        none = dict(fader=None, pan=None, send=None, send_pan=None, mute=None, solo=None)
+        self.assertTrue(self.server.api_mixer()['has_send'])
+        self.assertEqual(self.server.api_mixer()['send_mixes'], [0])
+        # strip 16 send one notch up (pan kept from the readback), then the marker values
+        self.assertEqual(self.call(mix, **{**none, 'mix': 0, 'channel': 15, 'send': 0x5f})[1],
+                         ['16 | e9 04 00 10 5f 3e'])
+        self.assertEqual(self.call(mix, **{**none, 'mix': 0, 'channel': 15, 'send': 0x21, 'send_pan': -7})[1],
+                         ['16 | e9 04 00 10 21 19'])
+        self.assertEqual(self.call(mix, **{**none, 'mix': 0, 'channel': 14, 'send': 0x2a})[1],
+                         ['16 | e9 04 00 0f 2a 02'])
+        self.assertEqual(self.device.mixer_json()['0'][15]['send'], 0x21)
+        self.assertEqual(self.device.mixer_json()['0'][15]['send_pan'], -7)
+        # a strip change and a send change together are two frames; mix 1 has no send
+        self.assertEqual(self.call(mix, **{**none, 'mix': 0, 'channel': 15, 'send': 0x60, 'fader': 1})[1],
+                         ['16 | e9 04 00 10 60 19', '16 | d4 04 00 10 01 3e'])
+        result, sent = self.call(mix, **{**none, 'mix': 1, 'channel': 15, 'send': 0})
+        self.assertEqual((result['ok'], sent), (False, []))
+        for send, pan in ((97, 0), (-1, 0), (0, 31)):
+            with self.assertRaises(protocol.ConstraintError):
+                protocol.build_reverb_send_command(self.zen, 0, send, pan)
+        with self.assertRaises(protocol.ConstraintError):
+            protocol.build_reverb_send_command(self.zen, 16, 0, 0)
+
+    def test_gazelle_reverb_frames_and_ranges(self):
+        change = self.server.api_auraverb_change
+        info = self.server.api_auraverb()
+        self.assertTrue(info['available'])
+        self.assertEqual(info['ranges']['pre_delay'], [0, 150])
+        self.assertEqual(info['current'][0]['params']['room_size'], 0x51)
+        base = dict(mix=0, param=None, value=None, enabled=None)
+        self.assertEqual(self.call(change, **{**base, 'param': 'color', 'value': 99})[1],
+                         ['1d | da 0b 00 51 63 00 64 0b 0d 18 42 32 01'])
+        self.assertEqual(self.call(change, **{**base, 'param': 'pre_delay', 'value': 1})[1],
+                         ['1d | da 0b 00 51 63 01 64 0b 0d 18 42 32 01'])
+        self.assertEqual(self.call(change, **{**base, 'param': 'pre_delay', 'value': 0})[1],
+                         ['1d | da 0b 00 51 63 00 64 0b 0d 18 42 32 01'])
+        self.call(change, **{**base, 'param': 'color', 'value': 100})
+        self.assertEqual(self.call(change, **{**base, 'enabled': False})[1],
+                         ['1d | da 0b 00 51 64 00 64 0b 0d 18 42 32'])
+        self.assertEqual(self.call(change, **{**base, 'param': 'late_reflection_delay', 'value': 150})[1],
+                         ['1d | da 0b 00 51 64 00 64 0b 96 18 42 32'])
+        for param, value in (('pre_delay', 151), ('reverb_level', 0), ('color', 101)):
+            result, sent = self.call(change, **{**base, 'param': param, 'value': value})
+            self.assertEqual((result['ok'], sent), (False, []), param)
+
+    def test_reverb_returns(self):
+        back = self.server.api_reverb_return
+        self.assertEqual(self.call(back, bus=0, level=0x5a, mute=True)[1], ['13 | 68 00 da'])
+        self.assertEqual(self.call(back, bus=0, level=0x58, mute=False)[1], ['13 | 68 00 58'])
+        self.assertEqual(self.call(back, bus=1, level=0x5a, mute=True)[1], ['13 | 68 01 da'])
+        self.assertEqual(self.call(back, bus=1, level=0, mute=False)[1], ['13 | 68 01'])
+        for bus, level in ((2, 0), (0, 97), (0, -1)):
+            result, sent = self.call(back, bus=bus, level=level, mute=False)
+            self.assertEqual((result['ok'], sent), (False, []))
+        self.assertIsNone(self.server.api_auraverb()['returns'])       # not read yet
+        self.device.structured[(0x17, 0)] = protocol.parse_readback_records(
+            self.zen, bytes.fromhex('b3 44 60 60'), 0x17, 0)            # marker pass
+        self.assertEqual(self.server.api_auraverb()['returns'],
+                         [{'bus': 0, 'level': 0x33, 'mute': True},
+                          {'bus': 1, 'level': 0x44, 'mute': False}])
+
+    def test_settings_frames_and_state_bytes(self):
+        server = self.server
+        self.assertEqual(self.call(server.api_output_trim, target=0, value=6)[1], ['54 | cb 42 00 01 06'])
+        self.assertEqual(self.call(server.api_output_trim, target=0, value=0)[1], ['54 | cb 42 00 01'])
+        self.assertEqual(self.call(server.api_output_trim, target=1, value=0)[1], [])   # Orion-only target
+        self.assertEqual(self.call(server.api_pan_law, value=3)[1], ['12 | 24 03'])
+        self.assertEqual(self.call(server.api_pan_law, value=4)[1], [])
+        self.assertEqual(self.zen['params']['pan_law']['values']['3'], '-4.5 dB')
+        self.assertEqual(self.call(server.api_oscillator, value=0x44)[1], ['12 | 0a 44'])
+        self.assertEqual(self.call(server.api_oscillator, value=0x34)[1], ['12 | 0a 34'])
+        self.assertEqual(self.call(server.api_oscillator, value=0x06)[1], [])           # bit 0x02 never seen
+        self.assertEqual(self.call(server.api_brightness, value=0x2b)[1], ['12 | 0e 2b'])
+        # 25:14>18 with 29:29>31 (trim 14 dBu, Monitor muted), 26 = brightness, 20 = oscillator
+        report = self.state(o20=0x04, o25=0x18, o26=0x23, o29=0x31)
+        self.assertEqual(self.device._parse_output_trim(report), {'monitor_a': 6})
+        self.assertEqual(protocol.parse_state_scalar(self.zen, report, 'screen_brightness_byte_offset'), 0x23)
+        self.assertEqual(protocol.parse_state_scalar(self.zen, report, 'oscillator_byte_offset'), 0x04)
+        self.assertTrue(self.device._parse_buses(report)[0]['mute'])
+        with self.assertRaises(protocol.ConstraintError):
+            protocol.build_output_trim_command(self.zen, 0, 7)
+
+    def test_record_spdif_and_rack_inputs_write_one_group_each(self):
+        route = self.server.api_route
+        # Record 8 -> LOOPBACK HP 1/MON 2: the panel's own frame; groups 6-9 are not touched
+        self.device.routing[3] = self.device.routing[6][:8]
+        self.assertEqual(self.call(route, dest=3, channel=7, kind='loopback_hp1', number=2)[1],
+                         ['53 | d3 41 03 00 00 00 01 03 02 03 03 02 00 02 01 0a 00 04 01'])
+        self.assertEqual(self.call(route, dest=3, channel=7, kind='loopback_hp2', number=1)[1],
+                         ['53 | d3 41 03 00 00 00 01 03 02 03 03 02 00 02 01 0a 00 05'])
+        # an ordinary source on Record 5 is still ONE frame (the panel sent five)
+        self.assertEqual(self.call(route, dest=3, channel=4, kind='spdif', number='R')[1],
+                         ['53 | d3 41 03 00 00 00 01 03 02 03 03 02 01 02 01 0a 00 05'])
+        self.assertEqual(self.call(route, dest=3, channel=0, kind='afx', number=1)[1][0][:19],
+                         '53 | d3 41 03 03 00')
+        self.assertEqual(self.call(route, dest=4, channel=1, kind='compplay', number=8)[1],
+                         ['53 | d3 41 04 02 00 01 07'])
+        self.assertEqual(self.call(route, dest=4, channel=0, kind='emumic', number=1)[1],
+                         ['53 | d3 41 04 0a 00 01 07'])
+        self.assertEqual(self.call(route, dest=5, channel=3, kind='compplay', number=3)[1],
+                         ['53 | d3 41 05 00 00 00 01 01 00 01 02'])
+        refused = [(5, 0, 'loopback_hp1', 1), (5, 0, 'afx', 1), (4, 0, 'afx', 1),
+                   (6, 5, 'loopback_hp2', 1), (6, 5, 'afx', 1), (3, 8, 'preamp', 1)]
+        for dest, channel, kind, number in refused:
+            result, sent = self.call(route, dest=dest, channel=channel, kind=kind, number=number)
+            self.assertEqual((result['ok'], sent), (False, []), (dest, kind))
+        result, sent = self.call(route, dest=6, channel=0, kind='preamp', number=2)
+        self.assertEqual((result['ok'], sent), (False, []))          # strips 1-4: their source is group 5
+        with self.assertRaises(RuntimeError):                         # and the worker refuses it as well
+            self.device._set_routing_source(types.SimpleNamespace(write=self.sent.append), 6, 0, (0, 1))
+        self.assertEqual(self.sent, [])
+        self.assertIn('LOOPBACK HP 2 1', protocol.route_source_refusal(self.zen, 5, 0x05, 0))
+        self.assertIsNone(protocol.route_source_refusal(self.zen, 5, 0x08, 0))    # mute
+        self.assertIsNone(protocol.route_source_refusal(self.profile_orion, 0, 0x06, 0))
+        sent = self.call(route, dest=6, channel=15, kind='compplay', number=8)[1]   # strip 16, as captured
+        self.assertEqual([frame[:13] for frame in sent],
+                         [f'53 | d3 41 {dest:02x}' for dest in (6, 7, 8, 9)])
+        self.assertTrue(all(frame[14:].startswith('00 00 00 01 03 02 03 03 02 00 02 01 0a 00 0a 01'
+                                                  + ' 08 00' * 7 + ' 01 07') for frame in sent))
 
 
 if __name__ == '__main__':

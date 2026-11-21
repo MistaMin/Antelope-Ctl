@@ -356,6 +356,29 @@ class InsertChainTests(unittest.TestCase):
         with self.assertRaises(ValueError):                      # cabinet: impulse-response data, not loadable
             rack.change(0, 'load', type_id=4)
 
+    def test_zen_go_reorder_is_one_chain_write_in_the_new_order(self):
+        device = FakeDevice(load('zen_go_sc'))
+        device.racks[2] = bytes([0x27, 0, 0x33, 0])   # rack 3: PowerGate, PowerEx (d7 11 02 27 00 33)
+        rack = InsertRack(device)
+        self.assertTrue(rack.state()['reorder'])
+        state = rack.change(2, 'move', source=1, slot=0)   # panel: PowerEx dragged onto slot 1
+        self.assertEqual([payload(packet) for packet in device.written], ['d7 11 02 33 00 27'])
+        self.assertEqual(device.written[0][:5].hex(' '), '70 00 00 00 23')
+        self.assertEqual([row['type'] for row in state['racks']['2']], [0x33, 0x27])
+        for source, slot in ((0, 0), (0, 2), (2, 0), (None, 0), (-1, 0)):
+            with self.assertRaises(ValueError):
+                rack.change(2, 'move', source=source, slot=slot)
+        self.assertEqual(len(device.written), 1)
+        device.deaf = True                               # no readback of the new order: editing stops
+        with self.assertRaises(RuntimeError):
+            rack.change(2, 'move', source=0, slot=1)
+        self.assertIsNotNone(rack.failure)
+        other = FakeDevice(load('discrete_4_a270'))      # not captured on the Discrete 4
+        other.racks[0] = bytes([0x27, 0, 0x33, 0])
+        with self.assertRaises(ValueError):
+            InsertRack(other).change(0, 'move', source=1, slot=0)
+        self.assertEqual(other.written, [])
+
     def test_orion_has_no_insert_contract(self):
         self.assertIsNone(protocol.afx_insert_writes(load('orion_studio_sc')))
 

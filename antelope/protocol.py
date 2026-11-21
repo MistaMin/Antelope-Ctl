@@ -161,6 +161,19 @@ def protected_mute_buses(profile: dict) -> list:
     return [int(x) for x in constraints(profile).get('protected_mute_buses', [])]
 
 
+def bus_flag_may_release_mute(profile: dict, bus_id: int, param_name: str, bus_state) -> bool:
+    """True when this dim/mono write could un-mute a protected bus and must be
+    refused: the bus is in constraints.protected_mute_buses, the profile does
+    not say a flag write keeps the mute (bus_block.flags_combine), and the bus
+    reads muted or could not be read (`bus_state` None). On the Zen Go both
+    dim on and dim off clear the mute bit."""
+    if param_name == 'bus_mute' or bus_id not in protected_mute_buses(profile):
+        return False
+    if profile['frame']['state_report'].get('bus_block', {}).get('flags_combine'):
+        return False
+    return bus_state is None or bool(bus_state.get('mute'))
+
+
 def space_channel_count(profile: dict, space: str):
     """How many channels this device actually has in an address space
     ('input', 'adat', 'spdif') -- for sizing `status` / `meter` /
@@ -1578,8 +1591,59 @@ def build_mix_command(profile: dict, mix: int, channel: int, fader: int,
 
 
 def mix_has_send(profile: dict) -> bool:
-    """True if this device's mixer strip carries a per-strip send level."""
+    """True if this device's mixer strip carries a per-strip send level.
+    (The Zen Go's send is a frame of its own: build_reverb_send_command.)"""
     return 'send_offset' in profile['frame'].get('mix_command', {})
+
+
+def build_reverb_send_command(profile: dict, channel: int, send: int, pan_deg: int) -> bytes:
+    """Build frame.reverb_send_command: one strip's Gazelle Reverb send level
+    and send pan, both in every frame (Zen Go: e9 04 00 <strip> <send> <pan>).
+    `channel` is the 0-based strip, `send` raw attenuation, `pan_deg` as in
+    build_mix_command. Out-of-range values are refused, not clamped."""
+    f = profile['frame'].get('reverb_send_command')
+    if not f:
+        raise KeyError('this profile has no frame.reverb_send_command')
+    check_opcode(profile, _as_int(f['opcode']))
+    lo, hi = f['send_range']
+    pan_lo, pan_hi = f['pan_range']
+    if not 0 <= channel < int(f['channels']):
+        raise ConstraintError(f'reverb send strip {channel} is outside 0..{int(f["channels"]) - 1}')
+    if not lo <= send <= hi or not pan_lo <= pan_deg <= pan_hi:
+        raise ConstraintError(f'reverb send {send} / pan {pan_deg} is outside '
+                              f'{lo}..{hi} / {pan_lo}..{pan_hi}')
+    pkt = bytearray(profile['transport']['report_size'])
+    pkt[_as_int(f['magic_offset'])] = _as_int(f['magic'])
+    pkt[_as_int(f['opcode_offset'])] = _as_int(f['opcode'])
+    pkt[_as_int(f['param_id_offset'])] = _as_int(f['param_id'])
+    pkt[_as_int(f['subcmd_offset'])] = _as_int(f['subcmd'])
+    pkt[_as_int(f['channel_offset'])] = channel + _as_int(f.get('channel_base', 0))
+    pkt[_as_int(f['send_offset'])] = send
+    pkt[_as_int(f['pan_offset'])] = _as_int(f['pan_center']) + pan_deg
+    return bytes(pkt)
+
+
+def build_output_trim_command(profile: dict, target: int, value: int) -> bytes:
+    """Output trim selector. Orion: SET_PARAM params.output_trim with the
+    target byte. Zen Go: its own frame (frame.output_trim_command, captured as
+    cb 42 00 01 <n> for the one Monitor trim), fixed bytes sent as captured."""
+    spec = profile.get('params', {}).get('output_trim', {})
+    lo, hi = spec.get('range', [0, 6])
+    if str(target) not in spec.get('targets', {}) or not lo <= value <= hi:
+        raise ConstraintError(f'output trim target {target} / value {value} is not '
+                              f'declared by this profile (values {lo}..{hi})')
+    f = profile['frame'].get('output_trim_command')
+    if not f:
+        return build_command(profile, 'output_trim', target, value)
+    check_opcode(profile, _as_int(f['opcode']))
+    pkt = bytearray(profile['transport']['report_size'])
+    pkt[_as_int(f['magic_offset'])] = _as_int(f['magic'])
+    pkt[_as_int(f['opcode_offset'])] = _as_int(f['opcode'])
+    pkt[_as_int(f['param_id_offset'])] = _as_int(f['param_id'])
+    fixed = bytes.fromhex(f['fixed'])
+    pkt[_as_int(f['fixed_offset']):_as_int(f['fixed_offset']) + len(fixed)] = fixed
+    pkt[_as_int(f['value_offset'])] = value
+    return bytes(pkt)
 
 
 # canonical AuraVerb control order (matches the Launcher UI top-to-bottom).
@@ -1613,7 +1677,6 @@ def build_auraverb_command(profile: dict, params: dict, enabled: bool = True,
         raise KeyError('this profile has no frame.auraverb_command -- Gazelle Reverb not available')
     check_opcode(profile, _as_int(f['opcode']))
     offs = f['param_offsets']
-    lo, hi = f.get('param_range', [0, 100])
     missing = [k for k in offs if k not in params]
     if missing:
         raise ValueError(f'build_auraverb_command needs all {len(offs)} params; '
@@ -1627,8 +1690,10 @@ def build_auraverb_command(profile: dict, params: dict, enabled: bool = True,
     pkt[_as_int(f['mix_offset'])] = mix & 0xFF
     if 'mix_wet_offset' in f:
         pkt[_as_int(f['mix_wet_offset'])] = _as_int(f['mix_wet_constant']) & 0xFF
+    ranges = f.get('param_ranges', {})   # Zen Go: delays 0..150, level 1..100
     for name, off in offs.items():
         v = int(params[name])
+        lo, hi = ranges.get(name, f.get('param_range', [0, 100]))
         if not (lo <= v <= hi):
             raise ValueError(f'Gazelle Reverb {name} = {v} outside {lo}..{hi}')
         pkt[_as_int(off)] = v & 0xFF
@@ -1922,6 +1987,21 @@ def route_source_key(profile: dict, bank: int, index: int):
         if source_bank == bank and first <= index <= first + count - 1:
             return f'{name}:{index - first + base}'
     return None
+
+
+def route_source_refusal(profile: dict, dest: int, bank: int, index: int):
+    """Why this source may not be newly assigned in a destination group, or None.
+
+    ``frame.routing_command.destination_sources`` lists the source kinds a
+    group takes (mute is always allowed); a group without a list takes all.
+    Zen Go: the loopbacks only for Record and S/PDIF out."""
+    rc = profile['frame'].get('routing_command', {})
+    allowed = rc.get('destination_sources', {}).get(str(dest))
+    key = route_source_key(profile, bank, index) or ''
+    if allowed is None or key == 'mute:' or key.split(':')[0] in allowed:
+        return None
+    return (f'{route_source_label(profile, bank, index)} is not captured as a source '
+            f'for {route_destination_label(profile, dest)}')
 
 
 def route_mute_source(profile: dict):
@@ -2803,17 +2883,27 @@ def parse_mixer_record(profile: dict, body: bytes):
                 f'mixer record is too short for {count} slots '
                 f'(need {need}, got {len(body)})')
         slots = []
+        # Zen Go: the same record repeats the reverb send level and send pan
+        # of each strip further in (also readable alone as cat 0x18).
+        send_off = layout.get('send_offset')
         for i in range(count):
             fader = body[level_off + i * stride]
             flags = body[state_off + i * stride]
-            slots.append({
+            slot = {
                 'fader': fader,
                 'pan': (flags & pan_mask) - pan_center,
                 'send': 0,
                 'mute': bool(flags & mute_bit),
                 'solo': bool(flags & solo_bit),
                 'raw': bytes((fader, flags)),
-            })
+            }
+            if send_off is not None:
+                at = _as_int(send_off) + i * stride
+                if at + 1 >= len(body):
+                    raise ValueError('mixer record is too short for its reverb sends')
+                slot['send'] = body[at]
+                slot['send_pan'] = (body[at + 1] & pan_mask) - pan_center
+            slots.append(slot)
         return slots
 
     if not body:
@@ -3621,8 +3711,8 @@ def parse_bus_state(profile: dict, data: bytes, bus_id: int) -> dict:
     level = data[level_off]
     result = {'bus': bus_id, 'level': level, 'status_raw': status_byte}
     if status_values:
-        # Zen Go encodes the output mode as one enum byte (0=normal,
-        # 1=mute, 2=dim), rather than the independent Orion bit flags.
+        # A profile may declare the output mode as one exclusive enum byte
+        # instead of independent bit flags (no shipped profile does now).
         for state_name, expected in status_values.items():
             if str(state_name).lower() in {'normal', 'none', 'off'}:
                 continue

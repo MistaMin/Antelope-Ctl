@@ -322,6 +322,21 @@ def _routing_channel_count(profile, dest):
     return proto.route_dest_channels(profile, dest)
 
 
+def _routing_refusal(dest, channel, target):
+    """Why this change to a UI destination is refused before it is queued, or None:
+    a source the profile does not list for one of its groups, or a locked mixer strip."""
+    groups = _routing_write_destinations(dest)
+    strict = PROFILE.get("mixer", {}).get("input_routing", {})
+    if strict.get("strict") and set(groups) & set(strict.get("destinations", [])) \
+            and channel in strict.get("locked_channels", []):
+        return "that strip takes its source from another routing group on this device"
+    for group in groups:
+        refusal = proto.route_source_refusal(PROFILE, group, *target)
+        if refusal:
+            return refusal
+    return None
+
+
 def _routing_write_destinations(dest):
     """Physical records that implement one logical UI destination."""
     item = _routing_ui_spec(dest)
@@ -522,7 +537,8 @@ class Device:
             return {
                 str(m): [
                     {"ch": i, "fader": s["fader"], "pan": s["pan"],
-                     "send": s["send"], "mute": s["mute"], "solo": s["solo"]}
+                     "send": s["send"], "mute": s["mute"], "solo": s["solo"],
+                     **({"send_pan": s["send_pan"]} if "send_pan" in s else {})}
                     for i, s in enumerate(slots)
                 ]
                 for m, slots in self.mixer.items()
@@ -1304,6 +1320,11 @@ class Device:
                 except Exception:
                     pass
                 try:
+                    snap["oscillator"] = proto.parse_state_scalar(
+                        self.profile, state, "oscillator_byte_offset")
+                except Exception:
+                    pass
+                try:
                     snap["clock_source_idx"] = proto.parse_state_scalar(
                         self.profile, state, "clock_source_byte_offset")
                 except Exception:
@@ -1336,7 +1357,7 @@ class Device:
             # keep last values if this cycle only got one of the two frames
             with self._lock:
                 for k in ("channels", "buses", "adat", "spdif", "trim", "brightness",
-                          "sample_rate_idx", "clock_source_idx", "input_meters",
+                          "sample_rate_idx", "clock_source_idx", "oscillator", "input_meters",
                           "mixer_meters", "output_meters", "state_raw",
                           "meters_raw"):
                     if k not in snap and k in self.snapshot:
@@ -1826,7 +1847,7 @@ class DigLink(BaseModel):
     enabled: bool
 
 class Trim(BaseModel):
-    target: int         # 0 = Monitor A, 1 = Monitor B, 2 = Line Out
+    target: int         # Orion: 0 = Monitor A, 1 = Monitor B, 2 = Line Out. Zen Go: 0 = Monitor
     value: int          # 0..6
 
 class BusToggle(BaseModel):
@@ -1880,6 +1901,7 @@ class MixStrip(BaseModel):
     fader: int | None = None  # profile-defined dB attenuation (sign ignored)
     pan: int | None = None    # profile-defined panorama range
     send: int | None = None   # profile-defined Gazelle Reverb send range
+    send_pan: int | None = None   # Zen Go: the send has its own pan
     mute: bool | None = None
     solo: bool | None = None
 
@@ -1894,6 +1916,12 @@ class AuraVerbChange(BaseModel):
     param: str | None = None
     value: int | None = None
     enabled: bool | None = None
+
+
+class ReverbReturn(BaseModel):
+    bus: int                  # 0 = Monitor/HP1, 1 = HP2 on the Zen Go
+    level: int                # raw attenuation
+    mute: bool
 
 
 class SurroundGlobalChange(BaseModel):
@@ -2101,9 +2129,10 @@ def api_afx_catalog():
 
 class InsertChange(BaseModel):
     channel: StrictInt
-    operation: str
+    operation: str            # load | remove | move
     slot: StrictInt | None = None
     type: StrictInt | None = None
+    source: StrictInt | None = None   # move: the slot the effect comes from
 
 
 @app.get("/api/afx-inserts")
@@ -2114,10 +2143,11 @@ def api_afx_inserts():
 
 @app.post("/api/afx-inserts")
 def api_afx_inserts_change(change: InsertChange):
-    """Load or remove one effect: whole-rack write, verified by readback."""
+    """Load, remove or move one effect: whole-rack write, verified by readback."""
     try:
         return AFX_INSERTS.change(change.channel, change.operation,
-                                  slot=change.slot, type_id=change.type)
+                                  slot=change.slot, type_id=change.type,
+                                  source=change.source)
     except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
         return _bad(str(error))
 
@@ -2807,14 +2837,15 @@ def api_spdif_link(l: DigLink):
 
 @app.post("/api/output-trim")
 def api_output_trim(t: Trim):
-    """Settings-tab output-trim selector (param 0x4b, SET_PARAM). 3 targets
-    (0/1/2 = Monitor A / B / Line Out), 7-position selector 0..6 -- the raw
-    index is all the capture pinned; the physical dB meaning is not decoded.
-    Reads back in state_report.output_trim_block."""
-    if not (0 <= t.target <= 2):
-        return _bad(f"trim target {t.target} out of range 0..2")
-    v = max(0, min(6, t.value))
-    DEV.submit(lambda tr: tr.write(proto.build_command(PROFILE, "output_trim", t.target, v)))
+    """Settings-tab output-trim selector, 7 positions 0..6. Orion: param 0x4b,
+    targets 0/1/2 = Monitor A / B / Line Out. Zen Go: its own frame, target 0
+    = Monitor. Reads back in state_report.output_trim_block."""
+    try:
+        packet = proto.build_output_trim_command(
+            PROFILE, t.target, max(0, min(6, t.value)))
+    except (KeyError, ValueError, proto.ConstraintError) as e:
+        return _bad(str(e))
+    DEV.submit(lambda tr: tr.write(packet))
     return {"ok": True}
 
 
@@ -2832,17 +2863,13 @@ def api_bus_toggle(t: BusToggle):
         packet = proto.build_command(PROFILE, pname, t.bus, 1 if t.on else 0)
     except (KeyError, ValueError, proto.ConstraintError) as e:
         return _bad(str(e))
-    combine = PROFILE["frame"]["state_report"].get("bus_block", {}).get("flags_combine")
-    if t.param != "mute" and not combine \
-            and t.bus in proto.protected_mute_buses(PROFILE):
-        # On a sibling device the output status is one enum, so dim replaces
-        # mute. Until this device's flags are known to combine, changing
-        # dim/mono on a protected muted (or unread) bus could unmute it.
-        state = next((b for b in DEV.get()[0].get("buses", [])
-                      if b.get("bus") == t.bus), None)
-        if state is None or state.get("mute"):
-            return _bad(f"{proto.bus_name(PROFILE, t.bus)} is muted or unread: "
-                        f"{t.param} is refused so it cannot release the mute")
+    # Zen Go: dim on and dim off both clear the mute bit. Discrete 4: unknown.
+    # So dim/mono on a protected muted (or unread) bus is refused.
+    state = next((b for b in DEV.get()[0].get("buses", [])
+                  if b.get("bus") == t.bus), None)
+    if proto.bus_flag_may_release_mute(PROFILE, t.bus, pname, state):
+        return _bad(f"{proto.bus_name(PROFILE, t.bus)} is muted or unread: "
+                    f"{t.param} is refused so it cannot release the mute")
     DEV.submit(lambda tr, packet=packet: tr.write(packet))
     return {"ok": True}
 
@@ -2939,6 +2966,31 @@ def api_brightness(s: Scalar):
     return {"ok": True}
 
 
+@app.post("/api/pan-law")
+def api_pan_law(s: Scalar):
+    """Mixer panning law (SET_GLOBAL), an index into params.pan_law.values.
+    The index order differs per device. No page control yet."""
+    if str(s.value) not in PROFILE["params"].get("pan_law", {}).get("values", {}):
+        return _bad(f"pan-law index {s.value} is not declared by this profile")
+    DEV.submit(lambda t: t.write(proto.build_global_command(PROFILE, "pan_law", s.value)))
+    return {"ok": True}
+
+
+@app.post("/api/oscillator")
+def api_oscillator(s: Scalar):
+    """The two test oscillators: one packed byte (params.oscillator.value_bits)
+    holding both frequencies, the level and both mutes. Bits outside
+    params.oscillator.value_mask were never seen and are refused. The Zen Go
+    reports the byte back in the state stream as `oscillator`."""
+    spec = PROFILE["params"].get("oscillator", {})
+    if spec.get("value_mask") is None:
+        return _bad("this profile has no captured oscillator bits")
+    if not 0 <= s.value <= 255 or s.value & ~proto._as_int(spec["value_mask"]):
+        return _bad(f"oscillator value {s.value:#04x} uses bits outside {spec['value_mask']}")
+    DEV.submit(lambda t: t.write(proto.build_global_command(PROFILE, "oscillator", s.value)))
+    return {"ok": True}
+
+
 @app.post("/api/bus")
 def api_bus(b: Bus):
     proto.check_target(PROFILE, b.bus, "bus")
@@ -2979,6 +3031,11 @@ def api_routing():
         current = {key: value for key, value in current.items()
                    if key in visible}
     sources = proto.route_source_options(PROFILE)
+    listed = rc.get("destination_sources", {})
+    for d in dests:   # source kinds this destination takes (absent = all)
+        group = str(_routing_write_destinations(d["id"])[0])
+        if group in listed:
+            d["sources"] = listed[group]
     return {"dests": dests, "sources": sources, "current": current}
 
 
@@ -2998,6 +3055,9 @@ def api_route(r: Route):
             else proto.resolve_route_source(PROFILE, r.kind, r.number)
     except ValueError as e:
         return _bad(str(e))
+    refusal = _routing_refusal(r.dest, r.channel, tgt)
+    if refusal:
+        return _bad(refusal)
 
     def do(t, dest=r.dest, ch=r.channel, tgt=tgt):
         DEV._set_routing_source(t, dest, ch, tgt)
@@ -3030,6 +3090,9 @@ def api_route_batch(b: RouteBatch):
                 else proto.resolve_route_source(PROFILE, c.kind, c.number)
         except ValueError as e:                                  # noqa: BLE001
             return _bad(str(e))
+        refusal = _routing_refusal(b.dest, c.channel, tgt)
+        if refusal:
+            return _bad(refusal)
         resolved.append((c.channel, tgt))
 
     def do(t, dest=b.dest, changes=resolved):
@@ -3224,8 +3287,44 @@ def api_auraverb():
         "mix": UI_FEATURES.get("auraverb", {}).get("mix", 0),
         "params": param_names,
         "range": [lo, hi],
+        "ranges": command.get("param_ranges", {}),
         "current": DEV.auraverb_json(),
+        "returns": _reverb_returns(),
     }
+
+
+def _reverb_returns():
+    """Reverb return level + mute per output mix (Zen Go), from the readback;
+    None where the profile has no return control or nothing was read yet."""
+    spec = PROFILE["params"].get("reverb_return")
+    if not spec:
+        return None
+    rb = spec["runtime_readback"]
+    with DEV._lock:
+        rows = DEV.structured.get((proto._as_int(rb["category"]), proto._as_int(rb["index"])))
+    mute = proto._as_int(spec["mute_bit"])
+    return rows and [{"bus": int(bus), "level": rows[int(bus)]["value"] & ~mute,
+                      "mute": bool(rows[int(bus)]["value"] & mute)}
+                     for bus in spec["targets"]]
+
+
+@app.post("/api/reverb-return")
+def api_reverb_return(r: ReverbReturn):
+    """One reverb return: level and mute travel in the same byte, so both are
+    given (read the current pair from GET /api/auraverb `returns`)."""
+    spec = PROFILE["params"].get("reverb_return")
+    if not spec:
+        return _bad("this profile has no reverb return control")
+    lo, hi = spec["range"]
+    if str(r.bus) not in spec["targets"] or not lo <= r.level <= hi:
+        return _bad(f"reverb return {r.bus} / level {r.level} outside the captured range {lo}..{hi}")
+    value = r.level | (proto._as_int(spec["mute_bit"]) if r.mute else 0)
+    try:
+        packet = proto.build_command(PROFILE, "reverb_return", r.bus, value)
+    except (KeyError, ValueError, proto.ConstraintError) as e:
+        return _bad(str(e))
+    DEV.submit(lambda t: t.write(packet))
+    return {"ok": True}
 
 
 @app.post("/api/auraverb")
@@ -3243,7 +3342,8 @@ def api_auraverb_change(change: AuraVerbChange):
     names = command.get("param_offsets", {})
     if change.param is not None and change.param not in names:
         return _bad(f"unknown Gazelle Reverb parameter {change.param!r}")
-    lo, hi = command.get("param_range", [0, 100])
+    lo, hi = command.get("param_ranges", {}).get(
+        change.param, command.get("param_range", [0, 100]))
     if change.value is not None and not lo <= change.value <= hi:
         return _bad(f"Gazelle Reverb value {change.value} outside {lo}..{hi}")
 
@@ -3290,7 +3390,7 @@ def api_mixer():
         "n_mixes": DEV.n_mixes,
         "channels_per_mix": DEV.mix_channels,
         "has_master": DEV.mixer_has_master,
-        "has_send": proto.mix_has_send(PROFILE),
+        "has_send": proto.mix_has_send(PROFILE) or "reverb_send_command" in PROFILE["frame"],
         "send_mixes": [int(m) for m in send.get("mix_indices", [])],
         "send_master": bool(send.get("include_master", False)),
         # None = every pair is writable (profiles without mixer.link_write)
@@ -3315,7 +3415,9 @@ def api_mix(s: MixStrip):
     if not first_channel <= s.channel <= last_channel:
         label = "0 = master" if DEV.mixer_has_master else "no master strip"
         return _bad(f"channel {s.channel} out of range {first_channel}..{last_channel} ({label})")
-    has_send = proto.mix_has_send(PROFILE)
+    # Zen Go: the send (level + its own pan) is a separate frame from the strip.
+    send_frame = "reverb_send_command" in PROFILE["frame"]
+    has_send = proto.mix_has_send(PROFILE) or send_frame
     mixer = PROFILE.get("mixer", {})
     f_lo, f_hi = PROFILE.get("params", {}).get("mix_fader", {}).get(
         "range", mixer.get("fader", {}).get("range", [0, 90]))
@@ -3327,8 +3429,10 @@ def api_mix(s: MixStrip):
     send_allowed = has_send and s.mix in send_mixes \
         and (not DEV.mixer_has_master or s.channel != 0
              or bool(send_spec.get("include_master", False)))
-    if s.send is not None and not send_allowed:
+    if (s.send is not None or s.send_pan is not None) and not send_allowed:
         return _bad("this mixer strip has no Gazelle Reverb send")
+    if s.send_pan is not None and not send_frame:
+        return _bad("this device has no Gazelle Reverb send pan")
 
     def do(t, m=s.mix, ch=s.channel):
         slots = DEV._mixer_record_for_write(t, m)
@@ -3341,10 +3445,18 @@ def api_mix(s: MixStrip):
         send = cur["send"] if s.send is None else max(s_lo, min(s_hi, s.send))
         mute = cur["mute"] if s.mute is None else bool(s.mute)
         solo = cur["solo"] if s.solo is None else bool(s.solo)
-        t.write(proto.build_mix_command(PROFILE, m, ch, fader, pan,
-                                        send if has_send else 0, mute, solo))
+        send_change = s.send is not None or s.send_pan is not None
+        extra = {}
+        if send_frame and send_change:
+            send_pan = cur["send_pan"] if s.send_pan is None else max(p_lo, min(p_hi, s.send_pan))
+            t.write(proto.build_reverb_send_command(PROFILE, ch, send, send_pan))
+            extra = {"send_pan": send_pan}
+        if not send_frame or any(v is not None for v in (s.fader, s.pan, s.mute, s.solo)):
+            # a send-only change on the Zen Go leaves the strip frame unsent
+            t.write(proto.build_mix_command(PROFILE, m, ch, fader, pan,
+                                            send if has_send else 0, mute, solo))
         slots[ch] = {**cur, "fader": fader, "pan": pan, "send": send,
-                     "mute": mute, "solo": solo}
+                     "mute": mute, "solo": solo, **extra}
         DEV._cache_mixer(m, slots)
 
     DEV.submit(do)

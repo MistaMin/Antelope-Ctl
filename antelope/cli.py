@@ -1110,6 +1110,10 @@ def cmd_route(args, profile):
             sys.exit(f'`route {args.destination} {args.selector}` needs exactly one source')
         chans = [_route_source_tuple(profile, 'keep', dest, i, cache) for i in range(nchan)]
         chans[ch] = _route_source_tuple(profile, srcs[0], dest, ch, cache)
+    for i in (range(nchan) if sel == 'all' else [] if sel == 'mute' else [ch]):
+        refusal = proto.route_source_refusal(profile, dest, *chans[i])
+        if refusal:
+            sys.exit(refusal)
 
     stereo = str(dest) in profile['frame']['routing_command'].get('stereo_destinations', [])
     labels = [proto.route_source_label(profile, b, i) for b, i in chans]
@@ -1615,6 +1619,13 @@ def _bus_bool_command(args, profile, param_name):
     transport = get_transport(profile)
     on = 1 if args.state == 'on' else 0
     pkt = proto.build_command(profile, param_name, bus_id, on)
+    if bus_id in proto.protected_mute_buses(profile) and param_name != 'bus_mute':
+        # Same rule as the WebUI: dim/mono must not release a protected mute.
+        data = read_state(transport, profile, args.timeout)
+        state = proto.parse_bus_state(profile, data, bus_id) if data else None
+        if proto.bus_flag_may_release_mute(profile, bus_id, param_name, state):
+            sys.exit(f'{proto.bus_name(profile, bus_id)} is muted or unread: this write is '
+                     'refused so it cannot release the mute. Unmute it first if you mean to.')
     send_and_wait(transport, pkt)
     verify_bus(transport, profile, bus_id, args.timeout)
 

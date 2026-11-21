@@ -1,4 +1,4 @@
-"""Load and remove effects in a device's insert racks (Zen Go, Discrete 4).
+"""Load, remove and reorder effects in a device's insert racks (Zen Go, Discrete 4).
 
 Driven by the profile's ``afx_inserts`` block. Every change reads the rack
 fresh, rewrites the whole rack the way the vendor panel does, and reads it
@@ -51,7 +51,7 @@ class InsertRack:
         return {
             'available': True, 'online': online,
             'writes_enabled': self.failure is None, 'failure': self.failure,
-            'max_slots': writes['max_slots'],
+            'max_slots': writes['max_slots'], 'reorder': bool(writes.get('reorder')),
             'editable_channels': [channel for channel in spec['mixer_channels']
                                   if spec['record_index_for_channel'][str(channel)] in writes['strips']],
             'racks': racks,
@@ -229,7 +229,7 @@ class InsertRack:
             return self._describe(effect, type_id, instance, after, spec)
         return self._run(work)
 
-    def change(self, channel, operation, slot=None, type_id=None):
+    def change(self, channel, operation, slot=None, type_id=None, source=None):
         spec = self._spec()
         if spec is None:
             raise ValueError('Insert editing is not available for this device')
@@ -237,8 +237,10 @@ class InsertRack:
             raise RuntimeError(self.failure)
         writes = spec['writes']
         strip = self._strip(spec, channel)
-        if operation not in ('load', 'remove'):
-            raise ValueError('Operation must be load or remove')
+        if operation not in ('load', 'remove', 'move'):
+            raise ValueError('Operation must be load, remove or move')
+        if operation == 'move' and not writes.get('reorder'):
+            raise ValueError('Reordering is not captured on this device')
         effect = writes['effects'].get(str(type_id)) if operation == 'load' else None
         if operation == 'load' and effect is None:
             raise ValueError('That effect has no captured load on this device')
@@ -251,6 +253,13 @@ class InsertRack:
                 if type(slot) is not int or not 0 <= slot < len(before):
                     raise ValueError('There is no effect in that slot')
                 after = before[:slot] + before[slot + 1:]
+            elif operation == 'move':
+                # The same effects in a new order (captured: two effects swapped).
+                if any(type(index) is not int or not 0 <= index < len(before)
+                       for index in (source, slot)) or source == slot:
+                    raise ValueError('Move needs two different loaded slots')
+                after = list(before)
+                after.insert(slot, after.pop(source))
             else:
                 if len(before) >= writes['max_slots']:
                     raise RuntimeError(f"This rack already holds {writes['max_slots']} effects")

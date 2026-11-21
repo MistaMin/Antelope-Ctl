@@ -32,12 +32,34 @@ Detailed status per feature: [linux-parity-plan.md](linux-parity-plan.md).
   because an out-of-range index can crash the device's controller; the monitor bus mute is protected.
 - **Tests**: `python tools/offline_checks.py` runs everything that needs no hardware.
 
+## Implemented from the vendor panel run, live-tested
+
+Zen Go, from the vendor panel run of 2026-11-21 (every non-effect control of the panel). The frames
+and readbacks are rebuilt in the offline tests from the captured bytes. On 2026-11-21 every write path
+below was sent once through this project's server on the owner's unit, read back raw (changed bytes were
+exactly the expected ones, mixer maps 6-9 untouched), and restored; a raw snapshot before and after was
+identical. Dim on a muted output was refused. The JS page changes were not exercised in a browser.
+
+| Area | Zen Go | Where |
+|------|--------|-------|
+| Output status as a bit field; dim can no longer release a mute | fix | all three outputs: dim is refused while muted (WebUI, CLI) |
+| Mixer strip number on the wire (was one strip off) | fix | profile `channel_base` |
+| Gazelle Reverb: 8 knobs, FX on/off | yes | reverb panel |
+| Reverb send per strip (mix 1) | yes | mixer send knob |
+| Reverb send pan, reverb returns (level, mute) | API only | `POST /api/mix` `send_pan`, `POST /api/reverb-return` |
+| Monitor out trim, brightness | yes | Settings panel |
+| Panning law, oscillator | API only | `POST /api/pan-law`, `POST /api/oscillator` |
+| Routing: Record 1-8, S/PDIF out, AFX rack inputs 1-4, loopback and AFX OUT sources | yes | Routing tab |
+| AFX racks: reorder by drag | yes | rack list |
+
 ## Not done yet
 
 - Discrete 4: headphones 2-4, line outs and trims, digital outs, output routing, clock source, sample
   rate, 48V, mic modelling, AuraVerb, oscillator.
-- Zen Go: the 22 effects the Discrete 4 does not have (captures in progress).
-- Both: switches, menus and stacked rings inside effects, effect bypass, cabinet (no control found).
+- Zen Go: mic modelling (models were greyed in the vendor panel: no frame captured), clock source and
+  sample rate writes on the owner's unit (greyed too), page controls for panning law, oscillator,
+  reverb returns and send pan, sources of the Monitor / HP outputs (no selector in the vendor panel).
+- Discrete 4: switches, menus and stacked rings inside effects, effect bypass. Both: cabinet (no control found).
 
 ## Install
 

@@ -2250,7 +2250,7 @@ routing). **Divergences from Orion:**
 | in-band readback (§4a) | `0x74` req / `0x75`@1=`0x00` resp | **same, byte-identical** (re-checked 2026-09-01) |
 | ~~"connect name report"~~ | — | ~~`0x75` = ASCII name/serial/fw~~ **corrected: that IS a readback response, category `0x01`** -- the same category that carries name+serial on the Orion. It only looked device-specific because the Orion's `0x75` responses were being filtered as meter noise. |
 | readback connect walk | 113 records / 10 categories | **3 queries only** -- cat `0x00`, `0x01`, `0x11`, all index 0. Complete category counts are still unknown; only the explicitly capture-confirmed feature layouts (routing `0x03` indices 3, 5, 6-9, mixer `0x04` indices 0-1, and mixer-link bitmap `0x0b` index 3) are safe to use (§4a hazard) |
-| mixer frame | opcode `0x17`, subcmd `0x05`, has a **send** byte @22 | opcode **`0x16`**, subcmd **`0x04`**, **no send** byte |
+| mixer frame | opcode `0x17`, subcmd `0x05`, has a **send** byte @22 | opcode **`0x16`**, subcmd **`0x04`**, **no send** byte (the send is its own frame, see the 2026-11-21 addendum); the strip byte is the strip **number 1-16** (corrected 2026-11-21) |
 | mixes / strips | 4 mixes × 32 | 2 mixes × 16 |
 | mixer link selector | logical pair in the selected mix (Mix 1 wire mapping captured) | **Mix 1 pair `0..7`; Mix 2 pair `0..7` uses wire selectors `0x10..0x17`**; complete state is returned by q0b/03 |
 | preamps | 12 | 2 (A1 = ch0, A2 = ch1) |
@@ -2259,7 +2259,7 @@ routing). **Divergences from Orion:**
 | bus block | `28 + 3N` | `28 + 2N` |
 | clock source readback | **`0x73` @19** (`0x12`/`0x04`, 7 sources incl. word clock — confirmed 2026-09-03) | `0x73` **@19** (`0x12`/`0x04`, 3 sources, no word clock) |
 | source bank: mute / osc / emumic | `0x0b` / `0x0c` / `0x01` | **`0x08` / `0x09` / `0x0a`** |
-| new: output volume | buses | *also* an `0x16`/`0xd4` strip at `(mix 1, ch 3)` |
+| ~~new: output volume~~ | buses | buses only. The `0x16`/`0xd4` frame once read as an output strip is an ordinary mixer strip (HP2 page, strip 3); corrected 2026-11-21 |
 | new: DSP opcodes | `0x1d` AuraVerb | **`0x1a` / `0x1c` (`0xd5`), `0x23` (`0xd7`)**, all in `capture_07_dsp`, undecoded, blocked as a precaution. `0x1a`/`0x1c` share param `0xd5` in that single capture — `0x1a` is likely the Zen Go's mic-modeling/emuMic frame (in-scope), not necessarily AFX content like `0x23`; see zen_go_sc.json `params.mic_modeling` and §4a's namespace-collision note for the Orion side of this |
 
 **Routing (`0x53`/`0xd3`) -- decoded 2026-08-31.** Same frame as Orion
@@ -2284,11 +2284,11 @@ silence. q0b/03 returns a capture-confirmed 24-byte selector bitmap;
 selectors 0..7 map to Mix 1 pairs 0..7 and 16..23 map to Mix 2 pairs 0..7.
 The UI waits for the complete bitmap before seeding its cached link buttons.
 
-Still open: source bank `0x03`; the exact role of dest groups 3 and 5; the
-DSP/mic-modelling frames; physical-input meter ownership and calibration; the
-two output-volume paths; `param 0x66` (bus dim/mono?); the complete Zen Go
-readback category bounds; and the q03 body-variant discriminator. Live
-round-trip of the capture-confirmed Zen Go maps still needs hardware testing.
+Still open: the mic-modelling frame; physical-input meter ownership and
+calibration; the complete Zen Go readback category bounds; and the q03
+body-variant discriminator. Source bank `0x03`, dest groups 3 / 4 / 5, the
+output status byte and the "two output-volume paths" were settled by the
+2026-11-21 vendor panel run (addendum at the end of this document).
 See `open_questions` in the profile.
 
 ## Fork addendum: AFX inserts on Discrete 4 (`0xa270`) and Zen Go (`0xa015`)
@@ -2325,9 +2325,11 @@ stay private.
 - **Implemented.** `protocol.build_afx_insert_chain` and the WebUI's
   `/api/afx-inserts` rebuild these frames from the profile's
   `afx_inserts.chain_write` / `writes` contract and verify by readback.
-- **Not captured.** Zen Go bypass, parameter frames (five opcode-`0x1c`
-  frames follow a ClearQ load on the Discrete 4, undecoded), reorder, and
-  linked racks.
+- **Not captured (as of 2026-11-17).** Zen Go bypass, parameter frames (five
+  opcode-`0x1c` frames follow a ClearQ load on the Discrete 4, undecoded),
+  reorder, and linked racks. Bypass and the parameter frames were mapped
+  later (bullets below and the profiles); reorder and the rack link frame
+  are in the 2026-11-21 addendum.
 - **Command frame rule (both devices, 2026-11-17).** In every `0x70` frame
   byte 16 is a parameter id, byte 17 the payload length, and byte 4 the
   payload length plus `0x12`. So `0x13` is a one-byte SET_PARAM, `0x16` the
@@ -2345,3 +2347,58 @@ stay private.
   Auraverb, FET-A76, FET-A78, Comp-4K-Strip, BAE-1073MP, Guitar Amp (the
   model index is in its block) and Guitar Cabinet (seven frames, the large
   ones 246 bytes). All other loads are a chain write alone.
+
+## Fork addendum: Zen Go vendor panel run (2026-11-21)
+
+Evidence: the owner's unit (fw 05.04), vendor panel 1.1.26 under Wine, usbmon,
+every non-effect control of the panel clicked or wheeled once with a marker
+per action. Frames below are payload bytes from report byte 16; the opcode at
+byte 4 is the payload length plus `0x12` (rule above). Status and the exact
+evidence lines are in `profiles/zen_go_sc.json`; the capture stays private.
+Implemented from these captures; this project had not yet sent any of the new
+writes to the device when this was written.
+
+- **Output status byte** (`0x73` offsets 29 / 31 / 33) is a bit field: bit0
+  mute, bit1 dim, `03` = both. On Monitor bits 3-5 repeat the Monitor Out
+  Trim index. **A dim write, on or off, clears the mute bit**; a mute write
+  changes only bit0. This project refuses dim on a bus that reads muted.
+- **Mixer strip** `d4 04 <mix> <strip 1-16> <fader> <pan|flags>`: the strip
+  byte is the strip number (strip 16 = `10`), and cat `0x04` holds strip N
+  at body bytes 2N, 2N+1. The 133-byte record continues with the reverb
+  return byte at 66 and the (send, send pan) pairs of the strips from 69.
+- **Reverb send** `e9 04 00 <strip 1-16> <send> <pan>` (opcode `0x16`): send
+  `00` = 0 dB .. `60` = off, its own pan `02` .. `20` .. `3e`. Readback cat
+  `0x18` index 0, pair N = strip N.
+- **Reverb settings**: the Orion's frame, `da 0b 00 <room> <color>
+  <predelay> 64 <early> <late> <rich> <time> <level> <on>`; predelay and
+  late delay run 0-150, level 1-100. Readback cat `0x0a` index 0.
+- **Reverb returns** `68 <0 Monitor/HP1 | 1 HP2> <level | 0x80 mute>`
+  (opcode `0x13`; `0x68` is bus dim on the Orion). Readback cat `0x17`
+  index 0, bytes 0 and 1.
+- **Monitor Out Trim** `cb 42 00 01 <n>` (opcode `0x54`, a 66-byte payload of
+  which only these bytes were non-zero): n 0-6 = 20-14 dBu, `0x73` offset
+  25 = n*4.
+- **Panning law** `24 <n>` (opcode `0x12`): 0 = 0 dB, 1 = -6, 2 = -3,
+  3 = -4.5 (not the Orion's order). Readback cat `0x12` index 0.
+- **Oscillator** `0a <bits>` (opcode `0x12`): bit0 / bit2 = oscillator 1 / 2
+  at 440 Hz instead of 1 kHz, bits 4-5 level (0, -6, -12, -18 dBFS), bit6 /
+  bit7 mutes. Reads back at `0x73` offset 20. **Brightness** `0e <0-100>`,
+  offset 26.
+- **Page tabs** `49 00 <v>`: `0f` Monitors & Headphones / MONITOR-HP1, `0c`
+  HEADPHONES 2, `04` DIGITAL OUTS, `10` DAW I/O; `0x73` offset 122.
+- **Routing groups**: 3 = Record 1-8 (8 pairs), 4 = SPDIF OUT (2 pairs),
+  5 = AFX IN, the rack inputs of strips 1-4 (4 pairs), 6-9 = the input maps
+  of four mixers. **Source banks**: `03` AFX OUT, `04` LOOPBACK HP 1/MON,
+  `05` LOOPBACK HP 2 (both loopbacks only for Record and SPDIF OUT). The
+  panel treats Record n and mixer strip n as one selector and rewrites
+  groups 3 and 6-9 from its own model on an ordinary source; the device
+  stores each group separately, and this project writes only the group that
+  was changed.
+- **Links** `a2 00 00 <on>` preamp link (cat `0x0b` index 0; link ON makes
+  the panel send `50 01 <CH 1 gain>` as well), `a2 04 <pair> <on>` rack
+  link of strips 1+2 / 3+4 (cat `0x0b` index 4), sent before `a2 03`.
+- **Rack reorder**: one chain write with the same effects in the new order
+  (`d7 11 02 27 00 33` -> `d7 11 02 33 00 27`).
+- **Not captured**: mic-model selection (all models greyed), clock source
+  and sample rate (greyed at USB / 48 kHz), HP2 mute / dim, 48 V, session
+  transfer (saving sends nothing; loading replays the frames above).

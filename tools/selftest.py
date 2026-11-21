@@ -576,7 +576,7 @@ def t_write_bus_flags(dev):
                 )
             finally:
                 dev.write(proto.build_command(dev.p, param, bus, orig))
-                # Exclusive-enum status (Zen Go): setting dim replaces mute, so mute must come back too.
+                # Zen Go: a dim write clears the mute bit, so mute must come back too.
                 if orig_mute and 'bus_mute' in dev.p.get('params', {}):
                     dev.write(proto.build_command(dev.p, 'bus_mute', bus, 1))
                 if level_changed:

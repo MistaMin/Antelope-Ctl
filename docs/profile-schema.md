@@ -622,7 +622,7 @@ Machine-enforced bounds. `protocol.check_opcode` / `check_target` /
 | `gain_bounds` / `adat_gain_bounds` / `spdif_gain_bounds` | the gain CLI commands | dB clamp ranges |
 | `min_write_interval_ms` | (advisory) | rate-limit hint |
 | `mixer_bounds` `{mixes,strips,fader,pan}` | `build_mix_command` | optional: refuse a mix / strip outside the device, clamp fader and pan |
-| `protected_mute_buses` `[...]` | self-tests, WebUI `bus-toggle` | optional: buses whose mute no automatic action may release |
+| `protected_mute_buses` `[...]` | self-tests, WebUI `bus-toggle`, CLI `set-bus-dim` / `set-bus-mono` (`protocol.bus_flag_may_release_mute`) | optional: buses whose mute no automatic action may release |
 
 Optional keys for devices that differ from the Orion / Zen Go shape (all
 default to the old behaviour when absent; first used by
@@ -633,11 +633,25 @@ default to the old behaviour when absent; first used by
 | `buses.known[id].status: "unconfirmed"` | `channel_space_bounds("bus")` | a guessed bus: listed, but not a legal target and not shown until the status is changed |
 | `params.<name>.bus_target_key` | `build_command` | the wire target is `buses.known[bus][key]`, not the bus id (output dim ids that differ from level / mute ids) |
 | `frame.state_report.input_mode_base_offset` | `parse_state` | the input mode is a whole byte per channel; used when there is no `status_base_offset`. Phase / 48 V are then reported as unread |
-| `frame.state_report.bus_block.flags_combine` | WebUI `bus-toggle` | true once mute + dim are known to combine; until then dim is refused on a protected muted bus |
+| `frame.state_report.bus_block.flags_combine` | WebUI `bus-toggle`, CLI `set-bus-dim` / `set-bus-mono` | true only when a dim (or mono) write is known to leave the mute bit alone; otherwise dim is refused on a protected bus that reads muted or unread. False on the Zen Go: its status byte can read mute + dim, but every dim write clears mute |
 | `frame.mix_command.channel_base` | `build_mix_command` | added to the 0-based strip index on the wire |
 | `mixer.link_write` `{space, pairs_by_mix, companions_before}` | `build_mixer_link_commands` | the only (mix, pair) links that may be written, and SET_LINK frames in other spaces sent first |
 | `mixer.input_routing.strict` (+ `locked_channels`, `display_only_source_banks`) | WebUI routing writes, CLI `route` | the strip source map may only be written to all its mirror groups, on unlocked strips, with selectable sources |
 | `features.mixer_sources.locked_channels`, `.display_only_sources` | WebUI | strips whose source select is disabled; sources that are labelled but not selectable |
+
+Optional keys first used by `zen_go_sc.json` (vendor panel run 2026-11-21):
+
+| key | read by | meaning |
+|---|---|---|
+| `frame.routing_command.destination_sources` `{group: [kind, ...]}` | `route_source_refusal`: WebUI `route` / `route-batch` and routing matrix, CLI `route` | the only source kinds (keys of `source_semantics`) a new assignment in that group may use; mute is always allowed. A group without a list takes every source |
+| `frame.auraverb_command.param_ranges` `{name: [lo, hi]}` | `build_auraverb_command`, WebUI reverb panel | per-parameter range where it is not `param_range` |
+| `frame.reverb_send_command` | `build_reverb_send_command`, WebUI `mix` (`send`, `send_pan`) | the reverb send as a frame of its own: `channel_offset` + `channel_base`, `channels`, `send_offset` + `send_range`, `pan_offset` + `pan_center` + `pan_range` |
+| `frame.readback.layouts[]` `mixer_state` `.send_offset` | `parse_mixer_record` | where the (send, send pan) pairs of the strips start in the mixer record; slots then carry `send` and `send_pan` |
+| `frame.output_trim_command` `{opcode, param_id, fixed_offset, fixed, value_offset}` | `build_output_trim_command`, WebUI `output-trim` | an output trim that is not SET_PARAM: `fixed` is sent as captured. Targets come from `params.output_trim.targets`; `.target_labels` names the Settings rows |
+| `params.reverb_return` `{id, targets, range, mute_bit, runtime_readback}` | WebUI `reverb-return`, `GET /api/auraverb` | return level and mute in one SET_PARAM value byte; `runtime_readback` names the structured record that holds it |
+| `params.oscillator.value_mask` | WebUI `oscillator` | the bits of the packed oscillator byte that were captured; others are refused |
+| `frame.state_report.oscillator_byte_offset` | WebUI state stream (`oscillator`) | where the oscillator byte reads back |
+| `afx_inserts.writes.reorder` | `InsertRack.change` (`move`) | true where a whole-rack write in a new order was captured |
 
 Every bound here should have a matching `hazards` entry saying what goes
 wrong without it.

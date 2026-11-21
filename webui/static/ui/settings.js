@@ -175,12 +175,17 @@ function buildSettings() {
     const dbu = ot.trim_dbu || {};
     const label = i => (dbu[i] != null ? dbu[i] + ' dBu' : String(i));
     $$('[data-trim]').forEach(sel => {
+      // Only the trims this profile declares; a profile label replaces the Orion row name.
+      const row = sel.closest('.srow'), name = ot.target_labels?.[sel.dataset.trim];
+      row.hidden = !!ot.targets && !(sel.dataset.trim in ot.targets);
+      if (name) row.firstElementChild.textContent = name;
       sel.innerHTML = Array.from({ length: 7 }, (_, i) => `<option value="${i}">${label(i)}</option>`).join('');
       sel.addEventListener('change', () =>
         post('/api/output-trim', { target: +sel.dataset.trim, value: +sel.value }));
     });
   }
   const dc = $('[data-dc]');
+  if (dc) dc.closest('.srow').hidden = !PROFILE.params?.dc_coupling;   // Zen Go: no such control
   if (dc) {
     try { DC.on = localStorage.getItem('dcCoupled') === '1'; } catch (_) {}
     const paint = () => { dc.classList.toggle('on', DC.on); dc.textContent = DC.on ? 'ON' : 'OFF'; };

@@ -244,13 +244,14 @@ class Discrete4BasicsTests(unittest.TestCase):
     def test_other_devices_keep_their_frames(self):
         zen = load('zen_go_sc')
         self.assertEqual(payload(protocol.build_command(zen, 'bus_dim', 2, 1)), '66 02 01')
-        self.assertEqual(payload(protocol.build_mix_command(zen, 1, 3, 12, 0, 0)),
-                         'd4 04 01 03 0c 20')
+        # strip byte = strip number (vendor panel 2026-11-21: strip 9 of the HP2 page)
+        self.assertEqual(payload(protocol.build_mix_command(zen, 1, 8, 2, -30, 0)),
+                         'd4 04 01 09 02 02')
         self.assertEqual([payload(p) for p in
                           protocol.build_mixer_link_commands(zen, 1, 2, True)],
                          ['a2 03 12 01'])
         self.assertEqual(protocol.channel_space_bounds(zen, 'bus'), [0, 1, 2])
-        self.assertEqual(protocol.protected_mute_buses(zen), [])
+        self.assertEqual(protocol.protected_mute_buses(zen), [0, 1, 2])
 
 
 if __name__ == '__main__':

@@ -82,6 +82,41 @@ class ReadbackRecordTests(unittest.TestCase):
     def test_sibling_profiles_do_not_inherit_orion_layouts(self):
         self.assertIsNone(protocol.readback_record_layout(self.zen, 0x0b, 0))
 
+    def test_zen_go_reverb_and_mixer_records_from_the_panel_marker_pass(self):
+        zen = self.zen
+        # Replies of 2026-11-21 with strip 15 send 2a, strip 16 send 21 / send pan 19,
+        # mix 0 strip 16 at fader 11 muted with pan 17, return 0 at 33 muted, return 1 at 44.
+        mixer = bytes.fromhex(
+            '00 20 5a 20 5a 20 00 02 00 3e 00 02 00 3e 5a 02 5a 3e' + ' 00 02 00 3e' * 3
+            + ' 00 02 11 57' + ' 00 02 00 3e' * 8 + ' b3 00 20 60 20 60 20' + ' 60 02 60 3e' * 6
+            + ' 2a 02 21 19' + ' 60 02 60 3e' * 8)
+        slots = protocol.parse_mixer_record(zen, mixer)
+        self.assertEqual(len(slots), 16)
+        last = slots[15]
+        self.assertEqual((last['fader'], last['pan'], last['mute'], last['solo']), (0x11, -9, True, False))
+        self.assertEqual((last['send'], last['send_pan']), (0x21, -7))
+        self.assertEqual((slots[14]['send'], slots[14]['send_pan']), (0x2a, -30))
+        self.assertEqual((slots[0]['fader'], slots[0]['send'], slots[0]['send_pan']), (0x5a, 0x60, 0))
+        sends = protocol.parse_readback_records(zen, bytes.fromhex(
+            '00 20 60 20 60 20' + ' 60 02 60 3e' * 6 + ' 2a 02 21 19' + ' 60 02 60 3e' * 8), 0x18, 0)
+        self.assertEqual([(row['send'], row['pan']) for row in sends[15:17]], [(0x2a, 0x02), (0x21, 0x19)])
+        returns = protocol.parse_readback_records(zen, bytes.fromhex('b3 44 60 60'), 0x17, 0)
+        self.assertEqual([row['value'] for row in returns], [0xb3, 0x44, 0x60, 0x60])
+        self.assertEqual(protocol.parse_readback_records(zen, b'\x02', 0x12, 0)[0]['index'], 2)
+        reverb = protocol.parse_auraverb_record(zen, bytes.fromhex(
+            '00 1f 4d 07 64 2c 3a 39 11 46 00 ff' + ' 51 64 00 64 0b 0d 18 42 32 00 ff' * 2
+            + ' 51 64 00 64 0b 0d 18 42 32'))[0]
+        self.assertEqual(reverb['params'], {
+            'room_size': 0x1f, 'color': 0x4d, 'pre_delay': 0x07, 'early_reflection_gain': 0x2c,
+            'late_reflection_delay': 0x3a, 'richness': 0x39, 'reverb_time': 0x11, 'reverb_level': 0x46})
+        self.assertEqual((reverb['enabled'], reverb['wet']), (False, 100))
+        self.assertTrue(protocol.auraverb_readback_available(zen))
+        for category, index in ((0x0a, 1), (0x17, 1), (0x18, 1), (0x12, 1), (0x03, 2)):
+            with self.assertRaises(protocol.ConstraintError):
+                protocol.build_readback_query(zen, category, index)
+        self.assertEqual(protocol.build_readback_query(zen, 0x03, 4)[:16].hex(' '),
+                         '74 00 00 00 10 00 00 00 03 00 00 00 04 00 00 00')
+
 
 if __name__ == '__main__':
     unittest.main()

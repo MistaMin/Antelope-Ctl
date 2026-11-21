@@ -328,7 +328,8 @@ function renderMatrix() {
     }).join('')}</tr></thead><tbody>`;
 
   h += cellRow({ key: 'mute:', label: muteLabel, kind: 'mute', number: null });
-  SRC_GROUPS.forEach(grp => {
+  // A destination may list the source kinds it takes (Zen Go: loopbacks only for Record and S/PDIF out).
+  SRC_GROUPS.filter(grp => !d.sources || d.sources.includes(grp.key)).forEach(grp => {
     const open = ROUTE_GRP_OPEN.has(grp.key);
     const n = grpCount(grp, cur);
     const m = Math.min(N, grp.rows.length);

@@ -118,11 +118,12 @@ function initAuraVerbPanel() {
   if (!panel || !UI_FEATURES?.auraverb?.enabled) { if (panel) panel.hidden = true; return; }
   if (!panel.children.length) {
     const [lo, hi] = AURAVERB?.range || avCommand().param_range || [0, 100];
+    const span = key => AURAVERB?.ranges?.[key] || [lo, hi];   // Zen Go: delays 0..150, level 1..100
     panel.innerHTML = `<div class="av-hd"><span class="av-logo">Gazelle <span>Reverb</span></span>
       <span class="av-sub">MIX 1 REVERB</span><button class="modal-x" data-av-close aria-label="close">&times;</button></div>
       <div class="av-body"><div class="av-controls">${AV_PARAM_META.map(([key, label]) =>
         `<div class="av-control"><span class="av-value" data-av-value="${key}">–</span>
-          <div class="av-knob"><i></i><input type="range" data-av-param="${key}" min="${lo}" max="${hi}" value="0" aria-label="${AV_DISPLAY_NAME} ${label.toLowerCase()}"></div>
+          <div class="av-knob"><i></i><input type="range" data-av-param="${key}" min="${span(key)[0]}" max="${span(key)[1]}" value="${span(key)[0]}" aria-label="${AV_DISPLAY_NAME} ${label.toLowerCase()}"></div>
           <span class="av-label">${label}</span></div>`).join('')}</div>
         <div class="av-center"><span data-av-status>WAITING FOR READBACK</span><span class="av-screen">ROOM_SIZE</span>
           <span class="av-toggle">FX <button type="button" data-av-enable>OFF</button></span></div>
@@ -711,6 +712,18 @@ function renderInsertRacks() {
       remove.setAttribute('aria-label', `Remove ${row.label} from channel ${channel + 1}`);
       remove.disabled = !editable;
       remove.addEventListener('click', () => changeInsertRack({channel, operation: 'remove', slot}));
+      if (editable && state.reorder && rows.length > 1) {
+        // Drag one effect onto another of the same rack: one whole-rack write in the new order.
+        line.draggable = true;
+        line.title = 'Drag onto another effect of this rack to reorder';
+        line.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', `${channel}:${slot}`));
+        line.addEventListener('dragover', e => e.preventDefault());
+        line.addEventListener('drop', e => {
+          e.preventDefault();
+          const [from, source] = e.dataTransfer.getData('text/plain').split(':').map(Number);
+          if (from === channel && source !== slot) changeInsertRack({channel, operation: 'move', source, slot});
+        });
+      }
       if (state.mapped_types?.includes(row.type)) {
         const edit = document.createElement('button');
         edit.type = 'button';
