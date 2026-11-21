@@ -392,6 +392,9 @@ are a separate, smaller codec (`protocol.afx_block_get()` / `afx_block_set()`):
 raw `min`/`max`. An `f32` field takes an integer or a float and is range-checked
 after rounding to float32; integer fields refuse a float. An optional `values`
 list replaces the range check for a selector with gaps (FET ratio: 0, 1, 2, 4, 8).
+`afx_inserts.parameters.bypass` (`param_id`, `opcode`) enables the bypass frame
+(`protocol.build_afx_bypass()`); the state is the flag byte before the block, so
+it needs `read_offset` >= 1.
 
 `frame.link_command.readback` separately maps an input link command to safe
 `link_table` layouts. `post_write_pair_counts` schedules a diagnostic read
