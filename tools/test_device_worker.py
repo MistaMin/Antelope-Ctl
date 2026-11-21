@@ -64,7 +64,7 @@ class DeviceWorkerTests(unittest.TestCase):
             yield transport
 
         attempts = opening()
-        with mock.patch.object(server, 'open_transport',
+        with mock.patch.object(server.device_core, 'open_transport',
                                side_effect=lambda *args: _raise_or_return(next(attempts))):
             device.start()
             self.assertTrue(transport.reading.wait(5), 'the worker never connected')
@@ -75,6 +75,28 @@ class DeviceWorkerTests(unittest.TestCase):
         self.assertFalse(device._t.is_alive())
         self.assertEqual(transport.written, [b'after reconnect'])
 
+    def test_an_unexpected_error_does_not_end_the_worker(self):
+        device, transport = self.device, FakeTransport()
+        failed = threading.Event()
+
+        def broken_read(magic, timeout=None):
+            if not failed.is_set():
+                failed.set()
+                raise ValueError('short report')
+            transport.reading.set()
+            return None
+
+        transport.read_one = broken_read
+        with mock.patch.object(server.device_core, 'open_transport', return_value=transport), \
+                mock.patch.object(server.device_core.traceback, 'print_exc'):
+            device.start()
+            self.assertTrue(transport.reading.wait(5), 'the worker did not come back after the error')
+            ran = threading.Event()
+            device.submit(lambda t: ran.set())
+            self.assertTrue(ran.wait(5))
+            device.stop()
+        self.assertFalse(device._t.is_alive())
+
     def test_stop_ends_a_worker_that_cannot_open_the_device(self):
         device = self.device
         tried = threading.Event()
@@ -83,7 +105,7 @@ class DeviceWorkerTests(unittest.TestCase):
             tried.set()
             raise OSError('device not found')
 
-        with mock.patch.object(server, 'open_transport', side_effect=refuse):
+        with mock.patch.object(server.device_core, 'open_transport', side_effect=refuse):
             device.start()
             self.assertTrue(tried.wait(5))
             device.submit(lambda t: t.write(b'never'))
