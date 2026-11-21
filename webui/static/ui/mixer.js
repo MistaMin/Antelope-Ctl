@@ -796,7 +796,9 @@ function renderInsertParams() {
     input.step = field.step || 1;
     input.min = field.min; input.max = field.max; input.value = field.value;
     input.setAttribute('aria-label', field.label);
-    const changed = () => { paint(+input.value); queueInsertParam(field.key, +input.value); };
+    // A selector with gaps (field.values) snaps to the nearest allowed value.
+    const snap = value => field.values ? field.values.reduce((a, b) => Math.abs(b - value) < Math.abs(a - value) ? b : a) : value;
+    const changed = () => { input.value = snap(+input.value); paint(+input.value); queueInsertParam(field.key, +input.value); };
     input.addEventListener('input', changed);
     insertKnobGestures(cell, cell.querySelector('.insert-knob-body'), input, field, changed);
     paint(field.value);

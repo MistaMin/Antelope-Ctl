@@ -151,6 +151,7 @@ class InsertRack:
                             'scale': field.get('scale', 1), 'unit': field.get('unit', ''),
                             # Knob step: integers move by one; a float field by 1/100 of its range.
                             'step': (field['max'] - field['min']) / 100 if field['type'] == 'f32' else 1,
+                            **({'values': field['values']} if 'values' in field else {}),
                             'value': values[field['key']]} for field in effect['fields']] + extra}
 
     def _slot(self, transport, spec, channel, slot):
