@@ -69,7 +69,9 @@ function insertKnobGestures(cell, body, input, field, changed) {
   });
   cell.addEventListener('wheel', event => {
     event.preventDefault();
-    input.value = clamp(+input.value - Math.sign(event.deltaY) * step);
+    // A selector with gaps (field.values) moves to the next listed value.
+    input.value = field.values ? field.values[field.values.indexOf(+input.value) - Math.sign(event.deltaY)] ?? +input.value
+      : clamp(+input.value - Math.sign(event.deltaY) * step);
     changed();
   }, {passive: false});
 }
