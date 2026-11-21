@@ -17,7 +17,8 @@ Detailed status per feature: [linux-parity-plan.md](linux-parity-plan.md).
 | Mixers: fader, pan, mute, solo, strip link, strip source | yes (4 mixes x 16 strips) | upstream profile |
 | AFX racks: show, load, remove effects | yes | yes (63 of 72 types loadable) |
 | Effect settings (knobs) | 45 effects + ClearQ | the same 45 + ClearQ + 22 Zen-Go-only effects |
-| Guitar amp | load / remove only | load / remove only |
+| Effect switches and selectors | not captured | 85 on 38 effects (shown as plain controls) |
+| Guitar amp | load / remove only | model, output level, Bright |
 | Effect faceplates in the WebUI | 47 layouts, own artwork | same layouts; the 22 Zen-Go-only effects show plain controls |
 
 - **Faceplates** are drawn with the owner's GoodLookin DRI knob/switch/plate renderer

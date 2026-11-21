@@ -2516,6 +2516,8 @@ def _afx_f32(value) -> float:
 
 def afx_field_in_range(field: dict, value) -> bool:
     """Whether ``value`` is inside a mapped field's min..max (false for NaN/inf)."""
+    if 'values' in field:  # a selector with gaps (FET ratio buttons: 0, 1, 2, 4, 8)
+        return value in field['values']
     if field['type'] != 'f32':
         return int(field['min']) <= value <= int(field['max'])
     # Compared as stored: float32(0.01) is slightly below the double 0.01.
