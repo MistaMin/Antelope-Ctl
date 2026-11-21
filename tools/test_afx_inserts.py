@@ -192,8 +192,16 @@ class InsertChainTests(unittest.TestCase):
             if kind in own:
                 self.assertEqual((effect['read_offset'], effect['read_stride']), (1, effect['block_length'] + 1), kind)
                 continue
-            self.assertEqual(effect['fields'], d4['afx_inserts']['parameters']['effects'][kind]['fields'], kind)
-            self.assertEqual(effect.get('read_offset'), {'1': 0, '3': None}.get(kind, 1))
+            # The Discrete 4's fields come first; switches clicked only on the Zen Go follow.
+            shared = d4['afx_inserts']['parameters']['effects'][kind]['fields']
+            self.assertEqual(effect['fields'][:len(shared)], shared, kind)
+            taken = [byte for field in effect['fields'] for byte in
+                     range(field['offset'], field['offset'] + protocol._AFX_FIELD_TYPES[field['type']][0])]
+            self.assertEqual(len(taken), len(set(taken)), kind)
+            self.assertEqual(effect.get('read_offset'), 0 if kind == '1' else 1)
+        ratio = next(field for field in effects['9']['fields'] if field['key'] == 'ratio')
+        self.assertEqual([value for value in range(-1, 10) if protocol.afx_field_in_range(ratio, value)], [0, 1, 2, 4, 8])
+        self.assertEqual(protocol.afx_block_set(effects['3'], bytes(16), 'bright', 1)[10], 1)  # amp: readable since 2026-11-21
         # The Zen Go's read is tagged and its sub-command differs; the write frame is the same.
         self.assertEqual(protocol.build_afx_state_query(zen, 29)[:16].hex(' '),
                          '74 00 00 00 11 00 00 00 07 00 00 00 1d 00 00 80')
@@ -263,7 +271,8 @@ class InsertChainTests(unittest.TestCase):
             self.assertEqual(len(frames), 1)
             self.assertEqual(frames[0][:5].hex(' '), '70 00 00 00 24')
             self.assertEqual(payload(frames[0]), 'd5 12 03 00 00 46 3e 3f 00 44 00 32 59 00 01')
-            self.assertIsNone(block)   # no captured read: nothing to compare with
+            # Discrete 4: no captured read, nothing to compare with. Zen Go: read captured 2026-11-21.
+            self.assertEqual(block, None if profile is d4 else bytes.fromhex('00463e3f004400325900010000000000'))
             self.assertEqual(profile['afx_inserts']['writes']['effects']['3']['instances'], [0])
         self.assertEqual(protocol.afx_load_defaults(d4, 39, 0), ([], None))   # PowerGate: chain write only
 
