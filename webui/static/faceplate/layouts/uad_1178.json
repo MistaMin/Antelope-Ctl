@@ -1,0 +1,65 @@
+{
+ "effect": "uad_1178",
+ "title": "FET-A78",
+ "plate": "Silver",
+ "width": 760,
+ "height": 216,
+ "sections": [
+  {
+   "label": "LEVEL",
+   "x": 29,
+   "y": 36,
+   "w": 368,
+   "h": 164
+  },
+  {
+   "label": "TIMING",
+   "x": 411,
+   "y": 36,
+   "w": 320,
+   "h": 164
+  }
+ ],
+ "controls": [
+  {
+   "key": "input",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 127,
+   "y": 106,
+   "size": 92,
+   "label": "INPUT",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 299,
+   "y": 106,
+   "size": 92,
+   "label": "OUTPUT",
+   "steps": null
+  },
+  {
+   "key": "attack",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 497,
+   "y": 106,
+   "size": 68,
+   "label": "ATTACK",
+   "steps": null
+  },
+  {
+   "key": "release",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 645,
+   "y": 106,
+   "size": 68,
+   "label": "RELEASE",
+   "steps": null
+  }
+ ]
+}

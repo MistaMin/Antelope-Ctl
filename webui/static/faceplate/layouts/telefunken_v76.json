@@ -1,0 +1,63 @@
+{
+ "effect": "telefunken_v76",
+ "title": "VPA-76",
+ "plate": "Olive",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "FILTERS",
+   "x": 234,
+   "y": 36,
+   "w": 308,
+   "h": 168
+  }
+ ],
+ "controls": [
+  {
+   "key": "warmth",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 120,
+   "y": 108,
+   "size": 96,
+   "label": "WARMTH",
+   "steps": null
+  },
+  {
+   "key": "high_boost",
+   "kind": "toggle",
+   "style": "Lever toggle",
+   "x": 314,
+   "y": 108,
+   "size": 56,
+   "label": "HIGH BOOST",
+   "steps": null
+  },
+  {
+   "key": "low_cut",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 456,
+   "y": 108,
+   "size": 68,
+   "label": "LOW CUT",
+   "steps": [
+    "OFF",
+    "120Hz",
+    "300Hz",
+    "120+300Hz"
+   ]
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 648,
+   "y": 108,
+   "size": 80,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

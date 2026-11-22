@@ -1,0 +1,113 @@
+{
+ "effect": "pultec_meq",
+ "title": "VMEQ-5",
+ "plate": "Slate",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "LOW PEAK",
+   "x": 20,
+   "y": 20,
+   "w": 234,
+   "h": 180
+  },
+  {
+   "label": "DIP",
+   "x": 263,
+   "y": 20,
+   "w": 234,
+   "h": 180
+  },
+  {
+   "label": "HIGH PEAK",
+   "x": 506,
+   "y": 20,
+   "w": 234,
+   "h": 180
+  }
+ ],
+ "controls": [
+  {
+   "key": "low_peak_freq",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 82,
+   "y": 105,
+   "size": 64,
+   "label": "FREQ",
+   "steps": [
+    "200 Hz",
+    "300 Hz",
+    "500 Hz",
+    "700 Hz",
+    "1 kHz"
+   ]
+  },
+  {
+   "key": "low_peak",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 182,
+   "y": 105,
+   "size": 88,
+   "label": "PEAK"
+  },
+  {
+   "key": "dip_freq",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 325,
+   "y": 105,
+   "size": 64,
+   "label": "FREQ",
+   "steps": [
+    "200 Hz",
+    "300 Hz",
+    "500 Hz",
+    "700 Hz",
+    "1 kHz",
+    "1.5 kHz",
+    "2 kHz",
+    "3 kHz",
+    "4 kHz",
+    "5 kHz",
+    "7 kHz"
+   ]
+  },
+  {
+   "key": "dip",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 425,
+   "y": 105,
+   "size": 88,
+   "label": "DIP"
+  },
+  {
+   "key": "high_peak_freq",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 568,
+   "y": 105,
+   "size": 64,
+   "label": "FREQ",
+   "steps": [
+    "1.5 kHz",
+    "2 kHz",
+    "3 kHz",
+    "4 kHz",
+    "5 kHz"
+   ]
+  },
+  {
+   "key": "high_peak",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 668,
+   "y": 105,
+   "size": 88,
+   "label": "PEAK"
+  }
+ ]
+}

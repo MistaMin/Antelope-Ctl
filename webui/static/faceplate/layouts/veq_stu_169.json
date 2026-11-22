@@ -1,0 +1,65 @@
+{
+ "effect": "veq_stu_169",
+ "title": "VEQ-STU 169",
+ "plate": "Leveler",
+ "width": 760,
+ "height": 226,
+ "sections": [
+  {
+   "label": "TONE",
+   "x": 16,
+   "y": 34,
+   "w": 558,
+   "h": 176
+  },
+  {
+   "label": "OUT",
+   "x": 582,
+   "y": 34,
+   "w": 162,
+   "h": 176
+  }
+ ],
+ "controls": [
+  {
+   "key": "low",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 109,
+   "y": 110,
+   "size": 100,
+   "label": "LOW",
+   "steps": null
+  },
+  {
+   "key": "mid",
+   "kind": "knob",
+   "style": "FS#b3261e",
+   "x": 295,
+   "y": 110,
+   "size": 100,
+   "label": "MID",
+   "steps": null
+  },
+  {
+   "key": "high",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 481,
+   "y": 110,
+   "size": 100,
+   "label": "HIGH",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 663,
+   "y": 110,
+   "size": 76,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

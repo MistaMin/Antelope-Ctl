@@ -1,0 +1,127 @@
+{
+ "effect": "neumann_w492",
+ "title": "NEU-W492",
+ "plate": "Black",
+ "width": 760,
+ "height": 330,
+ "sections": [
+  {
+   "label": "LOW",
+   "x": 20,
+   "y": 20,
+   "w": 136,
+   "h": 290
+  },
+  {
+   "label": "LOW MID",
+   "x": 166,
+   "y": 20,
+   "w": 136,
+   "h": 290
+  },
+  {
+   "label": "HIGH MID",
+   "x": 312,
+   "y": 20,
+   "w": 136,
+   "h": 290
+  },
+  {
+   "label": "HIGH",
+   "x": 458,
+   "y": 20,
+   "w": 136,
+   "h": 290
+  },
+  {
+   "label": "OUTPUT",
+   "x": 604,
+   "y": 20,
+   "w": 136,
+   "h": 290
+  }
+ ],
+ "controls": [
+  {
+   "key": "low_gain",
+   "kind": "knob",
+   "style": "Rd#b3261e",
+   "x": 88,
+   "y": 95,
+   "size": 76,
+   "label": "GAIN"
+  },
+  {
+   "key": "low_freq",
+   "kind": "knob",
+   "style": "Rd#b3261e",
+   "x": 88,
+   "y": 225,
+   "size": 56,
+   "label": "FREQ"
+  },
+  {
+   "key": "low_mid_gain",
+   "kind": "knob",
+   "style": "Rd#c9a227",
+   "x": 234,
+   "y": 95,
+   "size": 76,
+   "label": "GAIN"
+  },
+  {
+   "key": "low_mid_freq",
+   "kind": "knob",
+   "style": "Rd#c9a227",
+   "x": 234,
+   "y": 225,
+   "size": 56,
+   "label": "FREQ"
+  },
+  {
+   "key": "high_mid_gain",
+   "kind": "knob",
+   "style": "Rd#2e7d32",
+   "x": 380,
+   "y": 95,
+   "size": 76,
+   "label": "GAIN"
+  },
+  {
+   "key": "high_mid_freq",
+   "kind": "knob",
+   "style": "Rd#2e7d32",
+   "x": 380,
+   "y": 225,
+   "size": 56,
+   "label": "FREQ"
+  },
+  {
+   "key": "high_gain",
+   "kind": "knob",
+   "style": "Rd#2f6fb0",
+   "x": 526,
+   "y": 95,
+   "size": 76,
+   "label": "GAIN"
+  },
+  {
+   "key": "high_freq",
+   "kind": "knob",
+   "style": "Rd#2f6fb0",
+   "x": 526,
+   "y": 225,
+   "size": 56,
+   "label": "FREQ"
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Rd",
+   "x": 672,
+   "y": 146,
+   "size": 72,
+   "label": "OUTPUT"
+  }
+ ]
+}

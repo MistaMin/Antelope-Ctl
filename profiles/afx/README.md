@@ -15,4 +15,8 @@ See the [schema guide](../../docs/profile-schema.md#afx-and-the-shared-effect-ca
 for storage/loading/export details and the
 [capture workflow](../../docs/orion-afx-workflow.md#editing-captured-plugin-knowledge)
 for evidence updates and migration of archived helpers. Catalog observations
-do not enable runtime writes.
+do not enable runtime writes. This fork's `zen_go_sc.json` and
+`discrete_4_a270.json` implementations are the exception: their
+`commands.parameters` is the runtime parameter block of that device
+([schema](../../docs/profile-schema.md#afx-parameter-blocks-in-the-catalog)), and
+WebUI faceplate layouts are named `webui/static/faceplate/layouts/<effect_id>.json`.

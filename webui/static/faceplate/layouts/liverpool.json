@@ -1,0 +1,101 @@
+{
+ "effect": "liverpool",
+ "title": "Liverpool",
+ "plate": "Dash",
+ "width": 760,
+ "height": 212,
+ "sections": [
+  {
+   "label": "LEVEL",
+   "x": 16,
+   "y": 36,
+   "w": 296,
+   "h": 160
+  },
+  {
+   "label": "TIMING",
+   "x": 326,
+   "y": 36,
+   "w": 256,
+   "h": 160
+  },
+  {
+   "label": "OUTPUT",
+   "x": 596,
+   "y": 36,
+   "w": 148,
+   "h": 160
+  }
+ ],
+ "controls": [
+  {
+   "key": "input",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 96,
+   "y": 104,
+   "size": 88,
+   "label": "INPUT",
+   "steps": null
+  },
+  {
+   "key": "threshold",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 232,
+   "y": 104,
+   "size": 88,
+   "label": "THRESHOLD",
+   "steps": null
+  },
+  {
+   "key": "attack",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 396,
+   "y": 104,
+   "size": 68,
+   "label": "ATTACK",
+   "steps": null
+  },
+  {
+   "key": "recovery",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 512,
+   "y": 104,
+   "size": 68,
+   "label": "RECOVERY",
+   "steps": [
+    "1",
+    "H",
+    "2",
+    "H",
+    "3",
+    "H",
+    "4",
+    "H",
+    "5",
+    "H",
+    "6"
+   ]
+  },
+  {
+   "key": "output_attenuator",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 670,
+   "y": 104,
+   "size": 76,
+   "label": "ATTENUATOR",
+   "steps": [
+    "30",
+    "20",
+    "15",
+    "10",
+    "5",
+    "0"
+   ]
+  }
+ ]
+}

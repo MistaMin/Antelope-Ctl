@@ -1,0 +1,92 @@
+{
+ "effect": "powerex",
+ "title": "PowerEx",
+ "plate": "Granite",
+ "width": 760,
+ "height": 222,
+ "sections": [
+  {
+   "label": "EXPANDER",
+   "x": 16,
+   "y": 34,
+   "w": 380,
+   "h": 172
+  },
+  {
+   "label": "TIMING",
+   "x": 404,
+   "y": 34,
+   "w": 213,
+   "h": 172
+  },
+  {
+   "label": "OUT",
+   "x": 625,
+   "y": 34,
+   "w": 119,
+   "h": 172
+  }
+ ],
+ "controls": [
+  {
+   "key": "threshold",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 83,
+   "y": 108,
+   "size": 96,
+   "label": "THRESHOLD",
+   "steps": null
+  },
+  {
+   "key": "ratio",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 218,
+   "y": 108,
+   "size": 96,
+   "label": "RATIO",
+   "steps": null
+  },
+  {
+   "key": "range",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 341,
+   "y": 108,
+   "size": 72,
+   "label": "RANGE",
+   "steps": null
+  },
+  {
+   "key": "attack",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 457,
+   "y": 108,
+   "size": 68,
+   "label": "ATTACK",
+   "steps": null
+  },
+  {
+   "key": "decay",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 564,
+   "y": 108,
+   "size": 68,
+   "label": "DECAY",
+   "steps": null
+  },
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Slv",
+   "x": 685,
+   "y": 108,
+   "size": 80,
+   "label": "GAIN",
+   "steps": null
+  }
+ ]
+}

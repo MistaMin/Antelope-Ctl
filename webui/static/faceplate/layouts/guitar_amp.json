@@ -1,0 +1,56 @@
+{
+ "effect": "guitar_amp",
+ "title": "Guitar Amp",
+ "plate": "Walnut",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "MODEL",
+   "x": 20,
+   "y": 20,
+   "w": 440,
+   "h": 180
+  },
+  {
+   "label": "OUT",
+   "x": 470,
+   "y": 20,
+   "w": 270,
+   "h": 180
+  }
+ ],
+ "controls": [
+  {
+   "key": "model",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 240,
+   "y": 105,
+   "size": 84,
+   "label": "MODEL",
+   "steps": [
+    "Darkface 65 (US)",
+    "Top30 (UK) Bright",
+    "Modern (US) CH3",
+    "Plexi 59 (UK)",
+    "Rock 22.10 (UK)",
+    "Rock 75 (UK)",
+    "Marcus II (US) Lead",
+    "Tweed Deluxe (US)",
+    "Overange 120 (UK)",
+    "BurnSphere (DE) Lead",
+    "Bass SuperTube VR"
+   ]
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Ivr",
+   "x": 605,
+   "y": 105,
+   "size": 84,
+   "label": "OUTPUT"
+  }
+ ]
+}

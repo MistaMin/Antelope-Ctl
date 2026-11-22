@@ -1,12 +1,15 @@
 // ---- effect faceplates (static: /webui/static/faceplate/) ----------------
 // A faceplate is one effect's settings drawn as a hardware panel: a plate
-// tile with knob and switch sprite strips placed by layouts/<type>.json.
+// tile with knob and switch sprite strips placed by layouts/<effect id>.json.
 // manifest.json names the sprite files. Both are optional: without them the
 // effect keeps the plain knob grid in mixer.js.
 const FACEPLATE_BASE = new URL('../faceplate/', document.currentScript?.src || location.href).href;
 const FACEPLATE_FILES = new Map();   // path -> promise of parsed JSON, or null
 
 function insertParamText(field, value) {
+  // A selector position's printed label, where the AFX catalogue has one for this control.
+  const option = field.options?.[String(value)];
+  if (option !== undefined) return option;
   const scale = Number(field.scale) || 1;
   // toFixed(4) drops float32 noise (0.51 is stored as 0.50999999...); integers are unchanged.
   const shown = scale === 1 ? String(+Number(value).toFixed(4)) : (value * scale).toFixed(String(scale).split('.')[1]?.length || 0);
@@ -31,8 +34,9 @@ function faceplateSprite(manifest, control) {
 }
 
 // {layout, manifest} when the effect has a layout whose every style exists, else null.
-async function loadFaceplate(type) {
-  const [manifest, layout] = await Promise.all([faceplateFile('manifest.json'), faceplateFile(`layouts/${type}.json`)]);
+async function loadFaceplate(effectId) {
+  if (!effectId) return null;
+  const [manifest, layout] = await Promise.all([faceplateFile('manifest.json'), faceplateFile(`layouts/${effectId}.json`)]);
   if (!manifest || !layout || !Array.isArray(layout.controls)) return null;
   if (!(layout.width > 0 && layout.height > 0) || !manifest.plates?.[layout.plate]) return null;
   const sound = layout.controls.every(control => ['knob', 'stepped', 'toggle'].includes(control.kind)

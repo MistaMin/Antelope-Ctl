@@ -30,7 +30,7 @@
   const missing = [];
   let drawn = 0;
   for (const effect of Object.values(data).sort((a, b) => a.type - b.type)) {
-    const face = await loadFaceplate(effect.type);
+    const face = await loadFaceplate(effect.effect_id);
     if (!face) { missing.push(`${effect.label} (${effect.type})`); continue; }
     const item = document.createElement('div');
     item.className = 'insert-params preview-item';

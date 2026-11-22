@@ -1,0 +1,72 @@
+{
+ "effect": "altec_436c",
+ "title": "ALT-436C",
+ "plate": "Dash",
+ "width": 760,
+ "height": 216,
+ "sections": [
+  {
+   "label": "LEVEL",
+   "x": 16,
+   "y": 36,
+   "w": 366,
+   "h": 164
+  },
+  {
+   "label": "TIMING",
+   "x": 396,
+   "y": 36,
+   "w": 171,
+   "h": 164
+  },
+  {
+   "label": "OUTPUT",
+   "x": 581,
+   "y": 36,
+   "w": 163,
+   "h": 164
+  }
+ ],
+ "controls": [
+  {
+   "key": "volume",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 114,
+   "y": 106,
+   "size": 92,
+   "label": "VOLUME",
+   "steps": null
+  },
+  {
+   "key": "threshold",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 284,
+   "y": 106,
+   "size": 92,
+   "label": "THRESHOLD",
+   "steps": null
+  },
+  {
+   "key": "release_time",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 482,
+   "y": 106,
+   "size": 68,
+   "label": "RELEASE",
+   "steps": null
+  },
+  {
+   "key": "trim",
+   "kind": "knob",
+   "style": "Mini",
+   "x": 662,
+   "y": 106,
+   "size": 60,
+   "label": "TRIM",
+   "steps": null
+  }
+ ]
+}

@@ -369,7 +369,9 @@ minimum from a fresh write; its prior full-block source is recorded explicitly.
 remaining controls without enabling runtime parameter commands.
 The shared control declarations retain their identifiers, so Orion observations
 do not become another model's contract. All three command definitions
-remain `null` for every implementation. A declared control name carries neither an inferred range
+remain `null` for every Orion and `discrete_4_sc.json` implementation; the
+`zen_go_sc.json` and `discrete_4_a270.json` implementations populate
+`commands.parameters` (see [the parameter block](#afx-parameter-blocks-in-the-catalog)). A declared control name carries neither an inferred range
 nor an inferred byte width/offset. `source_name` preserves Gazelle's effect
 key; `name` uses a public product name only when one has been matched.
 Descriptions otherwise remain `null`. Categories now group the menu by
@@ -380,6 +382,50 @@ Other. This presentation metadata carries no write permission, device-ID
 mapping or license evidence. A `#plugins...` or
 `#params...` suffix in an evidence URL is a JSON key path within the linked
 source document, not an HTML anchor.
+
+### AFX parameter blocks in the catalog
+
+This fork's Zen Go (`zen_go_sc.json`) and Discrete 4 (`discrete_4_a270.json`)
+implementations carry the runtime parameter block of each mapped effect in
+`commands.parameters`; the device-wide frame, state query, bypass, loads and
+chain write stay in the device profile's `afx_inserts`. The device profile names
+its catalogue entries with `afx_inserts.parameters.catalog` (a file name in the
+profiles directory, normally `afx_effects.json`) and `catalog_profile` (its own
+file name, the implementations' `profile`):
+
+```json
+{
+  "profile": "zen_go_sc.json",
+  "type_id": 9,
+  "status": "readback-verified",
+  "commands": {"load": null, "recall": null, "parameters": {
+    "frame": "afx_inserts.parameters.write",
+    "writable": true,
+    "block_length": 5, "read_stride": 6, "read_offset": 1,
+    "status": "confirmed",
+    "fields_from": "discrete_4_a270.json",
+    "notes": "...", "evidence": "..."
+  }},
+  "control_encodings": {},
+  "evidence": [],
+  "notes": "..."
+}
+```
+
+`frame` names the device-wide write layout and `writable` is false only with
+`editable: false` (read layout unconfirmed). The remaining keys are the runtime
+contract `protocol.afx_parameter_effect(profile, type_id)` returns:
+`block_length`, `read_stride`, `read_offset`, `fields`, optional `bands`,
+`state_query`, `defaults`, `editable`, `read_layout`, and the device trial's
+`status`, `notes` and `evidence`. `fields_from` names another implementation of
+the same effect whose `fields` this one shares (same block, same byte meanings);
+the Zen Go uses it for the 47 effects it shares with the Discrete 4. A field's
+optional `options` maps raw values (decimal strings, signed for `i8`) to the
+printed labels the WebUI shows; they are copied only from a capture-observed Orion
+`control_encodings` enum at the same block offset, never where this project's own
+recorded meaning differs, and the meanings this project observed stay in `notes`.
+`load_catalog` refuses a malformed contract, a dangling `fields_from` and one
+device type ID with parameters in two effects. Resolution is cached per process.
 
 ---
 
@@ -472,8 +518,9 @@ by default, and `build_readback_query()` applies the same guard. A layout
 derived from an application schema still needs a device capture before its
 outer index can be used.
 
-The fields of an effect's parameter block (`afx_inserts.parameters.effects.<type>.fields`)
-are a separate, smaller codec (`protocol.afx_block_get()` / `afx_block_set()`):
+The fields of an effect's parameter block (`commands.parameters.fields` of the
+device's implementation in `profiles/afx/<effect_id>.json`, see
+[the catalogue](#afx-parameter-blocks-in-the-catalog)) are a separate, smaller codec (`protocol.afx_block_get()` / `afx_block_set()`):
 `u8`/`i8`, `u16`/`i16`, `u32`/`i32` and `f32` (little-endian float32), each with
 raw `min`/`max`. An `f32` field takes an integer or a float and is range-checked
 after rounding to float32; integer fields refuse a float. An optional `values`

@@ -1,0 +1,30 @@
+{
+ "effect": "rd_47",
+ "title": "RD-47",
+ "plate": "Coal",
+ "width": 760,
+ "height": 228,
+ "sections": [],
+ "controls": [
+  {
+   "key": "voltage_gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 275,
+   "y": 112,
+   "size": 104,
+   "label": "VOLTAGE GAIN",
+   "steps": null
+  },
+  {
+   "key": "output_trim",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 497,
+   "y": 112,
+   "size": 80,
+   "label": "OUTPUT TRIM",
+   "steps": null
+  }
+ ]
+}

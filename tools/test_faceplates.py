@@ -1,10 +1,13 @@
 """Effect faceplate layouts (webui/static/faceplate/layouts) against the Discrete 4 profile."""
 import json
 import math
+import sys
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from antelope import protocol  # noqa: E402
 FACEPLATE = ROOT / "webui" / "static" / "faceplate"
 KINDS = ("knob", "stepped", "toggle")
 
@@ -33,12 +36,16 @@ def style_sets(path):
 
 class FaceplateLayoutTests(unittest.TestCase):
     def test_layouts(self):
-        effects = load(ROOT / "profiles" / "discrete_4_a270.json")["afx_inserts"]["parameters"]["effects"]
+        profile = load(ROOT / "profiles" / "discrete_4_a270.json")
+        # Layouts are keyed by catalogue effect id (type ids are model-local).
+        effects = {protocol.afx_effect_id(profile, int(kind)): effect
+                   for kind, effect in protocol.afx_parameter_effects(profile).items()}
         catalogues = {name: style_sets(FACEPLATE / name) for name in ("styles.json", "manifest.json")}
         for path in sorted((FACEPLATE / "layouts").glob("*.json")):
             with self.subTest(layout=path.name):
                 layout = load(path)
-                self.assertEqual(str(layout["type"]), path.stem)
+                self.assertEqual(layout["effect"], path.stem)
+                self.assertNotIn("type", layout)
                 self.assertIn(path.stem, effects, "not a mapped effect")
                 fields = {field["key"]: field for field in effects[path.stem]["fields"]}
                 width, height = layout["width"], layout["height"]

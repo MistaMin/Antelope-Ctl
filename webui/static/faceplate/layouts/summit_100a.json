@@ -1,0 +1,30 @@
+{
+ "effect": "summit_100a",
+ "title": "SMT-100A",
+ "plate": "Silver",
+ "width": 760,
+ "height": 228,
+ "sections": [],
+ "controls": [
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 263,
+   "y": 112,
+   "size": 104,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "gain_reduction",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 497,
+   "y": 112,
+   "size": 104,
+   "label": "GAIN REDUCTION",
+   "steps": null
+  }
+ ]
+}

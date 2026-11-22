@@ -1,0 +1,87 @@
+{
+ "effect": "neve_1073",
+ "title": "BAE 1073",
+ "plate": "Marine",
+ "width": 760,
+ "height": 230,
+ "sections": [
+  {
+   "label": "FILTER",
+   "x": 20,
+   "y": 20,
+   "w": 130,
+   "h": 190
+  },
+  {
+   "label": "EQ",
+   "x": 160,
+   "y": 20,
+   "w": 400,
+   "h": 190
+  },
+  {
+   "label": "GAIN",
+   "x": 570,
+   "y": 20,
+   "w": 170,
+   "h": 190
+  }
+ ],
+ "controls": [
+  {
+   "key": "high_pass",
+   "kind": "stepped",
+   "style": "Rd#2f6fb0",
+   "x": 85,
+   "y": 110,
+   "size": 64,
+   "label": "HIGH PASS",
+   "steps": [
+    "OFF",
+    "50 Hz",
+    "80 Hz",
+    "160 Hz",
+    "300 Hz"
+   ]
+  },
+  {
+   "key": "low_gain",
+   "kind": "stepped",
+   "style": "Rd",
+   "x": 230,
+   "y": 110,
+   "size": 84,
+   "label": "LOW",
+   "steps": null
+  },
+  {
+   "key": "mid_gain",
+   "kind": "stepped",
+   "style": "Rd",
+   "x": 360,
+   "y": 110,
+   "size": 84,
+   "label": "MID",
+   "steps": null
+  },
+  {
+   "key": "high_gain",
+   "kind": "stepped",
+   "style": "Rd",
+   "x": 490,
+   "y": 110,
+   "size": 84,
+   "label": "HIGH",
+   "steps": null
+  },
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Rd#b3261e",
+   "x": 655,
+   "y": 110,
+   "size": 96,
+   "label": "GAIN"
+  }
+ ]
+}

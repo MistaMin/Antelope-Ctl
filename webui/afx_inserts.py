@@ -56,9 +56,8 @@ class InsertRack:
                                   if spec['record_index_for_channel'][str(channel)] in writes['strips']],
             'racks': racks,
             'mapped_types': sorted(int(kind) for kind, effect in
-                                   ((spec.get('parameters') or {}).get('effects') or {}).items()
-                                   if (spec.get('parameters') or {}).get('enabled')
-                                   and effect.get('editable') is not False),
+                                   protocol.afx_parameter_effects(self.device.profile).items()
+                                   if effect.get('editable') is not False),
             'effects': [{'type': int(kind), 'label': labels.get(kind, {}).get('label', f'type {kind}'),
                          'group': labels.get(kind, {}).get('group', '')}
                         for kind in writes['effects']],
@@ -163,6 +162,7 @@ class InsertRack:
         extra = [] if active is None else [{'key': 'active', 'label': 'Active', 'min': 0, 'max': 1, 'scale': 1,
                                             'unit': '', 'step': 1, 'value': active}]
         return {'ok': True, 'type': type_id, 'instance': instance,
+                'effect_id': protocol.afx_effect_id(self.device.profile, type_id),
                 'label': spec.get('type_labels', {}).get(str(type_id), {}).get('label', f'type {type_id}'),
                 'block': block.hex(' '),
                 'fields': [{**{key: field[key] for key in ('key', 'label', 'min', 'max')},
@@ -170,6 +170,8 @@ class InsertRack:
                             # Knob step: integers move by one; a float field by 1/100 of its range.
                             'step': (field['max'] - field['min']) / 100 if field['type'] == 'f32' else 1,
                             **({'values': field['values']} if 'values' in field else {}),
+                            # Printed labels of selector positions, from the AFX catalogue.
+                            **({'options': field['options']} if 'options' in field else {}),
                             'value': values[field['key']]} for field in effect['fields']] + extra}
 
     def _slot(self, transport, spec, channel, slot, expected=None):

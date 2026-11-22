@@ -1,0 +1,72 @@
+{
+ "effect": "tube_176",
+ "title": "Tube176",
+ "plate": "Slate",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "INPUT",
+   "x": 16,
+   "y": 36,
+   "w": 197,
+   "h": 168
+  },
+  {
+   "label": "TIMING",
+   "x": 227,
+   "y": 36,
+   "w": 306,
+   "h": 168
+  },
+  {
+   "label": "OUTPUT",
+   "x": 547,
+   "y": 36,
+   "w": 197,
+   "h": 168
+  }
+ ],
+ "controls": [
+  {
+   "key": "input",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 114,
+   "y": 108,
+   "size": 96,
+   "label": "INPUT",
+   "steps": null
+  },
+  {
+   "key": "attack",
+   "kind": "knob",
+   "style": "Tab",
+   "x": 310,
+   "y": 108,
+   "size": 64,
+   "label": "ATTACK",
+   "steps": null
+  },
+  {
+   "key": "release",
+   "kind": "knob",
+   "style": "Tab",
+   "x": 450,
+   "y": 108,
+   "size": 64,
+   "label": "RELEASE",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Knl",
+   "x": 646,
+   "y": 108,
+   "size": 96,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

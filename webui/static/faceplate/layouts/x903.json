@@ -1,0 +1,40 @@
+{
+ "effect": "x903",
+ "title": "X903",
+ "plate": "Black",
+ "width": 760,
+ "height": 216,
+ "sections": [],
+ "controls": [
+  {
+   "key": "threshold",
+   "kind": "knob",
+   "style": "Rd#b3261e",
+   "x": 218,
+   "y": 106,
+   "size": 92,
+   "label": "THRESHOLD",
+   "steps": null
+  },
+  {
+   "key": "ratio",
+   "kind": "knob",
+   "style": "Rd#5b7a94",
+   "x": 380,
+   "y": 106,
+   "size": 72,
+   "label": "RATIO",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Rd#2e7d32",
+   "x": 542,
+   "y": 106,
+   "size": 92,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

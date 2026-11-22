@@ -1,0 +1,84 @@
+{
+ "effect": "pultec_eqp",
+ "title": "VEQ-1A",
+ "plate": "Slate",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "LOW",
+   "x": 20,
+   "y": 20,
+   "w": 230,
+   "h": 180
+  },
+  {
+   "label": "HIGH",
+   "x": 260,
+   "y": 20,
+   "w": 480,
+   "h": 180
+  }
+ ],
+ "controls": [
+  {
+   "key": "low_boost",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 80,
+   "y": 105,
+   "size": 88,
+   "label": "BOOST"
+  },
+  {
+   "key": "low_atten",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 190,
+   "y": 105,
+   "size": 88,
+   "label": "ATTEN"
+  },
+  {
+   "key": "high_boost",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 325,
+   "y": 105,
+   "size": 88,
+   "label": "BOOST"
+  },
+  {
+   "key": "bandwidth",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 435,
+   "y": 105,
+   "size": 64,
+   "label": "BANDWIDTH"
+  },
+  {
+   "key": "high_atten",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 545,
+   "y": 105,
+   "size": 88,
+   "label": "ATTEN"
+  },
+  {
+   "key": "atten_sel",
+   "kind": "stepped",
+   "style": "Chk",
+   "x": 670,
+   "y": 105,
+   "size": 64,
+   "label": "ATTEN SEL",
+   "steps": [
+    "5 kHz",
+    "10 kHz",
+    "20 kHz"
+   ]
+  }
+ ]
+}

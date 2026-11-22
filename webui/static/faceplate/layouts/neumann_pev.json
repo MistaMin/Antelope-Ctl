@@ -1,0 +1,94 @@
+{
+ "effect": "neumann_pev",
+ "title": "NEU-PEV",
+ "plate": "Black",
+ "width": 760,
+ "height": 220,
+ "sections": [
+  {
+   "label": "LOW",
+   "x": 20,
+   "y": 20,
+   "w": 150,
+   "h": 180
+  },
+  {
+   "label": "PRESENCE",
+   "x": 180,
+   "y": 20,
+   "w": 270,
+   "h": 180
+  },
+  {
+   "label": "HIGH",
+   "x": 460,
+   "y": 20,
+   "w": 150,
+   "h": 180
+  },
+  {
+   "label": "OUTPUT",
+   "x": 620,
+   "y": 20,
+   "w": 120,
+   "h": 180
+  }
+ ],
+ "controls": [
+  {
+   "key": "60_hz",
+   "kind": "stepped",
+   "style": "Rd#b3261e",
+   "x": 95,
+   "y": 105,
+   "size": 84,
+   "label": "60 HZ",
+   "steps": null
+  },
+  {
+   "key": "presence",
+   "kind": "stepped",
+   "style": "Rd#c9a227",
+   "x": 255,
+   "y": 105,
+   "size": 84,
+   "label": "PRESENCE",
+   "steps": [
+    "0 dB",
+    "2 dB",
+    "4 dB",
+    "6 dB",
+    "8 dB"
+   ]
+  },
+  {
+   "key": "presence_freq",
+   "kind": "stepped",
+   "style": "Rd#c9a227",
+   "x": 375,
+   "y": 105,
+   "size": 64,
+   "label": "FREQ",
+   "steps": null
+  },
+  {
+   "key": "10_khz",
+   "kind": "stepped",
+   "style": "Rd#2f6fb0",
+   "x": 535,
+   "y": 105,
+   "size": 84,
+   "label": "10 KHZ",
+   "steps": null
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Rd",
+   "x": 680,
+   "y": 105,
+   "size": 64,
+   "label": "OUTPUT"
+  }
+ ]
+}

@@ -1,0 +1,54 @@
+{
+ "effect": "gyratex_ix",
+ "title": "Gyratec IX",
+ "plate": "Black",
+ "width": 760,
+ "height": 224,
+ "sections": [],
+ "controls": [
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Mtl",
+   "x": 148,
+   "y": 110,
+   "size": 100,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "phase",
+   "kind": "toggle",
+   "style": "Bat toggle",
+   "x": 306,
+   "y": 110,
+   "size": 56,
+   "label": "PHASE",
+   "steps": null
+  },
+  {
+   "key": "low_cut",
+   "kind": "stepped",
+   "style": "Ptr",
+   "x": 448,
+   "y": 110,
+   "size": 68,
+   "label": "LOW-CUT",
+   "steps": [
+    "OFF",
+    "LOW",
+    "HIGH"
+   ]
+  },
+  {
+   "key": "output",
+   "kind": "knob",
+   "style": "Mtl",
+   "x": 612,
+   "y": 110,
+   "size": 100,
+   "label": "OUTPUT",
+   "steps": null
+  }
+ ]
+}

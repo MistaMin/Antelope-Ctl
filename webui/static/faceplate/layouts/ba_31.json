@@ -1,0 +1,30 @@
+{
+ "effect": "ba_31",
+ "title": "BA-31",
+ "plate": "Black",
+ "width": 760,
+ "height": 220,
+ "sections": [],
+ "controls": [
+  {
+   "key": "gain",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 267,
+   "y": 108,
+   "size": 96,
+   "label": "GAIN",
+   "steps": null
+  },
+  {
+   "key": "trim",
+   "kind": "knob",
+   "style": "Fat",
+   "x": 493,
+   "y": 108,
+   "size": 96,
+   "label": "TRIM",
+   "steps": null
+  }
+ ]
+}

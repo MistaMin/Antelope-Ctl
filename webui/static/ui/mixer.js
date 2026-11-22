@@ -884,7 +884,7 @@ async function openInsertParams(channel, slot, expected) {
       + `&expected_type=${expected.type}&expected_instance=${expected.instance}`);
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'The settings could not be read.');
-    const face = await loadFaceplate(result.type);
+    const face = await loadFaceplate(result.effect_id);
     if (INSERT_PARAMS?.channel === channel && INSERT_PARAMS.slot === slot) Object.assign(INSERT_PARAMS, {data: result, face});
   } catch (error) {
     reportMessage('inserts', 'Effect settings', error.message);
