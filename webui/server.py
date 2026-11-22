@@ -240,6 +240,10 @@ class Trim(BaseModel):
     target: int         # Orion: 0 = Monitor A, 1 = Monitor B, 2 = Line Out. Zen Go: 0 = Monitor
     value: int          # 0..6
 
+class LineTrim(BaseModel):
+    linked: bool
+    trims: list[int]    # Line Out 1-4, 0..6 each (Discrete 4)
+
 class BusToggle(BaseModel):
     bus: int
     param: str          # "dim" | "mute" | "mono"
@@ -1233,6 +1237,19 @@ def api_output_trim(t: Trim):
     try:
         packet = proto.build_output_trim_command(
             PROFILE, t.target, max(0, min(6, t.value)))
+    except (KeyError, ValueError, proto.ConstraintError) as e:
+        return _bad(str(e))
+    DEV.submit(lambda tr: tr.write(packet))
+    return {"ok": True}
+
+
+@app.post("/api/line-trim")
+def api_line_trim(t: LineTrim):
+    """Discrete 4 Line Out 1-4 trims (0..6 = 20..14 dBu) and their one link:
+    one whole frame, as the vendor panel sends it. Read back from cat 0x0e
+    (GET /api/readbacks, layout line_out_trims). No page control."""
+    try:
+        packet = proto.build_line_trim_command(PROFILE, t.linked, t.trims)
     except (KeyError, ValueError, proto.ConstraintError) as e:
         return _bad(str(e))
     DEV.submit(lambda tr: tr.write(packet))

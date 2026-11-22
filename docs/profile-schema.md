@@ -632,8 +632,8 @@ default to the old behaviour when absent; first used by
 |---|---|---|
 | `buses.known[id].status: "unconfirmed"` | `channel_space_bounds("bus")` | a guessed bus: listed, but not a legal target and not shown until the status is changed |
 | `params.<name>.bus_target_key` | `build_command` | the wire target is `buses.known[bus][key]`, not the bus id (output dim ids that differ from level / mute ids) |
-| `frame.state_report.input_mode_base_offset` | `parse_state` | the input mode is a whole byte per channel; used when there is no `status_base_offset`. Phase / 48 V are then reported as unread |
-| `frame.state_report.bus_block.flags_combine` | WebUI `bus-toggle`, CLI `set-bus-dim` / `set-bus-mono` | true only when a dim (or mono) write is known to leave the mute bit alone; otherwise dim is refused on a protected bus that reads muted or unread. False on the Zen Go: its status byte can read mute + dim, but every dim write clears mute |
+| `frame.state_report.input_mode_base_offset` | `parse_state` | the input mode is a whole byte per channel; used when there is no `status_base_offset`. Phase / 48 V are then reported as unread. No shipped profile uses it since the Discrete 4's status byte (mode bits + phase bit) was found on 2026-11-22 |
+| `frame.state_report.bus_block.flags_combine` | WebUI `bus-toggle`, CLI `set-bus-dim` / `set-bus-mono` | true only when a dim (or mono) write is known to leave the mute bit alone; otherwise dim is refused on a protected bus that reads muted or unread. False on the Zen Go: its status byte can read mute + dim, but every dim write clears mute. True on the Discrete 4 (2026-11-22: dim on / off while muted gave 03 / 01) |
 | `frame.mix_command.channel_base` | `build_mix_command` | added to the 0-based strip index on the wire |
 | `mixer.link_write` `{space, pairs_by_mix, companions_before}` | `build_mixer_link_commands` | the only (mix, pair) links that may be written, and SET_LINK frames in other spaces sent first |
 | `mixer.input_routing.strict` (+ `locked_channels`, `display_only_source_banks`) | WebUI routing writes, CLI `route` | the strip source map may only be written to all its mirror groups, on unlocked strips, with selectable sources |
@@ -652,6 +652,12 @@ Optional keys first used by `zen_go_sc.json` (vendor panel run 2026-11-21):
 | `params.oscillator.value_mask` | WebUI `oscillator` | the bits of the packed oscillator byte that were captured; others are refused |
 | `frame.state_report.oscillator_byte_offset` | WebUI state stream (`oscillator`) | where the oscillator byte reads back |
 | `afx_inserts.writes.reorder` | `InsertRack.change` (`move`) | true where a whole-rack write in a new order was captured |
+
+Optional keys first used by `discrete_4_a270.json` (vendor panel run 2026-11-22):
+
+| key | read by | meaning |
+|---|---|---|
+| `frame.line_trim_command` `{opcode, param_id, fixed_offset, fixed, link_offset, link_values, trim_offsets, trim_range}` | `build_line_trim_command`, WebUI `POST /api/line-trim` | several output trims and their shared link in one frame, sent whole on every change: `fixed` as captured, `link_values.linked` / `.unlinked` at `link_offset`, one trim per `trim_offsets` entry |
 
 Every bound here should have a matching `hazards` entry saying what goes
 wrong without it.

@@ -1646,6 +1646,31 @@ def build_output_trim_command(profile: dict, target: int, value: int) -> bytes:
     return bytes(pkt)
 
 
+def build_line_trim_command(profile: dict, linked: bool, trims) -> bytes:
+    """Discrete 4: the four Line Out trims and their one link in one frame
+    (frame.line_trim_command, captured as cb 42 01 <link> t1 00 t2 00 t3 00 t4).
+    The vendor panel sends the whole frame on every change, so all four trims
+    are given. Out-of-range values are refused, not clamped."""
+    f = profile['frame'].get('line_trim_command')
+    if not f:
+        raise KeyError('this profile has no frame.line_trim_command')
+    check_opcode(profile, _as_int(f['opcode']))
+    lo, hi = f['trim_range']
+    offsets = f['trim_offsets']
+    if len(trims) != len(offsets) or any(type(t) is not int or not lo <= t <= hi for t in trims):
+        raise ConstraintError(f'line out trims need {len(offsets)} values in {lo}..{hi}')
+    pkt = bytearray(profile['transport']['report_size'])
+    pkt[_as_int(f['magic_offset'])] = _as_int(f['magic'])
+    pkt[_as_int(f['opcode_offset'])] = _as_int(f['opcode'])
+    pkt[_as_int(f['param_id_offset'])] = _as_int(f['param_id'])
+    fixed = bytes.fromhex(f['fixed'])
+    pkt[_as_int(f['fixed_offset']):_as_int(f['fixed_offset']) + len(fixed)] = fixed
+    pkt[_as_int(f['link_offset'])] = f['link_values']['linked' if linked else 'unlinked']
+    for offset, trim in zip(offsets, trims):
+        pkt[_as_int(offset)] = trim
+    return bytes(pkt)
+
+
 # canonical AuraVerb control order (matches the Launcher UI top-to-bottom).
 # The wire order is different (see frame.auraverb_command.param_offsets); the
 # builder maps by name so order here is purely cosmetic for the CLI.

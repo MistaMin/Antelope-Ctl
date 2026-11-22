@@ -36,9 +36,18 @@
       "bus_dim": "Dim",
       "mix_fader": "Fader",
       "mix_pan": "Pan",
+      "mix_send": "Reverb Send",
       "mix_mute": "Mute",
       "mix_solo": "Solo",
-      "mix_channel_link": "Mixer Link"
+      "mix_channel_link": "Mixer Link",
+      "auraverb": "Gazelle Reverb",
+      "reverb_return": "Reverb Return",
+      "param_0x49": "Panel Page Selection",
+      "screen_brightness": "Screen Brightness",
+      "output_trim": "Monitor Out Trim",
+      "line_out_trim": "Line Out Trim",
+      "oscillator": "Oscillator",
+      "pan_law": "Pan Law"
     }
   },
   "features": {
@@ -48,31 +57,37 @@
       "enabled": true,
       "space": "input",
       "controls": ["gain", "input_mode", "phase_invert", "channel_link"],
-      "status": "gain, mode, phase and the preamp 1+2 link are captured; 48 V is not captured and stays off; phase and link are write-only (no state byte identified)"
+      "status": "gain, mode, phase and both preamp links (1+2, 3+4) are captured and read back (phase: state byte 44 + ch bit 0x40; links: cat 0x0b index 0); Hi-Z on preamps 1-2 only; 48 V is not captured and stays off"
     },
     "buses": {
       "kind": "output_buses",
       "label": "Output Buses",
       "enabled": true,
       "controls": ["bus_level", "bus_mute", "bus_dim"],
-      "status": "Monitor and Headphone 1 captured; Headphones 2-4 are unconfirmed entries in buses.known and are neither shown nor writable"
+      "status": "Monitor and Headphones 1-4 captured (2026-11-22 vendor panel run); the Line Out volume and mute (bus 5, no dim) sit in the Settings panel"
     },
     "routing": {
       "kind": "routing_matrix",
       "label": "Routing",
-      "enabled": false,
-      "destination_ids": [],
-      "destinations": [],
-      "controls": [],
-      "status": "matrix disabled -- only the mixer strip source map is captured (see mixer_sources); line, digital and DAW destinations are not"
+      "enabled": true,
+      "destination_ids": [6, 0, 7, 8, 9],
+      "destinations": [
+        {"id": 6, "key": "mixer_input_assignments", "name": "mixer_input_assignments", "label": "Mixer Inputs (Record 5-8 = strips 5-8)", "channels": 16, "write_destinations": [6, 10, 11, 12, 13], "note": "One strip source map mirrored in groups 6 and 10-13, written to all five as the vendor panel does. Strips 1-4 are locked here: their source is the rack input group 9."},
+        {"id": 0, "key": "line_out", "name": "line_out", "label": "Line Out 1-4", "channels": 4, "write_destinations": [0], "note": "ANALOG OUTS page of the vendor panel."},
+        {"id": 7, "key": "adat_out", "name": "adat_out", "label": "ADAT Out 1-8", "channels": 8, "write_destinations": [7], "note": "DIGITAL OUTS page of the vendor panel."},
+        {"id": 8, "key": "spdif_out", "name": "spdif_out", "label": "S/PDIF Out 1-2", "channels": 2, "write_destinations": [8], "note": "DIGITAL OUTS page of the vendor panel."},
+        {"id": 9, "key": "afx_in", "name": "afx_in", "label": "Record 1-4 / AFX Rack Inputs", "channels": 4, "write_destinations": [9], "note": "DAW page Record 1-4 = what the effect racks of mixer strips 1-4 listen to; the panel writes only this group."}
+      ],
+      "controls": ["routing"],
+      "status": "five destinations from the 2026-11-22 vendor panel run; each change writes only its own group (the mixer map: its five mirrors)"
     },
     "mixer": {
       "kind": "virtual_mixer",
       "label": "Virtual Mixer",
       "enabled": true,
       "mix_ids": [0, 1, 2, 3],
-      "controls": ["mix_fader", "mix_pan", "mix_mute", "mix_solo", "mix_channel_link"],
-      "status": "frame captured on mix 0 strips 1, 2, 5, 8 and strip 1 of mixes 1-3; strip link only for strips 1+2 of mix 0"
+      "controls": ["mix_fader", "mix_pan", "mix_send", "mix_mute", "mix_solo", "mix_channel_link"],
+      "status": "frame captured on mixes 0-3; strip link captured for mix 0 strips 1+2, 3+4, 15+16 and mix 1 strips 7+8 only; reverb send on the MONITOR/HP1 mix"
     },
     "mixer_sources": {
       "kind": "mixer_source_assignment",
@@ -83,16 +98,24 @@
       "channels": 16,
       "routing_destinations": [6, 10, 11, 12, 13],
       "locked_channels": [0, 1, 2, 3],
-      "display_only_sources": ["afx"],
+      "display_only_sources": ["afx", "loopback_hp1", "loopback_hp2"],
       "controls": ["routing"],
-      "note": "One source map shared by all four mixes. Strips 1-4 are the effect-rack channels: the panel changes their source through another group (09) that is not mapped, so they are shown but locked."
+      "note": "One source map shared by all four mixes. Strips 1-4 are the effect-rack channels: their source is routing group 09 (Routing tab, Record 1-4 / AFX Rack Inputs), so they are shown but locked here. The loopbacks are offered by the panel only for Record 1-8 and are shown, not offered, here."
+    },
+    "auraverb": {
+      "kind": "bundled_effect",
+      "label": "Gazelle Reverb",
+      "enabled": true,
+      "mix": 0,
+      "controls": ["auraverb", "reverb_return"],
+      "status": "the page has the eight knobs and FX on/off; the Monitor/HP1 return and the send pans are API only"
     },
     "settings": {
       "kind": "device_settings",
       "label": "Settings",
-      "enabled": false,
-      "controls": [],
-      "status": "disabled -- settings frames not captured"
+      "enabled": true,
+      "controls": ["screen_brightness", "output_trim"],
+      "status": "Monitor Out Trim, brightness and the Line Out volume / mute in the Settings panel; pan law, oscillator and the Line Out 1-4 trims are captured and writable through the API but have no page control, so they are not listed"
     }
   },
   "usb_interfaces": {
@@ -128,7 +151,7 @@
       "channel_offset": 17,
       "value_offset": 18,
       "status": "confirmed",
-      "params_seen": "0x50 gain (vendor writes + this project's own round trip), 0x4f input mode, 0x52 phase, 0x47 / 0x48 / 0x66 output level / mute / dim, 0x49 (panel tab selection, not used): all vendor writes in the 2026-11-17 d4_basics captures, see each entry under params",
+      "params_seen": "0x50 gain (vendor writes + this project's own round trip), 0x4f input mode, 0x52 phase, 0x47 / 0x48 / 0x66 output level / mute / dim, 0x49 (panel tab selection, not used): all vendor writes in the 2026-11-17 d4_basics captures, see each entry under params. 0x68 reverb return: 2026-11-22 vendor panel run",
       "notes": "First confirmed for preamp gain (param 0x50): six isolated vendor writes on preamps 1 and 2, each followed within 20 ms by the matching state-report byte, and each undone by the next write. No other parameter id has been captured on this device.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee)"
     },
@@ -139,21 +162,23 @@
       "space_offset": 17,
       "pair_index_offset": 18,
       "enabled_offset": 19,
-      "space_values": {"0": "preamp pair", "3": "mixer strip pair", "4": "sent just before space 3 when mixer strips 1+2 are linked; meaning not established"},
+      "space_values": {"0": "preamp pair", "3": "mixer strip pair", "4": "effect-rack pair (racks 1+2 = pair 0, racks 3+4 = pair 1), sent just before space 3 when mix 0 strips 1+2 or 3+4 are linked; readback cat 0x0b index 4 body[pair]"},
       "observations": [
         "preamp 1 link icon on: a2 00 00 01; off: a2 00 00 00",
-        "MONITOR/HP1 mixer strip 1 LINK on: a2 04 00 01 then a2 03 00 01; off: a2 04 00 00 then a2 03 00 00"
+        "preamp 3+4 link icon on: a2 00 01 01; off: a2 00 01 00 (2026-11-22; gains were equal, no gain copy frame seen)",
+        "MONITOR/HP1 mixer strip 1 LINK on: a2 04 00 01 then a2 03 00 01; off: a2 04 00 00 then a2 03 00 00",
+        "MONITOR/HP1 strip 3 L: a2 04 01 01 then a2 03 01 01; strip 15 L: a2 03 07 01 only; HEADPHONES 2 strip 7 L: a2 03 13 01 only (2026-11-22)"
       ],
       "readback": {
-        "status": "unconfirmed",
+        "status": "capture-confirmed",
         "category": "0x0b",
         "index": 0,
         "record_count": 8,
-        "pair_counts": {"preamp": 1},
-        "notes": "GUESS, not used while unconfirmed: the panel reads category 0x0b index 0 on connect and it was all zeros with no link on. No capture shows it with a link on. Flip status to capture-confirmed only after live trial T2 shows byte 0 follow the preamp 1+2 link."
+        "pair_counts": {"preamp": 2},
+        "notes": "body[pair] = 1 while that preamp pair is linked: the 2026-11-22 marker reopen read 00 01 with only preamps 3+4 linked. record_count 8 is a display width."
       },
-      "status": "capture-confirmed for space 0 pair 0 and for the space 4 + space 3 pair 0 sequence",
-      "notes": "No 0x73 state byte below offset 160 moved on a preamp link write, so the link state cannot be read from the state report. Only pair 0 was exercised in each space. Bit 0x40 of the mixer flags byte is mute, not link.",
+      "status": "capture-confirmed for space 0 pairs 0-1, space 3 (mix 0 pairs 0, 1, 7; mix 1 pair 3) and space 4 pairs 0-1",
+      "notes": "No 0x73 state byte below offset 160 moved on a link write, so link state is read from category 0x0b. Bit 0x40 of the mixer flags byte is mute, not link. 2026-11-22 vendor panel run: d4_panel/live.log, markers_state.txt.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_explore.pcapng (sha256 cc2273a5618a618018b88186c50e79657f5b71bbfbdc50bf74f0bb4deafb164f), d4_basics_explore2.pcapng (sha256 74a068143e87bbc610c9a1f2be6f314572c47d271a6390c05d65c375e18a6ccd), d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662), d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
     },
     "mix_command": {
@@ -182,6 +207,74 @@
       "notes": "channel_base 1: the strip byte is the strip number, so this project's 0-based strip index is sent plus one (strip byte 0 was never seen written). The frame carries the whole strip; there is no send byte. Mixer writes produce no 0x73 state change. Strips 1, 2, 5 and 8 of mix 0 and strip 1 of mixes 1-3 were exercised; the other strips use the same frame and are not individually captured. The panel's SOLO sent one frame with the solo bit only; this project's WebUI also writes mutes to the other strips (its host-side solo), which the panel did not do.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35), d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee)"
     },
+    "global_command": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x12", "opcode_name": "SET_GLOBAL",
+      "param_id_offset": 16,
+      "value_offset": 17,
+      "status": "capture-confirmed",
+      "notes": "Device-global setter, value at @17 (no target byte), the Zen Go's frame. Captured for pan law (0x24), oscillator (0x0a) and brightness (0x0e) only.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_settings.txt)"
+    },
+    "reverb_send_command": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x16",
+      "param_id_offset": 16, "param_id": "0xe9",
+      "subcmd_offset": 17, "subcmd": "0x04",
+      "mix_offset": 18,
+      "channel_offset": 19,
+      "channel_base": 1,
+      "channels": 16,
+      "send_offset": 20,
+      "send_range": [0, 96],
+      "pan_offset": 21,
+      "pan_center": 32,
+      "pan_range": [-30, 30],
+      "status": "capture-confirmed",
+      "notes": "Gazelle Reverb send per strip, same frame as the Zen Go: e9 04 00 <strip 1-16> <send> <pan>. Send is attenuation, 0x00 = 0 dB .. 0x60 = off; the send pan (0x02 .. 0x3e) is separate from the strip pan. Byte 18 stayed 00 also with the reverb window opened from the HEADPHONES 2 tab (sends are global). Readback cat 0x18 index 0 body[2*strip] / body[2*strip+1], repeated in cat 0x04 index 0 from body[69].",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log): send swept on strip 1 (e9 04 00 01 <v> 20), strips 2 and 16 touched; marker reopen read strip 2 send 0x5b in cat 0x18 and cat 0x04"
+    },
+    "auraverb_command": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x1d", "opcode_name": "SET_AURAVERB",
+      "param_id_offset": 16, "param_id": "0xda",
+      "subcmd_offset": 17, "subcmd": "0x0b",
+      "mix_offset": 18,
+      "mix_wet_offset": 22,
+      "mix_wet_constant": 100,
+      "enabled_offset": 28,
+      "param_offsets": {"room_size": 19, "color": 20, "pre_delay": 21, "early_reflection_gain": 23, "late_reflection_delay": 24, "richness": 25, "reverb_time": 26, "reverb_level": 27},
+      "param_range": [0, 100],
+      "param_ranges": {"pre_delay": [0, 150], "late_reflection_delay": [0, 150], "reverb_level": [1, 100]},
+      "contract": {"status": "capture-confirmed", "operation": "0xda", "target": 0, "readback_category": "0x0a", "readback_index": 0, "readback_record_count": 1, "readback_block_offset": 1, "readback_block_size": 11},
+      "notes": "Gazelle Reverb (hardware name AuraVerb), the Zen Go's frame byte for byte: da 0b 00 <room> <color> <predelay> 64 <early> <late> <rich> <time> <level> <on>; every control sends the whole frame. Raw values: room, color, early, richness, time 0..100; predelay and late reflection delay 0..150; level 1..100; byte 22 always 0x64, byte 18 always 00. Readback cat 0x0a index 0: one header byte, then 11-byte blocks (block 0 = this reverb). The preset BV Acoustic Guitar Thickener is one frame (da 0b 00 00 3c 1e 64 15 09 22 1b 28 01), as on the Zen Go.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_reverb.txt): each knob wheeled, FX off/on, one preset; start record 00 51 64 00 64 0b 0d 18 42 32 01 ff, restored"
+    },
+    "output_trim_command": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x54",
+      "param_id_offset": 16, "param_id": "0xcb",
+      "fixed_offset": 17,
+      "fixed": "42 00 01",
+      "value_offset": 20,
+      "status": "capture-confirmed",
+      "notes": "Monitor Out Trim, the Zen Go's frame: cb 42 00 01 <n>, n 0..6 = 20..14 dBu. State byte 25 = 4n; not in cat 0x0e (marker reopen). See params.output_trim.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log): cb 42 00 01 01 .. 06 then 00, state byte 25 00>04>08>0c>10>14>18>00"
+    },
+    "line_trim_command": {
+      "magic_offset": 0, "magic": "0x70",
+      "opcode_offset": 4, "opcode": "0x54",
+      "param_id_offset": 16, "param_id": "0xcb",
+      "fixed_offset": 17,
+      "fixed": "42 01",
+      "link_offset": 19,
+      "link_values": {"linked": 0, "unlinked": 1},
+      "trim_offsets": [20, 22, 24, 26],
+      "trim_range": [0, 6],
+      "status": "capture-confirmed",
+      "notes": "Line Out 1-4 trims and their one LINK: cb 42 01 <link> t1 00 t2 00 t3 00 t4, the whole frame on every change (the bytes between the trims were always 00 and are sent as 00). t = 0..6 = 20.0 .. 14.0 dBu. link 01 = not linked, 00 = linked; all four LINK buttons are this one byte. With LINK on, one notch on Line Out 2 sent all four trims = 01 (the panel, not the device, copies the value; turning LINK on alone sent the unequal trims unchanged). Readback cat 0x0e index 0: body[0] = 01, body[1] = link, t1..t4 at body[2], [4], [6], [8] (frame.readback.record_layouts line_out_trims).",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_outputs.txt): every trim 0..6, LINK on/off; start and end cb 42 01 01 00 00 00 00 06 (cat 0x0e 01 01 00 00 00 00 06), marker reopen read 01 00 01 00 01 00 01 00 01"
+    },
     "routing_command": {
       "magic_offset": 0, "magic": "0x70",
       "opcode_offset": 4, "opcode": "0x53", "opcode_name": "SET_ROUTE",
@@ -190,27 +283,36 @@
       "destination_offset": 18,
       "channel_list_offset": 19,
       "channel_stride": 2,
-      "status": "capture-confirmed for the mixer strip source map (groups 6, 10, 11, 12, 13) only",
+      "status": "capture-confirmed for the mixer strip source map (groups 6, 10, 11, 12, 13), Line Out (0), ADAT Out (7), S/PDIF Out (8) and the rack inputs (9)",
       "layout": "70 00 00 00 | 53 00 00 00 | 00 x8 | d3 41 | <group> | 32 x (source type, source index)",
-      "notes": "Changing the source of mixer strip 5 re-sent five frames, groups 06, 0a, 0b, 0c, 0d in that order, identical except for slots 16-31: 00 00 in group 06, 09 00 in the others. The same difference is in each group's own readback (category 0x03, index = group), so a write built from the readback with one slot changed reproduces the captured frames byte for byte. Slots 0-15 are the 16 mixer strips. Only slot 4 (strip 5) was changed in a capture. Changing strip 1's source did NOT send these frames: it sent one frame to group 09 (four slots, source type 00), so slots 0-3 here (04 00..04 03) are fixed feeds from the four effect-rack channels and group 09 picks what feeds each rack. Group 09 is not understood well enough to write. Other groups seen only in readback: 0 (4 slots), 1-5 and 8 (2 slots), 7 (8 slots), 9 (4 slots).",
+      "notes": "Changing the source of mixer strip 5 re-sent five frames, groups 06, 0a, 0b, 0c, 0d in that order, identical except for slots 16-31: 00 00 in group 06, 09 00 in the others. The same difference is in each group's own readback (category 0x03, index = group), so a write built from the readback with one slot changed reproduces the captured frames byte for byte. Slots 0-15 are the 16 mixer strips. Only slot 4 (strip 5) was changed in a capture. Changing strip 1's source did NOT send these frames: it sent one frame to group 09 (four slots, source type 00), so slots 0-3 here (04 00..04 03) are fixed feeds from the four effect-rack channels and group 09 picks what feeds each rack. 2026-11-22 vendor panel run: group 09 is the DAW page's Record 1-4 = the four rack inputs (one frame d3 41 09 <4 slots> per change, nothing else written), group 00 Line Out 1-4, 07 ADAT OUT 1-8, 08 SPDIF OUT 1-2; each change wrote only the touched group. Groups 1-5 (2 slots) were written by no panel control.",
       "destination_groups": {
-        "6, 10, 11, 12, 13": "32 slots each, one shared mixer strip source map: slots 0-15 = strips 1-16, slots 16-31 unused (00 00 in group 6, 09 00 in the rest)",
-        "9": "4 slots, source type 00 index 0-3 (or 09 00 after MUTE was picked for strip 1). Observed, never written by this project.",
-        "0-5, 7, 8": "readback only, not decoded"
+        "6, 10, 11, 12, 13": "32 slots each, one shared mixer strip source map: slots 0-15 = strips 1-16, slots 16-31 unused (00 00 in group 6, 09 00 in the rest). Record N (DAW page) and mixer strip N are the same slot.",
+        "0": "4 slots -- LINE OUT 1-4 (ANALOG OUTS page): start 00 00 | 00 01 | 01 02 | 01 03.",
+        "7": "8 slots -- ADAT OUT 1-8 (DIGITAL OUTS page): start PREAMP 1-4, CP 1-2, S/PDIF IN 1-2.",
+        "8": "2 slots -- SPDIF OUT 1-2 (DIGITAL OUTS page): start PREAMP 1, PREAMP 2.",
+        "9": "4 slots -- Record 1-4 on the DAW page = the inputs of the four effect racks (mixer strips 1-4, which then read 04 <n> in group 06). Start PREAMP 1-4.",
+        "1-5": "2 slots each, readback only (start 01 05 00 05 01 | 02 06 00 06 01 | 03 07 00 07 01 | 04 08 00 08 01 | 05 05 00 05 01); probably the fixed Monitor / HP sources, no panel control"
       },
       "source_semantics": {
-        "0x01": {"key": "compplay", "kind": "numbered", "name": "COMPUTER PLAY", "label": "COMPUTER PLAY", "display_index_base": 1, "count": 2},
+        "0x00": {"key": "preamp", "kind": "numbered", "name": "PREAMP", "label": "PREAMP", "display_index_base": 1, "count": 4},
+        "0x01": {"key": "compplay", "kind": "numbered", "name": "COMPUTER PLAY", "label": "COMPUTER PLAY", "display_index_base": 1, "count": 16},
         "0x02": {"key": "adat", "kind": "numbered", "name": "ADAT IN", "label": "ADAT IN", "display_index_base": 1, "count": 8},
         "0x03": {"key": "spdif", "kind": "numbered", "name": "S/PDIF IN", "label": "S/PDIF IN", "display_index_base": 1, "count": 2},
-        "0x04": {"key": "afx", "kind": "numbered", "name": "AFX STRIP", "label": "RACK CHANNEL", "display_index_base": 1, "count": 4},
+        "0x04": {"key": "afx", "kind": "numbered", "name": "AFX OUT", "label": "AFX OUT", "display_index_base": 1, "count": 4},
+        "0x05": {"key": "loopback_hp1", "kind": "numbered", "name": "LOOPBACK HP 1/MON", "label": "LOOPBACK HP 1/MON", "display_index_base": 1, "count": 2},
+        "0x06": {"key": "loopback_hp2", "kind": "numbered", "name": "LOOPBACK HP 2", "label": "LOOPBACK HP 2", "display_index_base": 1, "count": 2},
         "0x09": {"key": "mute", "kind": "mute", "name": "MUTE", "label": "MUTE", "index": 0, "count": 1},
-        "0x0b": {"key": "emumic", "kind": "numbered", "name": "EMU MIC", "label": "EMU MIC", "display_index_base": 1, "count": 2}
+        "0x0a": {"key": "osc", "kind": "numbered", "name": "OSCILLATOR", "label": "OSCILLATOR", "display_index_base": 1, "count": 2},
+        "0x0b": {"key": "emumic", "kind": "numbered", "name": "EMU MIC", "label": "EMU MIC", "display_index_base": 1, "count": 4}
       },
-      "source_semantics_notes": "Each count is the number of indices seen in a capture, not the size of the bank: COMPUTER PLAY 1-2 (01 00 written to strip 5, 01 01 resting on strip 6), S/PDIF IN 1-2 and ADAT IN 1-8 (resting map), EMU MIC 1-2 (0b 00 and 0b 01 written to strip 5; the panel named 0b 00 EMU MIC 1), MUTE 09 00 (the unused slots, and group 09 after MUTE was picked). Type 04 is display only: it rests on strips 1-4, where the panel shows the preamp chosen through group 09. Type 00 (preamp, seen in groups 7, 8, 9) and the oscillator are not captured in this map and are not offered.",
+      "source_semantics_notes": "The full source list of the 2026-11-22 vendor panel run (every menu): 00 PREAMP 1-4, 01 COMPUTER PLAY 1-16 (01 00 and 01 0f written to Line Out 2), 02 ADAT IN 1-8, 03 SPDIF IN 1-2, 04 AFX OUT 1-4 (only on strips 1-4 of group 06, display only), 05 LOOPBACK HP 1/MON 1-2, 06 LOOPBACK HP 2 1-2 (only in the DAW-page menu: 05 00 on Record 1 and Record 8, 06 01 on Record 8), 09 MUTE, 0a OSCILLATOR O1-O2, 0b EMU MIC 1-4 (0b 00 and 0b 03 on Line Out 2). Earlier (2026-11-17): 0b 00 / 0b 01 and 01 00 written to strip 5.",
       "mute_source": [9, 0],
-      "addressable_destinations": {"6": "mixer_source_map_1", "10": "mixer_source_map_2", "11": "mixer_source_map_3", "12": "mixer_source_map_4", "13": "mixer_source_map_5"},
-      "destination_channels": {"6": 32, "10": 32, "11": 32, "12": 32, "13": 32},
-      "destination_labels": {"6": "Mixer Source Map (group 6)", "10": "Mixer Source Map (group 10)", "11": "Mixer Source Map (group 11)", "12": "Mixer Source Map (group 12)", "13": "Mixer Source Map (group 13)"},
+      "addressable_destinations": {"0": "line_out", "6": "mixer_source_map_1", "7": "adat_out", "8": "spdif_out", "9": "afx_in", "10": "mixer_source_map_2", "11": "mixer_source_map_3", "12": "mixer_source_map_4", "13": "mixer_source_map_5"},
+      "destination_channels": {"0": 4, "6": 32, "7": 8, "8": 2, "9": 4, "10": 32, "11": 32, "12": 32, "13": 32},
+      "destination_labels": {"0": "Line Out 1-4", "6": "Mixer Source Map (group 6)", "7": "ADAT Out 1-8", "8": "S/PDIF Out 1-2", "9": "Record 1-4 / AFX Rack Inputs", "10": "Mixer Source Map (group 10)", "11": "Mixer Source Map (group 11)", "12": "Mixer Source Map (group 12)", "13": "Mixer Source Map (group 13)"},
+      "destination_sources": {"0": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "7": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "8": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "9": ["preamp", "emumic", "compplay", "adat", "spdif", "osc", "loopback_hp1", "loopback_hp2"], "6": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "10": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "11": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "12": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"], "13": ["preamp", "emumic", "compplay", "adat", "spdif", "osc"]},
+      "destination_sources_notes": "The source kinds a new assignment may use per group (mute always). From the panel's menus: Line Out, ADAT and S/PDIF Out offer the seven non-loopback rows (sources other than MUTE written on Line Out 2 and S/PDIF Out 2; on ADAT Out only MUTE was picked, so its list is the menu's, a CANDIDATE for anything but MUTE); the DAW page (Record 1-8) adds the two loopbacks, allowed for group 09 where they were written. In the mixer map (groups 6, 10-13) they are not offered: the panel offers them only for Record 5-8, the map has no per-slot rule here, and a mix fed into one of its own strips is a feedback loop; a loopback already in the map is shown and re-sent unchanged. AFX OUT is in no menu.",
       "stereo_destinations": [],
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_routing.pcapng (sha256 1300cca39589949c51e419f4ac305a48e7a4d4b5b42e7d4b73ae97289c1a44bd), d4_basics_routing2.pcapng (sha256 8154611ba1690dc95d5e1f217cca2ed513f9437776b53e922769b0dad65a57eb), d4_basics_routing3.pcapng (sha256 03a315bdc873b21aba75603324e408e803f9f41b2559d93be1fe40fee82b3a87); resting map and the per-group tails from panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29)"
     },
@@ -230,15 +332,16 @@
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8), d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c); each frame matches one logged click to within a second"
     },
     "afx_bypass": {
-      "status": "observed",
+      "status": "capture-confirmed",
       "opcode": "0x14",
-      "layout": "70 00 00 00 | 14 00 00 00 | 00 x8 | 98 | 00 | <type> | <enabled>",
+      "layout": "70 00 00 00 | 14 00 00 00 | 00 x8 | 98 | <instance> | <type> | <enabled>",
       "observations": [
         "first click on the slot's BP button (Master De-esser, PREAMP 1): 98 00 1b 00",
-        "second click: 98 00 1b 01"
+        "second click: 98 00 1b 01",
+        "2026-11-22: Master De-esser instance 1 in rack 2: 98 01 1b 00 / 98 01 1b 01; PowerGate 98 00 27 00 / 01; guitar amp 98 00 03 00; the effect face's BYPASS, the main window's strip BP and BP ALL (one frame per loaded effect, not a toggle) send the same frame"
       ],
-      "notes": "One effect, one strip, one instance: which of the two zero bytes is the instance and whether a strip is addressed at all is unknown. The last byte reads as enabled = 1 / bypassed = 0. Not replayed by this project.",
-      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8)"
+      "notes": "Byte 17 is the instance (captured on instances 0 and 1), not a strip. The last byte is enabled = 1 / bypassed = 0. The vendor panel never read it back (no reply changed, a reopened panel showed a bypassed amp as active). See afx_inserts.parameters.bypass.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_load_remove.pcapng (sha256 2ce691401a21f4869f6cd9ca45b693768e5699e228f018a607505f496567e4f8); vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_afx.txt)"
     },
     "meter_report": {
       "magic_offset": 0,
@@ -266,22 +369,22 @@
         "0x03": "routing, 14 records, each <group id> then (source type, source index) pairs; index = group id. Groups 6, 10, 11, 12, 13 are the mixer strip source map (see frame.routing_command). The others (body lengths 9, 5, 5, 5, 5, 5, -, 17, 5, 9) are not decoded.",
         "0x04": "mixer, 4 records of 133 bytes, index = mix. Bytes 0-65 are 33 (fader, pan + flags) pairs: pair 0 read 00 20 and was never written, pairs 1-16 are strips 1-16 (see layouts), pairs 17-32 read like more strips and are not shown by the panel. Bytes 66-132 (60, then 33 pairs equal to category 0x18) are not decoded.",
         "0x07": "per-effect instance state, queried only for loaded types (index 0x1b for Master De-esser; index 0 after ClearQ was loaded). Not bounded: do not query.",
-        "0x0a": "reverb config, 34 bytes. Not decoded.",
-        "0x0b": "link tables; the panel queries indices 0, 3 and 4 only (all three read all zeros with no link on). Not bounded: indices 1 and 2 were never queried and are refused.",
+        "0x0a": "Gazelle Reverb config, 34 bytes: header 00, then 11-byte blocks; block 0 = the reverb (frame.auraverb_command).",
+        "0x0b": "link tables; the panel queries indices 0, 3 and 4 only: index 0 body[pair] preamp links, index 3 body[mix*16 + pair] mixer strip links, index 4 body[pair] rack links (2026-11-22 marker reopen). Not bounded: indices 1 and 2 were never queried and are refused.",
         "0x0c": "queried when the effect menu opens; 118-byte {type, count} style body. Not decoded.",
-        "0x0e": "trim config, 7 bytes. Not decoded.",
+        "0x0e": "Line Out 1-4 trims: body[0] 01, body[1] link (00 linked), trims at body[2], [4], [6], [8] (frame.line_trim_command). The Monitor Out Trim is not here.",
         "0x11": "index 0: 1 byte; index 1: 67 bytes. Not decoded.",
-        "0x12": "pan law, 1 byte.",
+        "0x12": "pan law, 1 byte (params.pan_law).",
         "0x15": "remaining AFX instances, {type, count} pairs (104 bytes). Not decoded further.",
-        "0x16": "mic emulations, 16 bytes. Not decoded.",
-        "0x17": "reverb returns, 4 bytes.",
-        "0x18": "reverb sends, 66 bytes.",
+        "0x16": "mic emulations, 16 bytes (00 00 00 32 per preamp, unchanged by every panel gesture). Not decoded.",
+        "0x17": "reverb returns, 4 bytes, one per output mix: level | 0x80 mute (params.reverb_return).",
+        "0x18": "reverb sends, 66 bytes: header 00 20, then (send, pan) per strip 1-16.",
         "0x19": "AFX strip order, 36 records of {type, inst} pairs, zero-padded. Record 0 is the mixer channel 1 (PREAMP 1) rack."
       },
       "category_counts": {"0x03": 14, "0x04": 4, "0x0a": 1, "0x0c": 1, "0x0e": 1, "0x11": 2, "0x12": 1, "0x15": 1, "0x16": 1, "0x17": 1, "0x18": 1, "0x19": 36},
       "category_counts_note": "Each count is the highest index the vendor panel itself queried, plus one, identical across three connect walks. Categories 0x00 / 0x01 (firmware, identity with serial) are queried by the Manager Server, not the panel, and are left out until that capture is analysed.",
       "layouts": [
-        {"category": "0x04", "index": 0, "kind": "mixer_state", "body_size": 133, "record_count": 16, "record_stride": 2, "level_offset": 2, "state_offset": 3, "surface": 0, "status": "capture-confirmed"},
+        {"category": "0x04", "index": 0, "kind": "mixer_state", "body_size": 133, "record_count": 16, "record_stride": 2, "level_offset": 2, "state_offset": 3, "send_offset": 69, "send_offset_notes": "Reverb send of strip N at body[67 + 2N], its send pan at body[68 + 2N], the same pairs as cat 0x18 (2026-11-22 marker reopen: strip 2 send 0x5b in both). body[66] = the Monitor/HP1 reverb return.", "surface": 0, "status": "capture-confirmed"},
         {"category": "0x04", "index": 1, "kind": "mixer_state", "body_size": 133, "record_count": 16, "record_stride": 2, "level_offset": 2, "state_offset": 3, "surface": 1, "status": "capture-confirmed"},
         {"category": "0x04", "index": 2, "kind": "mixer_state", "body_size": 133, "record_count": 16, "record_stride": 2, "level_offset": 2, "state_offset": 3, "surface": 2, "status": "capture-confirmed"},
         {"category": "0x04", "index": 3, "kind": "mixer_state", "body_size": 133, "record_count": 16, "record_stride": 2, "level_offset": 2, "state_offset": 3, "surface": 3, "status": "capture-confirmed"}
@@ -293,24 +396,24 @@
           "kind": "link_table",
           "category": "0x0b",
           "index": 0,
-          "name": "preamp link bytes (meaning unconfirmed)",
+          "name": "preamp links",
           "record_count": 8,
           "record_stride": 1,
           "fields": [{"name": "linked", "offset": 0, "type": "bool"}],
           "status": "capture-confirmed",
-          "notes": "capture-confirmed as a query only: the vendor panel reads this index on connect. The body was all zeros with no link on; that byte N means pair N is a guess (frame.link_command.readback stays unconfirmed) and record_count 8 is a display width.",
+          "notes": "Byte N = preamp pair N linked (2026-11-22 marker reopen read 00 01 with preamps 3+4 linked). record_count 8 is a display width.",
           "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29)"
         },
         {
           "kind": "link_table",
           "category": "0x0b",
           "index": 3,
-          "name": "mixer strip link bytes (meaning unconfirmed)",
-          "record_count": 8,
+          "name": "mixer strip links",
+          "record_count": 24,
           "record_stride": 1,
           "fields": [{"name": "linked", "offset": 0, "type": "bool"}],
           "status": "capture-confirmed",
-          "notes": "capture-confirmed as a query only: the vendor panel reads this index after each mixer record. The body was all zeros with no link on; the byte-per-pair reading and the width are guesses (mixer.link_readback stays unconfirmed).",
+          "notes": "Byte mix*16 + pair = that strip pair linked: the 2026-11-22 marker reopen read 01 at bytes 1 (mix 0 strips 3+4) and 19 (mix 1 strips 7+8), the two links then on. record_count 24 covers mixes 0 and 1 (selectors 0-23); bytes 32-55 for mixes 2-3 follow the same rule but no link was captured there.",
           "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29)"
         },
         {
@@ -322,7 +425,7 @@
           "record_stride": 1,
           "fields": [{"name": "raw", "offset": 0, "type": "u8"}],
           "status": "capture-confirmed",
-          "notes": "The vendor panel reads this index on connect; all zeros with no rack linked. Used only as a guard: insert editing is refused unless it reads all zeros. Linking mixer strips 1+2 sends a2 04 first, which may set a byte here (live trial T3).",
+          "notes": "The vendor panel reads this index on connect; all zeros with no rack linked. Byte N = rack pair N linked (2026-11-22 marker reopen read 00 01 after a2 04 01 01, strip 3 L of mix 0). Used only as a guard: insert editing is refused unless it reads all zeros.",
           "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29)"
         },
         {
@@ -336,7 +439,11 @@
           "status": "capture-confirmed",
           "notes": "With one effect loaded record 0 read `1b 00`; with two, `1b 00 01 00`; empty otherwise. record_count 8 is a parse width over a zero-padded body: the manual gives the Premium pack 4 FX instances per strip, and at most two slots have been seen filled.",
           "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_afx_loaded_walk.pcapng (sha256 07bccf4d28277d82bba54eee007a74a5da75f58f77886c428a4d2febb16b5883), d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c)"
-        }
+        },
+        {"kind": "line_out_trims", "category": "0x0e", "index": 0, "name": "Line Out 1-4 trims (link 00 = linked)", "record_count": 1, "record_stride": 9, "fields": [{"name": "head", "offset": 0, "type": "u8"}, {"name": "link", "offset": 1, "type": "u8"}, {"name": "trim_1", "offset": 2, "type": "u8"}, {"name": "trim_2", "offset": 4, "type": "u8"}, {"name": "trim_3", "offset": 6, "type": "u8"}, {"name": "trim_4", "offset": 8, "type": "u8"}], "status": "capture-confirmed", "evidence": "vendor panel run 2026-11-22: start 01 01 00 00 00 00 06, marker reopen 01 00 01 00 01 00 01 00 01 (frame.line_trim_command)"},
+        {"kind": "pan_law", "category": "0x12", "index": 0, "name": "panning law", "record_count": 1, "record_stride": 1, "fields": [{"name": "index", "offset": 0, "type": "u8"}], "status": "capture-confirmed", "evidence": "vendor panel run 2026-11-22: 03 at start and end, 00 in the marker reopen after 24 00"},
+        {"kind": "reverb_returns", "category": "0x17", "index": 0, "name": "reverb returns (level | 0x80 mute)", "record_count": 4, "record_stride": 1, "fields": [{"name": "value", "offset": 0, "type": "u8"}], "status": "capture-confirmed", "evidence": "vendor panel run 2026-11-22: 60 60 60 60 at start, da 60 60 60 after 68 00 da"},
+        {"kind": "reverb_sends", "category": "0x18", "index": 0, "name": "reverb sends (record N = strip N; record 0 is a header)", "record_count": 17, "record_stride": 2, "fields": [{"name": "send", "offset": 0, "type": "u8"}, {"name": "pan", "offset": 1, "type": "u8"}], "status": "capture-confirmed", "evidence": "vendor panel run 2026-11-22: strip 2 send 0x5b in the marker reopen"}
       ],
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29) and the three AFX captures"
     },
@@ -344,8 +451,12 @@
       "magic_offset": 0,
       "magic": "0x73",
       "gain_base_offset": 40,
-      "input_mode_base_offset": 44,
-      "input_mode_notes": "Byte 44 + channel is the input mode as a whole byte (0 Mic, 1 Line, 2 Hi-Z), not bits of a status byte: byte 44 went 01 -> 02 -> 00 -> 01 with the vendor's 4f 00 02 / 4f 00 00 / 4f 00 01, and gain byte 40 switched to that mode's own stored gain each time (Line 6, Hi-Z 10, Mic 0). Bytes 45-47 read 01 01 01 and were not exercised. There is no status_base_offset: no byte below offset 160 is known to carry phase or 48 V, so those are reported as unread.",
+      "status_base_offset": 44,
+      "status_bits": {
+        "input_mode": {"mask": "0x03", "shift": 0},
+        "phase_invert": {"mask": "0x40", "shift": 6}
+      },
+      "input_mode_notes": "Byte 44 + channel is the preamp status byte: bits 0-1 the input mode (0 Mic, 1 Line, 2 Hi-Z), bit 0x40 phase invert. Byte 44 went 01 -> 02 -> 00 -> 01 with the vendor's 4f 00 02 / 4f 00 00 / 4f 00 01, and gain byte 40 switched to that mode's own stored gain each time (Line 6, Hi-Z 10, Mic 0). 2026-11-22 vendor panel run: mode on all four preamps (45-47 followed 4f 01..03), phase 52 <ch> 01 / 00 set and cleared 0x40 (45:00>40, 46:00>40, 47:00>40, in Mic mode). 48 V has no known bit (not captured), so it is reported as unread.",
       "input_mode_evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662)",
       "bus_block": {
         "base_offset": 28,
@@ -356,13 +467,25 @@
           "mute": {"mask": "0x01", "shift": 0},
           "dim": {"mask": "0x02", "shift": 1}
         },
-        "flags_combine": false,
-        "flags_combine_notes": "Only the values 00, 01 (mute) and 02 (dim) were seen, never 03. Whether mute and dim combine or dim replaces mute (as on the Zen Go) is unknown; while this is false the WebUI refuses dim on a protected bus that is muted. Set true after live trial T8 reads 03.",
-        "notes": "Byte 28 / 29 = Monitor level / flags, 30 / 31 = Headphone 1 level / flags: each followed the vendor's 47 / 48 / 66 writes within 20 ms. Bytes 32-37 read 1e 00 22 00 1e 00 and would be buses 2-4 by the same stride: not exercised, see buses.known.",
-        "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662)"
+        "flags_combine": true,
+        "flags_combine_notes": "2026-11-22 vendor panel run, on all five dimmable buses while muted: dim on 01 -> 03, dim off 03 -> 01 (Monitor 66 04, HP1-4 66 00..03). On this device a dim write keeps the mute bit, unlike the Zen Go, so dim on a muted bus is allowed; only a mute write (48) changes bit 0.",
+        "notes": "Byte 28 + 2*bus = level, 29 + 2*bus = flags, for Monitor (0), Headphones 1-4 (1-4) and the Line Out (5, bytes 38 / 39, no dim): each followed the vendor's 47 / 48 / 66 writes within 20 ms. The Monitor Out Trim is NOT repeated in the Monitor flags byte here (byte 29 did not move on cb 42 00 01 <n>).",
+        "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662); vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_outputs.txt)"
       },
-      "status": "confirmed for preamp 1-2 gain; capture-confirmed for preamp 1 mode and the Monitor / Headphone 1 level and flags; observed otherwise",
-      "gain_notes": "Bytes 40 and 41 followed the vendor's gain writes to preamps 1 and 2 (6 -> 7 -> 8 -> 7 -> 6 and 6 -> 7 -> 6, raw dB). Bytes 42 and 43 read 0 while the panel showed 0 dB on preamps 3 and 4: consistent, not exercised. The mode / phantom / phase status byte is not located, so there is no status_base_offset.",
+      "oscillator_byte_offset": 20,
+      "screen_brightness_byte_offset": 26,
+      "output_trim_block": {
+        "fields": {"target_0": {"byte_offset": 25, "mask": "0x1c", "shift": 2}},
+        "notes": "Monitor Out Trim index n (0..6) reads as 4n at byte 25 (2026-11-22: 25:00>04>08>0c>10>14>18>00). Byte 20 = oscillator, 26 = brightness (params.oscillator / params.screen_brightness)."
+      },
+      "surface_selector": {
+        "full_report_offset": 124,
+        "values": {"0x01": "DAW", "0x09": "ANALOG OUTS", "0x0b": "HEADPHONES 2", "0x0c": "HEADPHONES 3", "0x0d": "HEADPHONES 4", "0x0e": "MONITOR/HP1 (and MONITORS & HEADPHONES)", "0x10": "DIGITAL OUTS"},
+        "status": "capture-confirmed",
+        "notes": "Follows param 0x49 (the vendor panel's page tabs). Not sent by this project. 2026-11-22 vendor panel run."
+      },
+      "status": "confirmed for preamp 1-2 gain; capture-confirmed for the preamp gain / mode / phase bytes, the bus block (Monitor, Headphones 1-4, Line Out), oscillator, trim, brightness and page bytes; observed otherwise",
+      "gain_notes": "Bytes 40 and 41 followed the vendor's gain writes to preamps 1 and 2 (6 -> 7 -> 8 -> 7 -> 6 and 6 -> 7 -> 6, raw dB). Bytes 42 and 43 read 0 while the panel showed 0 dB on preamps 3 and 4; 2026-11-22 the gain of preamp 3 was swept (byte 42) and preamp 4 moved one notch (byte 43). The mode / phase status byte is 44 + channel (status_base_offset).",
       "gain_evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee)",
       "notes": "The device streams two unsolicited 320-byte reports at ~125 Hz each with no host traffic: magic 0x73 (state) and 0x83 (meter-like, mostly 0x60/0x32 lanes), the same pair as Zen Go. Unlike Zen Go, bytes 4..5 of 0x73 are 0x0000 (Zen Go: 0x4001). With the device at 48 kHz, 0x73 bytes 22..23 = 0xbb80 (48000) and byte 18 = 0x02 (the family's 48k index): candidates only, not tested against a rate change. Over 10 s idle, 0x73 offsets 160-163, 224-227, 242-243 moved. Base offsets deliberately not filled in.",
       "evidence": "owner's unit, tools/readback_probe.py phase 1 (passive, 10 s), 2026-11-16; raw output kept privately"
@@ -495,7 +618,7 @@
             }
           ],
           "defaults": "1e 00 47 00 00 00 00 | c8 00 47 00 00 00 02 | e8 03 47 00 00 00 02 | 88 13 47 00 00 00 02 | 98 3a 47 00 00 00 01",
-          "notes": "ClearQ, a five-band equaliser. Its write block is per band: 8 bytes = band 0-4, frequency u16 (Hz as the panel shows it: 30, 200, 1000, 5k, 15k for raw 30, 200, 1000, 5000, 15000), Q u16 in hundredths (raw 71 shown as 0.71), gain i16, shape u8; one frame sets one band. offset here is the position in the 35-byte read image (band n starts at 7 x n). Mapped = the six controls a sweep took to both ends: band 1 frequency 20-800, band 3 frequency 125-8000, Q of bands 2 and 3 50-1800, gain of bands 2 and 3 -2400..1200. The gain scale 0.01 is inferred (one wheel notch = 100, the panel showed 0.0 at raw 0 and its graph spans +/-20 dB); the displayed end values were not captured. Not mapped, written back unchanged: frequency of bands 2, 4, 5 (only one notch seen: 200->300, 5000->6000, 15000->16000), Q of band 4 (71->121), gain of bands 1, 4, 5 (0->100), Q of bands 1 and 5 (the panel draws no Q knob for their shapes) and the shape byte (defaults 0, 2, 2, 2, 1; the Zen Go owner's band 1 read 4; never seen changing: the panel's shape buttons need a click, the probe only wheeled). The sweep hit the band 3 frequency knob three times and never bands 2, 4, 5. Fields appended after Band 3 Gain (B1 Gain, B1 Shape, B2 Freq, B4 Freq, B4 Q, B4 Gain, B5 Freq, B5 Gain, B5 Shape): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: B1 Shape: 0 = low shelf, 4 = low cut; B5 Shape: 1 = high shelf, 3 = high cut; bands 2-4 are bells (shape 2, fixed). The Q knobs of bands 1 and 5 sent nothing in either shape. In a cut state the panel greys the gain and sends gain 0. Panel display: Q = raw / 100, gain = raw / 100 dB, frequency = raw Hz. Discrete 4 live trial pending.",
+          "notes": "ClearQ, a five-band equaliser. Its write block is per band: 8 bytes = band 0-4, frequency u16 (Hz as the panel shows it: 30, 200, 1000, 5k, 15k for raw 30, 200, 1000, 5000, 15000), Q u16 in hundredths (raw 71 shown as 0.71), gain i16, shape u8; one frame sets one band. offset here is the position in the 35-byte read image (band n starts at 7 x n). Mapped = the six controls a sweep took to both ends: band 1 frequency 20-800, band 3 frequency 125-8000, Q of bands 2 and 3 50-1800, gain of bands 2 and 3 -2400..1200. The gain scale 0.01 is inferred (one wheel notch = 100, the panel showed 0.0 at raw 0 and its graph spans +/-20 dB); the displayed end values were not captured. Not mapped, written back unchanged: frequency of bands 2, 4, 5 (only one notch seen: 200->300, 5000->6000, 15000->16000), Q of band 4 (71->121), gain of bands 1, 4, 5 (0->100), Q of bands 1 and 5 (the panel draws no Q knob for their shapes) and the shape byte (defaults 0, 2, 2, 2, 1; the Zen Go owner's band 1 read 4; never seen changing: the panel's shape buttons need a click, the probe only wheeled). The sweep hit the band 3 frequency knob three times and never bands 2, 4, 5. Fields appended after Band 3 Gain (B1 Gain, B1 Shape, B2 Freq, B4 Freq, B4 Q, B4 Gain, B5 Freq, B5 Gain, B5 Shape): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: B1 Shape: 0 = low shelf, 4 = low cut; B5 Shape: 1 = high shelf, 3 = high cut; bands 2-4 are bells (shape 2, fixed). The Q knobs of bands 1 and 5 sent nothing in either shape. In a cut state the panel greys the gain and sends gain 0. Panel display: Q = raw / 100, gain = raw / 100 dB, frequency = raw Hz. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): clearq_probe.pcapng (sha256 c45dbe19b22b0aa751ca18f4ce8803c5e3795f8935358e51a33b1a58bc040b03), clearq_sweep.pcapng (sha256 9d9dca1c4e4ea54c443f241916fa26db6f1a6902ea59eb0dde571e87aaaa58e8); read layout: d4_afx_two_effects.pcapng (sha256 a3b4cd77c5ec1eec2e90ad11a8796d59ee74182da14d6cdb6c702c665c6f985c) frames 68391/68405"
         },
         "2": {
@@ -521,13 +644,14 @@
             },
             {"key": "gain", "label": "Gain", "offset": 12, "type": "u16", "min": 0, "max": 2400}
           ],
-          "notes": "PowerFFC. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Knee (Detector, Gain): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Detector (dropdown): 65535 = PEAK, 2000 / 5000 / 10000 / 15000 / 20000 = RMS 20 / 50 / 100 / 150 / 200. Gain = the GAIN fader (100 per wheel notch; unit not established). Discrete 4 live trial pending.",
+          "notes": "PowerFFC. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Knee (Detector, Gain): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Detector (dropdown): 65535 = PEAK, 2000 / 5000 / 10000 / 15000 / 20000 = RMS 20 / 50 / 100 / 150 / 200. Gain = the GAIN fader (100 per wheel notch; unit not established). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): powerffc_sweep.pcapng (sha256 93234e148ecc2747e745804b6fa3fe0a9633f21088c0b2fd74bc44b6247c519b)"
         },
         "3": {
           "block_length": 16,
-          "status": "write-layout-captured, read-unconfirmed",
-          "editable": false,
+          "read_stride": 17,
+          "read_offset": 1,
+          "status": "confirmed",
           "fields": [
             {"key": "model", "label": "Model", "offset": 0, "type": "u8", "min": 0, "max": 10},
             {"key": "output", "label": "Output", "offset": 15, "type": "i8", "min": -48, "max": 12, "unit": "dB"},
@@ -545,7 +669,7 @@
             {"key": "switch_5", "label": "Switch 5", "offset": 14, "type": "u8", "min": 0, "max": 1}
           ],
           "defaults": "00 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 00",
-          "notes": "Guitar amp (the panel calls the effect Guitar Amp; Darkface 65 (US) is its first model). 16-byte block. Byte 0 = model: the wheel on the MODEL selector sent 0, 1, 2, 5, 6, 7, 9, 10 and changed nothing else in the block; names by number from the Zen Go, where each model was loaded by name: 0 Darkface 65 (US), 1 Top30 (UK) Bright, 2 Modern (US) CH3, 3 Plexi 59 (UK), 4 Rock 22.10 (UK), 5 Rock 75 (UK), 6 Marcus II (US) Lead, 7 Tweed Deluxe (US), 8 Overange 120 (UK), 9 BurnSphere (DE) Lead, 10 Bass SuperTube VR. Byte 15 = output level, signed, -48..12 (panel shows 0 dB at raw 0), swept to both ends. Knobs, one notch only (+2), probed while the model was 1 (Top30: Volume, Top Cut, Treble, Bass from left to right): byte 8 at the Volume position, byte 7 Top Cut, byte 5 Treble, byte 2 Bass; the Darkface picture at load agrees for Volume (raw 89, pointer near 8.9) and Bass (62). Their ranges were not captured: the sweep ran after the model sweeps had left the model at 10 (Bass SuperTube VR), whose panel has its knobs elsewhere, so the four knob sweeps sent no frame. Bytes 1, 3, 4, 6, 9-14 (other models' knobs and switches; default 46 .. 3f 00 .. 00 .. 00 01 00 00 00 00) are unidentified. Only model and output are mapped; every other byte would be written back unchanged. NOT EDITABLE: no cat 0x07 read of this effect has been captured, so its read layout (and whether its index is the type) is unknown and the app never writes a block it could not read first. read_stride / read_offset are left out on purpose. Fields appended after Output (Bright, Gain, Bass, Middle, Treble, Presence, Volume, Volume 2, Switch 2, Switch 3, Switch 4, Switch 5): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Bright: 1 = lever up on Darkface 65; other models use this byte for their own switch (see below). One block for all models; which knob a byte is depends on the model (names as printed, by byte): Darkface 65: Bass 2, Middle 3, Treble 5, Volume 8, Bright 10. Top30: Bass 2, Treble 5, Top Cut 7, Volume 8. Modern CH3: Gain 1, Bass 2, Middle 3, Treble 5, Presence 7, Volume 8, byte 10 = 0 Raw / 1 Vintage / 2 Modern. Plexi 59: 2, 3, 5, Presence 7, Volume 8. Rock 22.10: Pre-amp Volume 1, 2, 3, 5, Presence 7, Master Volume 8. Rock 75: Gain 1, 2, 3, 5, Presence 7, Volume 8. Marcus II: Drive 1, 2, 3, 5, Master 8, Volume 9, Shift (treble/drive) 11, Shift (bass/middle) 12, Normal/Bright 13, Off/Deep 14. Tweed Deluxe: Tone 3, Volume 8, Normal/Bright 11. Overange 120: HF Drive 1, Bass 2, F.A.C 3, Treble 5, Gain 8. BurnSphere: Gain 1, 2, 3, 5, Presence 7, Volume 8, Normal/Bright 10, Off/Bottom 11. Bass SuperTube: bass 2, midrange 3, treble 5, volume 8, bright 10, ultra-hi 11, 1-2-3 = byte 12 (0-2), bass-cut/off/ultra-low = byte 13 (0-2). Bytes 4 and 6 moved on no model. A model change rewrites only byte 0. Discrete 4 live trial pending. These fields supersede the \"only model and output are mapped\" statement above; the effect stays editable: false until a settings read is captured here, and enabling it later is that one change plus its read_stride / read_offset.",
+          "notes": "Guitar amp (the panel calls the effect Guitar Amp; Darkface 65 (US) is its first model). 16-byte block. Byte 0 = model: the wheel on the MODEL selector sent 0, 1, 2, 5, 6, 7, 9, 10 and changed nothing else in the block; names by number from the Zen Go, where each model was loaded by name: 0 Darkface 65 (US), 1 Top30 (UK) Bright, 2 Modern (US) CH3, 3 Plexi 59 (UK), 4 Rock 22.10 (UK), 5 Rock 75 (UK), 6 Marcus II (US) Lead, 7 Tweed Deluxe (US), 8 Overange 120 (UK), 9 BurnSphere (DE) Lead, 10 Bass SuperTube VR. Byte 15 = output level, signed, -48..12 (panel shows 0 dB at raw 0), swept to both ends. Knobs, one notch only (+2), probed while the model was 1 (Top30: Volume, Top Cut, Treble, Bass from left to right): byte 8 at the Volume position, byte 7 Top Cut, byte 5 Treble, byte 2 Bass; the Darkface picture at load agrees for Volume (raw 89, pointer near 8.9) and Bass (62). Their ranges were not captured: the sweep ran after the model sweeps had left the model at 10 (Bass SuperTube VR), whose panel has its knobs elsewhere, so the four knob sweeps sent no frame. Bytes 1, 3, 4, 6, 9-14 (other models' knobs and switches; default 46 .. 3f 00 .. 00 .. 00 01 00 00 00 00) are unidentified. Only model and output are mapped; every other byte would be written back unchanged. NOT EDITABLE: no cat 0x07 read of this effect has been captured, so its read layout (and whether its index is the type) is unknown and the app never writes a block it could not read first. The 2026-11-22 vendor panel run confirms there is none to capture: with the amp loaded (model Top30) the panel was closed and reopened, sent no cat 0x07 request on connect or when the rack opened, and showed its own default model Darkface 65; panel 1.9.22 keeps effect settings only in its own model. read_stride / read_offset are left out on purpose. Fields appended after Output (Bright, Gain, Bass, Middle, Treble, Presence, Volume, Volume 2, Switch 2, Switch 3, Switch 4, Switch 5): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Bright: 1 = lever up on Darkface 65; other models use this byte for their own switch (see below). One block for all models; which knob a byte is depends on the model (names as printed, by byte): Darkface 65: Bass 2, Middle 3, Treble 5, Volume 8, Bright 10. Top30: Bass 2, Treble 5, Top Cut 7, Volume 8. Modern CH3: Gain 1, Bass 2, Middle 3, Treble 5, Presence 7, Volume 8, byte 10 = 0 Raw / 1 Vintage / 2 Modern. Plexi 59: 2, 3, 5, Presence 7, Volume 8. Rock 22.10: Pre-amp Volume 1, 2, 3, 5, Presence 7, Master Volume 8. Rock 75: Gain 1, 2, 3, 5, Presence 7, Volume 8. Marcus II: Drive 1, 2, 3, 5, Master 8, Volume 9, Shift (treble/drive) 11, Shift (bass/middle) 12, Normal/Bright 13, Off/Deep 14. Tweed Deluxe: Tone 3, Volume 8, Normal/Bright 11. Overange 120: HF Drive 1, Bass 2, F.A.C 3, Treble 5, Gain 8. BurnSphere: Gain 1, 2, 3, 5, Presence 7, Volume 8, Normal/Bright 10, Off/Bottom 11. Bass SuperTube: bass 2, midrange 3, treble 5, volume 8, bright 10, ultra-hi 11, 1-2-3 = byte 12 (0-2), bass-cut/off/ultra-low = byte 13 (0-2). Bytes 4 and 6 moved on no model. A model change rewrites only byte 0. These fields supersede the \"only model and output are mapped\" statement above. Settings read on this device, 2026-11-22: loaded through this project into the channel 3 rack, the cat 0x07 reply was 01 00 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 00 01 .. (one flag byte, then the 16-byte block the load wrote, 17 bytes per instance), so the effect is editable here although the vendor panel itself never reads it.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): amp_darkface_65_probe.pcapng (sha256 bf6534259e6153639775b9eaa1fdad367b5567d0077b69a22621881067e8dc47), amp_darkface_65_sweep.pcapng (sha256 b8bdde701c8923a1a9b7973e94536a002f6ac54d8bfc3771a8042fd978bd7655); model names: Zen Go zengo_batch_load.pcapng (sha256 b90ffd5b6443635f92606209a10c4b4c29199e5caa376c216cb5533d84b3abe4)"
         },
         "5": {
@@ -581,7 +705,7 @@
             {"key": "low_freq", "label": "Low Freq", "offset": 0, "type": "u8", "min": 0, "max": 3},
             {"key": "high_freq", "label": "High Freq", "offset": 3, "type": "u8", "min": 0, "max": 6}
           ],
-          "notes": "VEQ-1A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Atten Sel (Low Freq, High Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low Freq 0-3 = 20, 30, 60, 100 CPS; High Freq 0-6 = 3, 4, 5, 8, 10, 12, 16 KCS. Discrete 4 live trial pending.",
+          "notes": "VEQ-1A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Atten Sel (Low Freq, High Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low Freq 0-3 = 20, 30, 60, 100 CPS; High Freq 0-6 = 3, 4, 5, 8, 10, 12, 16 KCS. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_1a_sweep.pcapng (sha256 610c0e84fd885a68e9441a250cd63a801dea35eaffb7071801069cca25947c39)"
         },
         "7": {
@@ -600,7 +724,7 @@
             {"key": "mid_freq", "label": "Mid Freq", "offset": 2, "type": "u8", "min": 0, "max": 6},
             {"key": "low_freq", "label": "Low Freq", "offset": 4, "type": "u8", "min": 0, "max": 4}
           ],
-          "notes": "BAE 1073. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after High-pass (Phase, Mid Freq, Low Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Frequency rings (wheel on the outer ring): Mid 0-6 = OFF, 360, 700, 1k6, 3k2, 4k8, 7k2; Low 0-4 = OFF, 35, 60, 110, 220. Discrete 4 live trial pending.",
+          "notes": "BAE 1073. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after High-pass (Phase, Mid Freq, Low Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Frequency rings (wheel on the outer ring): Mid 0-6 = OFF, 360, 700, 1k6, 3k2, 4k8, 7k2; Low 0-4 = OFF, 35, 60, 110, 220. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1073_sweep.pcapng (sha256 c585d8f1421d99361db63894e4eb3e5ea74f50669b94036d518493ca2c7fe1ae)"
         },
         "8": {
@@ -621,7 +745,7 @@
             {"key": "mf_gain", "label": "MF Gain", "offset": 4, "type": "u8", "min": 0, "max": 10},
             {"key": "hf_gain", "label": "HF Gain", "offset": 6, "type": "u8", "min": 0, "max": 10}
           ],
-          "notes": "VEQ-55A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after HF Freq (LF Shape, HF Shape, Filter, LF Gain, MF Gain, HF Gain): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Filter = the FLTR lever (1 = towards the print). LF/HF Shape: the lit buttons. Gains (white pointer, wheel on the lower part of the knob): 0 = -12, 5 = 0 dB, 10 = +12. Discrete 4 live trial pending.",
+          "notes": "VEQ-55A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after HF Freq (LF Shape, HF Shape, Filter, LF Gain, MF Gain, HF Gain): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Filter = the FLTR lever (1 = towards the print). LF/HF Shape: the lit buttons. Gains (white pointer, wheel on the lower part of the knob): 0 = -12, 5 = 0 dB, 10 = +12. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_55a_sweep.pcapng (sha256 414159187e001153aa0e9f2b77cefc3fc46cbecad669d694e593f5e1282c0ae2)"
         },
         "9": {
@@ -645,7 +769,7 @@
               "values": [0, 1, 2, 4, 8]
             }
           ],
-          "notes": "FET-A76. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Release (Ratio): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio: 1, 2, 4, 8 = the buttons 4, 8, 12, 20; 0 = none pressed; no other value was seen. Discrete 4 live trial pending.",
+          "notes": "FET-A76. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Release (Ratio): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio: 1, 2, 4, 8 = the buttons 4, 8, 12, 20; 0 = none pressed; no other value was seen. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): fet_a76_sweep.pcapng (sha256 c7f392d4e1f82babcd968d0d82d04f44a225e192403ebe25b4ee88b2479e5862)"
         },
         "11": {
@@ -676,7 +800,7 @@
             {"key": "mid_peak_trough", "label": "Mid Peak/Trough", "offset": 5, "type": "u8", "min": 0, "max": 1},
             {"key": "bass_freq", "label": "Bass Freq", "offset": 0, "type": "i8", "min": -5, "max": 5}
           ],
-          "notes": "UK-69. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Line Level (Mid Peak/Trough, Bass Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Mid Peak/Trough: 0 PK, 1 TR. Bass Freq = the bass selector, signed: -5 = 400 Hz end, 0 = 0, +5 = 15 (-dB 50 Hz) end. Discrete 4 live trial pending.",
+          "notes": "UK-69. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Line Level (Mid Peak/Trough, Bass Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Mid Peak/Trough: 0 PK, 1 TR. Bass Freq = the bass selector, signed: -5 = 400 Hz end, 0 = 0, +5 = 15 (-dB 50 Hz) end. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): uk_69_sweep.pcapng (sha256 210e6e5557b2c07ba23e65779b71d9ea6695bcda9574520db45fe0ea916e01ab)"
         },
         "13": {
@@ -713,7 +837,7 @@
             {"key": "hf_droop", "label": "HF Droop", "offset": 8, "type": "u8", "min": 0, "max": 100},
             {"key": "output", "label": "Output", "offset": 9, "type": "i8", "min": -24, "max": 12}
           ],
-          "notes": "Lang PEQ-2. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after HF Droop (Output): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Output = the small trim, signed dB as printed (+12 / 0 / -24). Discrete 4 live trial pending.",
+          "notes": "Lang PEQ-2. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after HF Droop (Output): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Output = the small trim, signed dB as printed (+12 / 0 / -24). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): lang_peq2_sweep.pcapng (sha256 d5a5d82dfc3c14362a749042cbc08c036ac8b614b6ea49532c5f9d38ba7910f0)"
         },
         "15": {
@@ -738,7 +862,7 @@
             {"key": "band_3_on", "label": "Band 3 On", "offset": 9, "type": "u8", "min": 0, "max": 1},
             {"key": "band_4_on", "label": "Band 4 On", "offset": 12, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "NEU-W492. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (High-pass, Band 1 On, Band 2 On, Band 3 On, Band 4 On): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Band 1-4 On are the red ON switches, left to right. High-pass: 0 = 140 Hz, 1 = 20 Hz, 2 = 80 Hz. Discrete 4 live trial pending.",
+          "notes": "NEU-W492. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (High-pass, Band 1 On, Band 2 On, Band 3 On, Band 4 On): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Band 1-4 On are the red ON switches, left to right. High-pass: 0 = 140 Hz, 1 = 20 Hz, 2 = 80 Hz. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): neu_w492_sweep.pcapng (sha256 65f5f9524bf80a701f25050faa62a0ca43170a11b60a34498459991f6ce89be7)"
         },
         "16": {
@@ -764,7 +888,7 @@
             {"key": "lmf_3", "label": "LMF /3", "offset": 11, "type": "u8", "min": 0, "max": 1},
             {"key": "low_pass", "label": "Low-pass", "offset": 1, "type": "u8", "min": 0, "max": 100}
           ],
-          "notes": "VEQ-4K Pink. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HMF x3, LMF /3, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: The names are the prints on the two buttons of the Pink model. Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial pending.",
+          "notes": "VEQ-4K Pink. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HMF x3, LMF /3, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: The names are the prints on the two buttons of the Pink model. Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_pink_sweep.pcapng (sha256 8a10f34a8d5e7760fca52cae11684bfc5109cc579d8486dcf98ac3c22a991bba)"
         },
         "17": {
@@ -790,7 +914,7 @@
             {"key": "lf_bell", "label": "LF Bell", "offset": 11, "type": "u8", "min": 0, "max": 1},
             {"key": "low_pass", "label": "Low-pass", "offset": 1, "type": "u8", "min": 0, "max": 100}
           ],
-          "notes": "VEQ-4K Orange. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HF Bell, LF Bell, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial pending.",
+          "notes": "VEQ-4K Orange. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HF Bell, LF Bell, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_orange_sweep.pcapng (sha256 07efe49dc1913f27ca04d9dadd92ff9550541b8e0f46581cc8d7ae5989b81f4c)"
         },
         "18": {
@@ -816,7 +940,7 @@
             {"key": "lf_bell", "label": "LF Bell", "offset": 11, "type": "u8", "min": 0, "max": 1},
             {"key": "low_pass", "label": "Low-pass", "offset": 1, "type": "u8", "min": 0, "max": 100}
           ],
-          "notes": "VEQ-4K Black. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HF Bell, LF Bell, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial pending.",
+          "notes": "VEQ-4K Black. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HF Bell, LF Bell, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_black_sweep.pcapng (sha256 c1815cab16909b5935fb276a6ae9ca3963a210e74194d33b7ec85fbd1766f4fc)"
         },
         "19": {
@@ -842,7 +966,7 @@
             {"key": "lf_bell", "label": "LF Bell", "offset": 11, "type": "u8", "min": 0, "max": 1},
             {"key": "low_pass", "label": "Low-pass", "offset": 1, "type": "u8", "min": 0, "max": 100}
           ],
-          "notes": "VEQ-4K Brown. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HF Bell, LF Bell, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial pending.",
+          "notes": "VEQ-4K Brown. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HF Bell, LF Bell, Low-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low-pass = the lower FILTERS knob (0 = OUT). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_4k_brown_sweep.pcapng (sha256 30f23140d0abc557158adf65223f3b224180b94ac5a08107414a26ee79545724)"
         },
         "20": {
@@ -861,7 +985,7 @@
             {"key": "mid_bandwidth", "label": "Mid Bandwidth", "offset": 4, "type": "u8", "min": 0, "max": 2},
             {"key": "low_freq", "label": "Low Freq", "offset": 0, "type": "u8", "min": 0, "max": 2}
           ],
-          "notes": "NEU-W495. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Mid Bandwidth, Low Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Mid Bandwidth: 0 narrow, 1 medium, 2 wide. Low Freq (red Hz knob): 0-2 = 40, 60, 100. Discrete 4 live trial pending.",
+          "notes": "NEU-W495. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Mid Bandwidth, Low Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Mid Bandwidth: 0 narrow, 1 medium, 2 wide. Low Freq (red Hz knob): 0-2 = 40, 60, 100. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): neu_w495_sweep.pcapng (sha256 4f1331d92752f2b33ecb9cb578fd4e0a07a512662faa1fa2e39c4d80b78eaf8c)"
         },
         "21": {
@@ -896,7 +1020,7 @@
             {"key": "high_pass", "label": "High-pass", "offset": 0, "type": "u8", "min": 0, "max": 1},
             {"key": "mid_freq", "label": "Mid Freq", "offset": 3, "type": "u8", "min": 0, "max": 100}
           ],
-          "notes": "VEQ-STU 169. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (High-pass, Mid Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: High-pass = the toggle (0 lever up). Mid Freq = the red ring (0 = 150, 100 = 7K). Discrete 4 live trial pending.",
+          "notes": "VEQ-STU 169. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (High-pass, Mid Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: High-pass = the toggle (0 lever up). Mid Freq = the red ring (0 = 150, 100 = 7K). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_stu_169_sweep.pcapng (sha256 dd63c28c4cc522b960e5f36c28f8b6e7d60d0edb2c4521f9a2525147235c9d7f)"
         },
         "23": {
@@ -922,7 +1046,7 @@
             {"key": "hmf_bandwidth", "label": "HMF Bandwidth", "offset": 10, "type": "u8", "min": 0, "max": 1},
             {"key": "hf_shape", "label": "HF Shape", "offset": 13, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "VEQ-STU 900. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (LF Shape, LMF Bandwidth, HMF Bandwidth, HF Shape): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: LF/HF Shape: 0 bell, 1 shelf. LMF/HMF Bandwidth: 0 narrow, 1 wide. Discrete 4 live trial pending.",
+          "notes": "VEQ-STU 900. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (LF Shape, LMF Bandwidth, HMF Bandwidth, HF Shape): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: LF/HF Shape: 0 bell, 1 shelf. LMF/HMF Bandwidth: 0 narrow, 1 wide. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_stu_900_sweep.pcapng (sha256 c06c0a2f2a62de429cc33eef4c9daae3ad8c3f587aab5e2c5b76bde66aa55ede)"
         },
         "24": {
@@ -942,7 +1066,7 @@
             {"key": "mid_freq", "label": "Mid Freq", "offset": 3, "type": "u8", "min": 0, "max": 11},
             {"key": "low_freq", "label": "Low Freq", "offset": 5, "type": "u8", "min": 0, "max": 4}
           ],
-          "notes": "BAE 1023. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after High-pass (Phase, High Freq, Mid Freq, Low Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Frequency rings: High 0-5 = OFF, 10k, 12k, 16k, 20k, 24k; Mid 0-11 = OFF, 160, 270, 360, 510, 700, 1k6, 3k2, 4k8, 7k2, 8k2, 10k; Low 0-4 = OFF, 35, 60, 110, 220. Discrete 4 live trial pending.",
+          "notes": "BAE 1023. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after High-pass (Phase, High Freq, Mid Freq, Low Freq): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Frequency rings: High 0-5 = OFF, 10k, 12k, 16k, 20k, 24k; Mid 0-11 = OFF, 160, 270, 360, 510, 700, 1k6, 3k2, 4k8, 7k2, 8k2, 10k; Low 0-4 = OFF, 35, 60, 110, 220. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1023_sweep.pcapng (sha256 3c0028bdb941c5c16a207a703ca5c11b13199f7ae29bdbc4512e64de495b023b)"
         },
         "25": {
@@ -964,7 +1088,7 @@
             {"key": "low_freq", "label": "Low Freq", "offset": 5, "type": "u8", "min": 0, "max": 4},
             {"key": "high_pass", "label": "High-pass", "offset": 7, "type": "u8", "min": 0, "max": 4}
           ],
-          "notes": "BAE 1084. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Low-pass (Hi Q, Phase, High Freq, Mid Freq, Low Freq, High-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Rings: High 0-3 = OFF, 16k, 12k, 10k; Mid 0-6 = OFF, 360 ... 7k2; Low 0-4 = OFF, 35, 60, 110, 220; High-pass 0-4 = OFF, 45, 70, 160, 360. Discrete 4 live trial pending.",
+          "notes": "BAE 1084. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Low-pass (Hi Q, Phase, High Freq, Mid Freq, Low Freq, High-pass): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Rings: High 0-3 = OFF, 16k, 12k, 10k; Mid 0-6 = OFF, 360 ... 7k2; Low 0-4 = OFF, 35, 60, 110, 220; High-pass 0-4 = OFF, 45, 70, 160, 360. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1084_sweep.pcapng (sha256 42fbc67bc735d6c7374d0cbe157d86de0ac4458736fae16941ffbbdbade9d860)"
         },
         "26": {
@@ -990,7 +1114,7 @@
             {"key": "low_shape", "label": "Low Shape", "offset": 6, "type": "u8", "min": 0, "max": 1},
             {"key": "hi_shape", "label": "Hi Shape", "offset": 13, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "VEQ-HA32C. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HP In, LP In, Low Shape, Hi Shape): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low/Hi Shape: 0 shelf, 1 bell. Discrete 4 live trial pending.",
+          "notes": "VEQ-HA32C. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (HP In, LP In, Low Shape, Hi Shape): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Low/Hi Shape: 0 shelf, 1 bell. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_ha32c_sweep.pcapng (sha256 698a4c8c8767bf2daf2b3cbb6a4f6838b15535a5d98c528918b01ef2e1bb69e1)"
         },
         "27": {
@@ -1011,7 +1135,7 @@
             {"key": "q", "label": "Q", "offset": 4, "type": "u16", "min": 1, "max": 400},
             {"key": "filter", "label": "Filter", "offset": 6, "type": "u8", "min": 0, "max": 4}
           ],
-          "notes": "Master De-esser. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Soft Knee (Monitor, Q, Filter): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Monitor = the monitor point (0 = output). Filter: 0-2 = HighPass 1-3, 3-4 = BandPass 1-2. Q: raw 1..400 (71 at load). Discrete 4 live trial pending.",
+          "notes": "Master De-esser. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Soft Knee (Monitor, Q, Filter): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Monitor = the monitor point (0 = output). Filter: 0-2 = HighPass 1-3, 3-4 = BandPass 1-2. Q: raw 1..400 (71 at load). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): master_deesser_sweep.pcapng (sha256 fc00ceac775a64bc39964d80e69bdbe68c8791b937f2c226b4ac98bb01401df1)"
         },
         "28": {
@@ -1033,7 +1157,7 @@
             {"key": "hmf_gain", "label": "HMF Gain", "offset": 6, "type": "u8", "min": 0, "max": 10},
             {"key": "hf_gain", "label": "HF Gain", "offset": 8, "type": "u8", "min": 0, "max": 10}
           ],
-          "notes": "VEQ-55B. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after HF Freq (LF Shape, HF Shape, LF Gain, LMF Gain, HMF Gain, HF Gain): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Shape: 0 bell, 1 shelf. Gains (white pointer): 0 = -12, 5 = 0 dB, 10 = +12. Discrete 4 live trial pending.",
+          "notes": "VEQ-55B. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after HF Freq (LF Shape, HF Shape, LF Gain, LMF Gain, HMF Gain, HF Gain): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Shape: 0 bell, 1 shelf. Gains (white pointer): 0 = -12, 5 = 0 dB, 10 = +12. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): veq_55b_sweep.pcapng (sha256 50b973b9d8ce73b382925053913f7acd8b54f2770ef901ac8881ac1bea5ce03e)"
         },
         "29": {
@@ -1096,7 +1220,7 @@
             {"key": "output", "label": "Output", "offset": 4, "type": "u8", "min": 0, "max": 100},
             {"key": "ratio", "label": "Ratio", "offset": 1, "type": "u8", "min": 0, "max": 3}
           ],
-          "notes": "Tube176. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Ratio): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio = the COMP. RATIO knob: 0-3 = 2:1, 4:1, 8:1, 12:1. Discrete 4 live trial pending.",
+          "notes": "Tube176. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Ratio): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio = the COMP. RATIO knob: 0-3 = 2:1, 4:1, 8:1, 12:1. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): tube_176_sweep.pcapng (sha256 7056d6373c29b3efe1be0e10e9dc9c8abdf3de2d0b5c8089c42b40ab7754d64b)"
         },
         "33": {
@@ -1125,7 +1249,7 @@
             {"key": "recovery_time", "label": "Recovery Time", "offset": 2, "type": "u8", "min": 0, "max": 4},
             {"key": "mode", "label": "Mode", "offset": 3, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "Stay-Levin. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Recovery Time (Mode): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Mode: 0 Double, 1 Single. Discrete 4 live trial pending.",
+          "notes": "Stay-Levin. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Recovery Time (Mode): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Mode: 0 Double, 1 Single. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): stay_levin_sweep.pcapng (sha256 df65a83010e5a278975e708ebeeb3d80d94ea38f05c3d70b00735aa0914ef599)"
         },
         "35": {
@@ -1155,7 +1279,7 @@
             {"key": "attack", "label": "Attack", "offset": 1, "type": "u8", "min": 0, "max": 2},
             {"key": "release", "label": "Release", "offset": 2, "type": "u8", "min": 0, "max": 2}
           ],
-          "notes": "SMT-100A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Gain Reduction (Attack, Release): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Attack / Release toggles: 0 Slow, 1 centre, 2 Fast. Discrete 4 live trial pending.",
+          "notes": "SMT-100A. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Gain Reduction (Attack, Release): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Attack / Release toggles: 0 Slow, 1 centre, 2 Fast. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): smt_100a_sweep.pcapng (sha256 d2cc7d9fbe7ac4e7793931af270648198e8238efb9097f6b3da977f1cb4894d3)"
         },
         "37": {
@@ -1179,7 +1303,7 @@
               "values": [0, 1, 2, 4, 8]
             }
           ],
-          "notes": "FET-A78. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Release (Ratio): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio: 1, 2, 4, 8 = the buttons 4, 8, 12, 20; 0 = none pressed; no other value was seen. Discrete 4 live trial pending.",
+          "notes": "FET-A78. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Release (Ratio): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio: 1, 2, 4, 8 = the buttons 4, 8, 12, 20; 0 = none pressed; no other value was seen. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): fet_a78_sweep.pcapng (sha256 889c913e0ae553a576710cf0a75adf273eb18da0e09c960785bf161765b3bd6a)"
         },
         "38": {
@@ -1246,7 +1370,7 @@
             {"key": "harmonics", "label": "Harmonics", "offset": 7, "type": "u8", "min": 0, "max": 2},
             {"key": "uk_mode", "label": "UK Mode", "offset": 8, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "Impresser. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Detector Band (Ratio, Harmonics, UK Mode): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio: 0-7 = 1:1, 2:1, 3:1, 4:1, 6:1, 10:1, 20:1, NUKE. Harmonics: 0 = 2nd, 1 = 3rd, 2 = both off. Discrete 4 live trial pending.",
+          "notes": "Impresser. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Detector Band (Ratio, Harmonics, UK Mode): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Ratio: 0-7 = 1:1, 2:1, 3:1, 4:1, 6:1, 10:1, 20:1, NUKE. Harmonics: 0 = 2nd, 1 = 3rd, 2 = both off. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): impresser_sweep.pcapng (sha256 698398731fa64eaad30bc7209bf64b587ce3dd7181d297fe8c72c120c97efdb7)"
         },
         "43": {
@@ -1290,7 +1414,7 @@
             {"key": "output", "label": "Output", "offset": 1, "type": "u8", "min": 0, "max": 100},
             {"key": "impedance", "label": "Impedance", "offset": 2, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "BAE 1073MP. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Impedance): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Impedance: 0 = 300 ohm, 1 = 1200 ohm. Discrete 4 live trial pending.",
+          "notes": "BAE 1073MP. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Impedance): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Impedance: 0 = 300 ohm, 1 = 1200 ohm. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae_1073mp_sweep.pcapng (sha256 016c247485e37849250d2ec53acc944de9590fa1f4e66e21706c9e027bf05337)"
         },
         "46": {
@@ -1310,7 +1434,7 @@
             {"key": "tape_type", "label": "Tape Type", "offset": 4, "type": "u8", "min": 0, "max": 3},
             {"key": "meter_rec_out", "label": "Meter Rec/Out", "offset": 8, "type": "u8", "min": 0, "max": 1}
           ],
-          "notes": "Reel To Reel. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Speed, EQ, Bias, Tape Type, Meter Rec/Out): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Speed: 0 = 15 IPS, 1 = 30 IPS. EQ: 0 NAB, 1 IEC. Bias: 0 Under, 1 Normal, 2 Over. Tape Type: 0-3 = I-IV. Meter Rec/Out: 0 Out, 1 Rec. Discrete 4 live trial pending.",
+          "notes": "Reel To Reel. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Output (Speed, EQ, Bias, Tape Type, Meter Rec/Out): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Speed: 0 = 15 IPS, 1 = 30 IPS. EQ: 0 NAB, 1 IEC. Bias: 0 Under, 1 Normal, 2 Over. Tape Type: 0-3 = I-IV. Meter Rec/Out: 0 Out, 1 Rec. Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): reel_to_reel_sweep.pcapng (sha256 d97268b8d11c3529313cbf0519662f5e6b4ba8adcada78b946406e93fefd384f)"
         },
         "47": {
@@ -1357,7 +1481,7 @@
             {"key": "limiter_in", "label": "Limiter In", "offset": 9, "type": "u8", "min": 0, "max": 1},
             {"key": "threshold", "label": "Threshold", "offset": 4, "type": "u8", "min": 0, "max": 15}
           ],
-          "notes": "BAE 10DCF. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Limiter Recovery (Compressor In, Limiter In, Threshold): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Threshold = the compressor THRESHOLD dB knob (0 = -30, 10 = -10, 15 = 0). Discrete 4 live trial pending.",
+          "notes": "BAE 10DCF. Each listed control was wheeled to both ends in the vendor panel and moved only its own bytes; min/max are the raw limits seen. Raw units: no physical unit is claimed. Bytes of the block not listed here (switches, menus, stacked rings the wheel did not reach) are unmapped and are written back unchanged. Fields appended after Limiter Recovery (Compressor In, Limiter In, Threshold): ported from the Zen Go, not captured on this device. They were mapped from vendor-panel captures on the owner's Zen Go (same effect type and block); the value meanings below are copied from the Zen Go note: Threshold = the compressor THRESHOLD dB knob (0 = -30, 10 = -10, 15 = 0). Discrete 4 live trial 2026-11-22: loaded alone into the channel 3 rack through this project, every control moved by one step and put back, each write confirmed by readback.",
           "evidence": "unattended run 2026-11-17 (owner's unit, vendor panel 1.9.22 under Wine, usbmon): bae10dcf_sweep.pcapng (sha256 b62ca93776ae92df9396f74e8b4d51a63b8daa6629e33203f7306ddb4f091584)"
         },
         "51": {
@@ -1381,15 +1505,16 @@
         "param_id": "0x98",
         "opcode": "0x14",
         "layout": "70 00 00 00 | 14 00 00 00 | 00 x8 | 98 | <instance> | <type> | <01 active / 00 bypassed>",
-        "notes": "CANDIDATE until the Discrete 4 live trial: the frame 98 00 <type> <enabled> was seen on this device (98 00 1b 00 then 98 00 1b 01, one slot's BP button; PowerGate's ON/OFF switch sends it too; PROTOCOL.md section 12a). That the byte after 98 is the instance (98 01 <type> <0/1> on a second instance), and that the state is the flag byte in front of each instance's block in the cat 0x07 reply (offset instance * read_stride + read_offset - 1), were established on the Zen Go and are not yet tried here. Only effects with read_offset >= 1 show the state.",
-        "evidence": "frame seen on this device earlier (PROTOCOL.md, Discrete 4 AFX notes); instance byte and flag byte: Zen Go trial 2026-11-21 (profiles/zen_go_sc.json afx_inserts.parameters.bypass)"
+        "notes": "Frame capture-confirmed on this device (2026-11-22 vendor panel run): 98 <instance> <type> <enabled>, sent by the slot BP, the effect face's BYPASS, the main window's strip BP and BP ALL, on instance 0 (98 00 1b, 98 00 27, 98 00 03) and instance 1 (98 01 1b in rack 2); the vendor panel never reads the state back. That the state is the flag byte in front of each instance's block in the cat 0x07 reply (offset instance * read_stride + read_offset - 1) was established on the Zen Go and confirmed here on 2026-11-22: two PowerGate instances in racks 3 and 4, each bypassed and re-activated alone through this project; only the addressed instance's flag byte changed (reply 01 .. 00 .. and 00 .. 01 ..). Only effects with read_offset >= 1 show the state.",
+        "evidence": "frame: this device, 2026-11-17 (PROTOCOL.md, Discrete 4 AFX notes) and vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_afx.txt); flag byte: Zen Go trial 2026-11-21 (profiles/zen_go_sc.json afx_inserts.parameters.bypass)"
       }
     },
     "writes": {
       "enabled": true,
       "strips": [0, 1, 2, 3],
       "max_slots": 4,
-      "reorder_notes": "Rack reorder (operation move) is not enabled on the Discrete 4: it was captured on the Zen Go only (profiles/zen_go_sc.json afx_inserts.writes.reorder) and no capture exists here.",
+      "reorder": true,
+      "reorder_notes": "Rack reorder (operation move): dragging slot 2 onto slot 1 of rack 1 sent one chain write in the new order, d7 49 00 27 00 1b after d7 49 00 1b 00 27 (vendor panel run 2026-11-22, d4_panel/live.log; read back from cat 0x19). Same read / write / read-back check as load and remove; not yet run by this project on the device.",
       "effects": {
         "1": {
           "instances": [0],
@@ -1548,11 +1673,11 @@
       "type": "int",
       "frame": "command (opcode 0x13) -- channel @17, value @18 (raw dB)",
       "readback": "state_report.gain_base_offset (40) + channel_index",
-      "runtime_range": [0, 20],
-      "range_by_mode": {"mic": [0, 20], "line": [0, 20], "hiz": [0, 20]},
+      "runtime_range": [-12, 65],
+      "range_by_mode": {"mic": [-12, 65], "line": [-6, 20], "hiz": [0, 20]},
       "manual_max_by_mode": {"mic": 65, "line": 20, "hiz": 39},
       "state_model": "per_input_per_mode",
-      "notes": "Captured: 6, 7 and 8 dB written (preamp 1 in Line mode, preamp 2), and the device's own stored gains read back on a mode change (Line 6, Hi-Z 10, Mic 0 on preamp 1). Every mode is held to 0-20 dB, the span all three modes offer; the per-mode maxima in manual_max_by_mode (Mic 65, Line 20, Hi-Z 39) are from the public manual, not captured, and are not used. Widen a mode in range_by_mode only after a write at the new top is read back. The device keeps one gain per input and mode; byte 40 + channel is the active mode's. Channels 0 and 1 are captured; 2 and 3 are assumed to follow.",
+      "notes": "Captured: 6, 7 and 8 dB written (preamp 1 in Line mode, preamp 2), and the device's own stored gains read back on a mode change (Line 6, Hi-Z 10, Mic 0 on preamp 1). 2026-11-22 vendor panel run: Line swept 0xfa (-6) .. 0x14 (20) and Mic 0xf4 (-12) .. 0x41 (65) on preamp 3, 1 dB per notch, state byte 42 following (signed), so range_by_mode holds those spans. Hi-Z stays at 0-20 dB: its range was NOT captured (the manual's 39 is not used). The device keeps one gain per input and mode; byte 40 + channel is the active mode's. Channels 0 and 1 are captured; 2 and 3 are assumed to follow.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_gain_mute.pcapng (sha256 8d5e49ad1299a735aadcf375146924deda45cf61c3cac06e0c357fa18164dcee), d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662); Discrete 4 user manual, Mic/Line/Hi-Z selector section, for the per-mode maxima"
     },
     "input_mode": {
@@ -1561,19 +1686,19 @@
       "type": "enum",
       "frame": "command (opcode 0x13) -- channel @17, value @18",
       "values": {"0": "Mic", "1": "Line", "2": "HiZ"},
-      "readback": "state_report.input_mode_base_offset (44) + channel_index",
-      "confirmed_indices": [0],
-      "notes": "All three values written to preamp 1 by the vendor panel (4f 00 02, 4f 00 00, 4f 00 01), each followed by state byte 44. Clicks on preamp 2's mode icon in the same capture sent nothing, so channels 1-3 are not exercised: Mic and Line are assumed to follow the channel index like gain; Hi-Z is held to channels.hiz_channels.",
+      "readback": "state_report status byte (44 + channel_index), bits 0-1",
+      "confirmed_indices": [0, 1, 2, 3],
+      "notes": "All three values written to preamp 1 by the vendor panel (4f 00 02, 4f 00 00, 4f 00 01), each followed by state byte 44. 2026-11-22 vendor panel run: every preamp's icon cycles the mode (4f <ch> <v>, state byte 44 + ch); preamps 1-2 cycle Line -> Hi-Z -> Mic, preamps 3-4 Line <-> Mic only, so Hi-Z is held to channels.hiz_channels [0, 1].",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662), d4_basics_mode.pcapng (sha256 0b0eda0a55817bb13c49d2c6c1b33474e08b3d488612012ba526fb514974a905), d4_basics_micgear.pcapng (sha256 ba62dabfb0822bfb0ebd20556485025a1e4cc594339597bde9bb160f58eb8da3), d4_basics_explore3.pcapng (sha256 cd6034c395d6604d871ae9b7caf8d4fec85853c301e538e54e60d96390230f04)"
     },
     "phase_invert": {
       "id": "0x52",
-      "status": "capture-confirmed (write only)",
+      "status": "capture-confirmed",
       "type": "bool",
       "frame": "command (opcode 0x13) -- channel @17, value @18 (0/1)",
-      "readback": "none identified: write-only",
-      "confirmed_indices": [0],
-      "notes": "52 00 01 / 52 00 00 from the phase control in the channel 1 dialog. That capture holds no 0x73 reports, and the one that does has no phase write, so the state byte is not identified: the WebUI shows the last value it sent, marked as not read back. Channels 1-3 are not exercised.",
+      "readback": "state_report status byte (44 + channel), bit 0x40",
+      "confirmed_indices": [0, 1, 2, 3],
+      "notes": "52 00 01 / 52 00 00 from the phase control in the channel 1 dialog (2026-11-17). 2026-11-22 vendor panel run: 52 01 / 52 02 / 52 03 <0/1> on preamps 2-4 set and cleared bit 0x40 of state byte 44 + ch (the dialog is reachable only in Mic mode). The WebUI shows the device's value.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_phase2.pcapng (sha256 1615193ff9475e402aa3a5f005a72e32d57672cb8f7c015fafea45b4c7f16494)"
     },
     "bus_level": {
@@ -1586,7 +1711,7 @@
       "applies_to": "buses (id in @17)",
       "encoding": "raw = dB attenuation: one wheel notch down raised it by 1",
       "readback": "state_report.bus_block (28 + 2*bus_id), byte 0",
-      "notes": "Captured writes: Monitor 2b <-> 2c, Headphone 1 18 <-> 19. The 0-96 span is the family's (Zen Go) and is NOT swept on this device: treat the ends as unconfirmed.",
+      "notes": "Captured writes: Monitor 2b <-> 2c, Headphone 1 18 <-> 19 (2026-11-17). 2026-11-22 vendor panel run: 0x00 (0 dB) .. 0x60 swept (muted) on Monitor, Headphones 1-4 (47 00..04) and the Line Out volume (47 05, Settings window, one volume for all four line outs).",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662), d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
     },
     "bus_mute": {
@@ -1595,7 +1720,7 @@
       "type": "bool",
       "applies_to": "buses (id in @17)",
       "readback": "state_report.bus_block flags byte (29 + 2*bus_id), bit 0x01",
-      "notes": "48 00 01 / 48 00 00 (Monitor) and 48 01 01 / 48 01 00 (Headphone 1). The owner's Monitor is normally muted: see constraints.protected_mute_buses.",
+      "notes": "48 00 01 / 48 00 00 (Monitor) and 48 01 01 / 48 01 00 (Headphone 1); 2026-11-22 also 48 02..05 (Headphones 2-4, Line Out). The owner's Monitor is normally muted: see constraints.protected_mute_buses.",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662), d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
     },
     "bus_dim": {
@@ -1605,7 +1730,7 @@
       "applies_to": "buses, through each bus's own dim_id",
       "bus_target_key": "dim_id",
       "readback": "state_report.bus_block flags byte (29 + 2*bus_id), bit 0x02",
-      "notes": "The target byte is NOT the bus id used by level and mute: Monitor dim is 66 04 01, Headphone 1 dim is 66 00 01. Each bus carries its id in buses.known[bus].dim_id and a bus without a confirmed one is refused.",
+      "notes": "The target byte is NOT the bus id used by level and mute: Monitor dim is 66 04 01, Headphone 1 dim is 66 00 01, Headphones 2-4 66 01 / 02 / 03 (2026-11-22). Each bus carries its id in buses.known[bus].dim_id and a bus without one (the Line Out) is refused. A dim write keeps the mute bit on this device (frame.state_report.bus_block.flags_combine).",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662), d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
     },
     "mix_fader": {
@@ -1633,52 +1758,154 @@
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
     },
     "mix_channel_link": {
-      "status": "capture-confirmed for strips 1+2 of mix 0 (write only)",
-      "frame": "link_command (opcode 0x14 / 0xa2): space 4 then space 3, pair 0",
-      "readback": "none confirmed: write-only (see mixer.link_readback)",
+      "status": "capture-confirmed for the pairs in mixer.link_write.pairs_by_mix",
+      "frame": "link_command (opcode 0x14 / 0xa2): space 3, wire pair = mix * 16 + pair; space 4 first for mix 0 pairs 0-1 (the rack link)",
+      "readback": "cat 0x0b index 3 body[mix * 16 + pair] (mixer.link_readback)",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
+    },
+    "param_0x49": {
+      "id": "0x49",
+      "status": "capture-confirmed",
+      "type": "enum",
+      "frame": "command (opcode 0x13) -- target @17 = 0, page @18",
+      "applies_to": "vendor panel page tab",
+      "values": {"1": "DAW", "9": "ANALOG OUTS", "11": "HEADPHONES 2", "12": "HEADPHONES 3", "13": "HEADPHONES 4", "14": "MONITOR/HP1 and MONITORS & HEADPHONES", "16": "DIGITAL OUTS"},
+      "readback": "state_report.surface_selector (byte 124)",
+      "notes": "Every page tab of the vendor panel sends 49 00 <page>; state byte 124 follows. It selects what the panel and the meters show, not routing. Not sent by this project (no mixer.surface_selection).",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_window.txt)"
+    },
+    "mix_send": {
+      "status": "capture-confirmed",
+      "frame": "reverb_send_command (opcode 0x16 / param 0xe9) -- send @20, send pan @21",
+      "per": "mix 0 only, strips 1-16 (the sends are global)",
+      "mix_indices": [0],
+      "include_master": false,
+      "range": [0, 96],
+      "encoding": "raw = dB attenuation: 0 = 0 dB, 96 (0x60) = off. The frame also carries the send's own pan (raw 32 + degrees, -30..30), kept from the readback when only the level changes.",
+      "readback": "cat 0x04 index 0 from body[69] (used by the WebUI) and cat 0x18 index 0",
+      "evidence": "see frame.reverb_send_command"
+    },
+    "auraverb": {
+      "status": "capture-confirmed (FX on/off + 8 knobs); not yet written from this project",
+      "frame": "auraverb_command (opcode 0x1d / param 0xda), whole frame on every change",
+      "type": "bool (on/off) + 8 x uint8",
+      "readback": "cat 0x0a index 0, block 0",
+      "notes": "UI name Gazelle Reverb. See frame.auraverb_command for ranges and evidence."
+    },
+    "reverb_return": {
+      "id": "0x68",
+      "status": "capture-confirmed for the Monitor/HP1 return only",
+      "type": "int + mute bit",
+      "frame": "command (opcode 0x13) -- return @17 (0 = Monitor/HP1), value @18 = level | 0x80 when muted",
+      "targets": {"0": "Monitor/HP1 return"},
+      "range": [0, 96],
+      "mute_bit": "0x80",
+      "runtime_readback": {"category": "0x17", "index": 0},
+      "readback": "cat 0x17 index 0 body[0]; also cat 0x04 index 0 body[66]",
+      "notes": "Level is dB attenuation. The panel fader covers 0x00 (0 dB) .. 0x5a (-90 dB) and cannot reach 0x60, the value the unit held at the start of the run (the panel left 0xda, muted -90). 0x60 is allowed so the start value can be put back; a write of 0x60 is NOT captured on this device (CANDIDATE, live test pending). The HEADPHONES 2-4 returns (cat 0x17 body[1..3], expected 68 01..03) were not touched in the run and are not writable.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_reverb.txt): fader 68 00 80 .. 68 00 da with mute; cat 0x17 60 60 60 60 at start, da 60 60 60 at the end"
+    },
+    "output_trim": {
+      "id": "0xcb",
+      "status": "capture-confirmed",
+      "type": "enum",
+      "frame": "output_trim_command (opcode 0x54) -- cb 42 00 01 <n>",
+      "targets": {"0": "Monitor Out Trim"},
+      "target_labels": {"0": "Monitor"},
+      "range": [0, 6],
+      "trim_dbu": {"0": 20, "1": 19, "2": 18, "3": 17, "4": 16, "5": 15, "6": 14},
+      "readback": "state_report byte 25 = 4n (output_trim_block)",
+      "evidence": "see frame.output_trim_command; dBu labels read off the panel menu (Settings window, seven entries)"
+    },
+    "line_out_trim": {
+      "status": "capture-confirmed",
+      "type": "4 x enum + link",
+      "frame": "line_trim_command (opcode 0x54) -- cb 42 01 <link> t1 00 t2 00 t3 00 t4",
+      "range": [0, 6],
+      "trim_dbu": {"0": 20, "1": 19, "2": 18, "3": 17, "4": 16, "5": 15, "6": 14},
+      "readback": "cat 0x0e index 0 (record_layouts line_out_trims)",
+      "notes": "Whole frame on every change: POST /api/line-trim with all four trims and the link. No page control. Start value on the owner's unit: 0 0 6 0, link off.",
+      "evidence": "see frame.line_trim_command"
+    },
+    "pan_law": {
+      "id": "0x24",
+      "status": "capture-confirmed",
+      "type": "enum",
+      "frame": "global_command (opcode 0x12) -- index @17",
+      "values": {"0": "0 dB", "1": "-6 dB", "2": "-3 dB", "3": "-4.5 dB"},
+      "readback": "cat 0x12 index 0 body[0]",
+      "notes": "Same menu order as the Zen Go (not the Orion's). No page control: POST /api/pan-law.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_settings.txt): 24 00 / 01 / 02 / 03 for the four menu rows; cat 0x12 read 03 at start and end"
+    },
+    "oscillator": {
+      "id": "0x0a",
+      "status": "capture-confirmed",
+      "type": "packed byte",
+      "frame": "global_command (opcode 0x12) -- all controls in the one byte @17",
+      "value_mask": "0xf5",
+      "value_bits": {
+        "0x01": "oscillator 1 frequency: 0 = 1 kHz, 1 = 440 Hz",
+        "0x04": "oscillator 2 frequency: 0 = 1 kHz, 1 = 440 Hz",
+        "0x30": "level, one field for both: 0 = 0 dBFS, 1 = -6, 2 = -12, 3 = -18",
+        "0x40": "oscillator 1 mute",
+        "0x80": "oscillator 2 mute"
+      },
+      "readback": "state_report byte 20 (oscillator_byte_offset), the same byte",
+      "notes": "Same bits as the Zen Go; bits 0x02 and 0x08 were never set and are refused. Start value on the owner's unit 0x30. No page control: POST /api/oscillator.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log): 0a 31 / 0a 34 (frequencies), 0a 00 / 10 / 20 / 30 (level), 0a 70 / 0a b0 (mutes); byte 20 followed each"
+    },
+    "screen_brightness": {
+      "id": "0x0e",
+      "status": "capture-confirmed",
+      "type": "int",
+      "frame": "global_command (opcode 0x12) -- value @17",
+      "range": [0, 100],
+      "readback": "state_report byte 26 (screen_brightness_byte_offset)",
+      "notes": "Byte 26 does not repeat the written value exactly: 0e 60 read 0x61, 0e 64 read 0x63, 0e 04 read 0x05 (raw values shown as read, not corrected). At the start of the run it read 0xff while the panel showed 100; the panel cannot write 0xff, so after the run it reads 0x63. 0xff is outside the slider range and is shown as the raw number.",
+      "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log): slider 0e 00..64, byte 26 followed each"
     }
   },
   "channels": {
     "count": 4,
     "addressing": "0-indexed input channel 0-3, written to frame.command.channel_offset",
     "names": ["Preamp 1", "Preamp 2", "Preamp 3", "Preamp 4"],
-    "confirmed_indices": [0, 1],
+    "confirmed_indices": [0, 1, 2, 3],
     "modes": {"0": "mic", "1": "line", "2": "hiz"},
-    "hiz_channels": [0],
-    "hiz_channels_notes": "Hi-Z was captured on channel 0 only. Add a channel here after a live trial (T5) shows 4f <ch> 02 followed by state byte 44 + ch = 02.",
-    "link_pairs": {"count": 1, "formula": "pair_index = channel_index // 2", "confirmed_pair_indices": [0], "notes": "Only the preamp 1+2 link (a2 00 00) is captured. Set count to 2 after a live trial of pair 1 (preamps 3+4)."},
+    "hiz_channels": [0, 1],
+    "hiz_channels_notes": "2026-11-22 vendor panel run: the mode icon of preamps 1 and 2 cycles Line -> Hi-Z -> Mic (4f 00 02, 4f 01 02, state byte 44 + ch = 02); preamps 3 and 4 have Mic / Line only, so Hi-Z is refused there (WebUI option disabled, POST /api/mode and CLI set-mode refuse it).",
+    "link_pairs": {"count": 2, "formula": "pair_index = channel_index // 2", "confirmed_pair_indices": [0, 1], "notes": "Preamps 1+2 (a2 00 00 <on>) and 3+4 (a2 00 01 <on>, 2026-11-22), read back at cat 0x0b index 0 body[pair]. The gains were equal when 3+4 was linked and the panel sent no gain copy; whether it copies an unequal gain on this device (it does on the Zen Go) is not captured."},
     "status": "observed",
-    "notes": "The vendor panel shows four preamps and the manual lists four analog inputs. Gain is captured on channels 0 and 1; mode and phase on channel 0 only; channels not exercised are assumed to follow the same channel byte. 48 V is not captured and is not mapped."
+    "notes": "The vendor panel shows four preamps and the manual lists four analog inputs. 2026-11-22 vendor panel run: gain, mode and phase exercised on all four. 48 V is not captured (the switch was deliberately not clicked) and is not mapped."
   },
   "constraints": {
     "_comment": "Conservative: only what has been captured on this device.",
-    "allowed_opcodes": ["0x13", "0x14", "0x16", "0x53", "0x5b"],
-    "allowed_opcodes_note": "0x13 SET_PARAM, 0x14 SET_LINK, 0x16 SET_MIX, 0x53 SET_ROUTE (mixer source map groups only), 0x5b insert chain write. On this device byte 4 also tracks the payload length; nothing else is sent.",
+    "allowed_opcodes": ["0x12", "0x13", "0x14", "0x16", "0x1d", "0x53", "0x54", "0x5b"],
+    "allowed_opcodes_note": "0x12 SET_GLOBAL (pan law, oscillator, brightness), 0x13 SET_PARAM, 0x14 SET_LINK, 0x16 SET_MIX and the reverb send, 0x1d Gazelle Reverb, 0x53 SET_ROUTE, 0x54 Monitor / Line Out trims, 0x5b insert chain write. Each is built only by its own builder with captured fixed bytes. On this device byte 4 also tracks the payload length; nothing else is sent.",
     "channel_bounds": {"min": 0, "max": 3},
-    "bus_ids": [0, 1, 2, 3, 4],
-    "bus_ids_note": "Ids 2-4 are listed so that confirming a headphone bus is a one-line change in buses.known; while an entry there says unconfirmed the id is refused and not shown.",
+    "bus_ids": [0, 1, 2, 3, 4, 5],
+    "bus_ids_note": "Monitor, Headphones 1-4 and the Line Out (5). An entry in buses.known that says unconfirmed is refused and not shown.",
     "protected_mute_buses": [0],
-    "protected_mute_buses_note": "The owner's Monitor output is normally MUTED. No automatic action may release it: self-tests skip this bus, and dim on it is refused while it is muted (see frame.state_report.bus_block.flags_combine). Only an explicit Mute click or set-bus-mute sends 48 00 00.",
+    "protected_mute_buses_note": "The owner's Monitor output is normally MUTED. No automatic action may release it: self-tests skip this bus, and only an explicit Mute click or set-bus-mute sends 48 00 00. Dim on it is allowed while muted because a dim write keeps the mute bit on this device (frame.state_report.bus_block.flags_combine, 2026-11-22: 01 -> 03 -> 01).",
     "input_mode_allowed_values": [0, 1, 2],
-    "gain_bounds": {"mic": [0, 20], "line": [0, 20], "hiz": [0, 20]},
+    "gain_bounds": {"mic": [-12, 65], "line": [-6, 20], "hiz": [0, 20]},
     "mixer_bounds": {"mixes": 4, "strips": 16, "fader": [0, 90], "pan": [-30, 30]},
     "min_write_interval_ms": 250,
     "value_from_user_input": "never send a raw value straight from user input; clamp to the documented range"
   },
   "buses": {
-    "_comment": "One line per bus. To confirm a headphone bus after its live trial, change that line's status from unconfirmed to confirmed (and correct dim_id if the trial showed another id).",
-    "count": 5,
+    "_comment": "One line per bus. An entry with status unconfirmed is refused and not shown.",
+    "count": 6,
     "known": {
       "0": {"name": "Monitor", "label": "Monitor", "status": "capture-confirmed", "dim_id": 4},
       "1": {"name": "HP1", "label": "Headphone 1", "status": "capture-confirmed", "dim_id": 0},
-      "2": {"name": "HP2", "label": "Headphone 2", "status": "unconfirmed", "dim_id": 1},
-      "3": {"name": "HP3", "label": "Headphone 3", "status": "unconfirmed", "dim_id": 2},
-      "4": {"name": "HP4", "label": "Headphone 4", "status": "unconfirmed", "dim_id": 3}
+      "2": {"name": "HP2", "label": "Headphone 2", "status": "capture-confirmed", "dim_id": 1},
+      "3": {"name": "HP3", "label": "Headphone 3", "status": "capture-confirmed", "dim_id": 2},
+      "4": {"name": "HP4", "label": "Headphone 4", "status": "capture-confirmed", "dim_id": 3},
+      "5": {"name": "line_out", "label": "Line Out", "status": "capture-confirmed"}
     },
-    "unconfirmed_notes": "Headphones 2-4 are GUESSES: bus ids 2-4 continue the 47 / 48 numbering, state bytes 32-37 continue the two-byte stride (they read 1e 00 22 00 1e 00), and dim ids 1-3 assume the headphones count from 0 with Monitor last (HP1 = 0, Monitor = 4). None is in a capture: clicks on the HP2 tab's DIM sent nothing. Live trials T9-T11.",
+    "notes": "2026-11-22 vendor panel run: Headphones 2-4 confirmed as guessed (bus ids 2-4 for 47 / 48, dim ids 1-3, state bytes 32-37), level swept 0x00..0x60 muted on each. Bus 5 is the Line Out volume and mute of the Settings window (one for all four line outs; 47 05 / 48 05, state bytes 38 / 39); it has no dim. The Line Out is shown in the Settings panel (name line_out).",
     "readback": "state_report.bus_block: 28 + 2*bus_id = level, 29 + 2*bus_id = flags (bit 0x01 mute, bit 0x02 dim)",
-    "status": "capture-confirmed for Monitor and Headphone 1",
+    "status": "capture-confirmed",
     "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_state.pcapng (sha256 a36092cfb4bc977e1490b26be1ec9d3d315477ff1370b8572fce564737b67662), d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35)"
   },
   "mixer": {
@@ -1690,30 +1917,36 @@
     "pan": {"param": "mix_command byte 21 low 6 bits", "center": 32, "range_deg": [-30, 30]},
     "mute_bit": "0x40 of mix_command byte 21",
     "solo_bit": "0x80 of mix_command byte 21",
-    "exercised_strips_by_mix": {"0": [1, 2, 5, 8], "1": [1], "2": [1], "3": [1]},
+    "exercised_strips_by_mix": {"0": [1, 2, 5, 8, 15, 16], "1": [1, 5, 6, 7, 8], "2": [1, 5], "3": [1, 5]},
     "link_write": {
       "status": "capture-confirmed",
       "space": 3,
-      "pairs_by_mix": {"0": [0]},
-      "companions_before": [{"space": 4, "pairs": [0]}],
-      "notes": "Only strips 1+2 of mix 0 are captured: a2 04 00 <on> then a2 03 00 <on>. Not captured, so not writable: other pairs (does the space 4 frame go with them? on the Zen Go only the first two pairs have it) and mixes 1-3 (how a mix is addressed is unknown; if the Zen Go's 16 selectors per mix apply, add link_pair_index.mix_stride 16). After a live trial add the pair to pairs_by_mix, and to companions_before only if the vendor sends space 4 for it."
+      "pairs_by_mix": {"0": [0, 1, 7], "1": [3]},
+      "companions_before": [{"space": 4, "pairs": [0, 1]}],
+      "notes": "Captured: mix 0 strips 1+2 (a2 04 00 then a2 03 00) and 3+4 (a2 04 01 then a2 03 01), mix 0 strips 15+16 (a2 03 07 only) and mix 1 strips 7+8 (a2 03 13 only: wire pair = mix * 16 + pair, link_pair_index). The space 4 frame (rack link) goes only with pairs 0-1 of mix 0. Other pairs and mixes 2-3 follow the same rule but are not captured and not writable; add a pair here after a live trial."
+    },
+    "link_pair_index": {
+      "mix_stride": 16,
+      "status": "capture-confirmed",
+      "notes": "HEADPHONES 2 strips 7+8 sent a2 03 13 (= 1 * 16 + 3) and the marker reopen read cat 0x0b index 3 byte 19 = 01 (2026-11-22)."
     },
     "link_readback": {
-      "status": "unconfirmed",
+      "status": "capture-confirmed",
       "category": "0x0b",
       "index": 3,
-      "record_count": 8,
-      "selector_ranges": {"0": [0, 7]},
-      "notes": "GUESS, not used while unconfirmed: one byte per pair as on the Zen Go. The only capture of this record is all zeros. Until live trial T3 confirms it the WebUI shows the link it last sent, not the device's."
+      "record_count": 24,
+      "selector_ranges": {"0": [0, 7], "1": [16, 23]},
+      "pair_formula": "pair = wire_selector - (mix * 16)",
+      "notes": "One byte per wire selector: the 2026-11-22 marker reopen read 01 at bytes 1 and 19 with mix 0 strips 3+4 and mix 1 strips 7+8 linked. Mixes 2-3 (bytes 32-55) are left out: no link was captured there."
     },
     "input_routing": {
       "destinations": [6, 10, 11, 12, 13],
       "channels": 16,
       "locked_channels": [0, 1, 2, 3],
-      "display_only_source_banks": [4],
+      "display_only_source_banks": [4, 5, 6],
       "strict": true,
       "status": "capture-confirmed",
-      "notes": "strict: a write to any of these groups must go to all five, touch only strips 5-16 and never place a display-only source. See frame.routing_command."
+      "notes": "strict: a write to any of these groups must go to all five, touch only strips 5-16 and never place a display-only source (AFX OUT, the loopbacks). Strips 1-4 take their source from group 09. See frame.routing_command."
     },
     "readback": "No mixer change appears in the 0x73 state report. Faders, pans, mutes and solos are read from category 0x04 (frame.readback.layouts), strip sources from category 0x03 groups 6 / 10-13.",
     "status": "capture-confirmed frame; readback layout tied to the vendor's writes, write -> read not yet tried",
@@ -1721,13 +1954,15 @@
     "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 + Manager Server 1.8.20 under Wine, usbmon on Linux, 2026-11-17: d4_basics_mixer.pcapng (sha256 796f091fa664597d54b790ce813ea53ebb6f7eadb1fd059b2b89280480c0fa35); panels_connect_walk.pcapng (sha256 a29c54490617ced77a07ba4f41e02d9aeafadd09c9827fbdbc1fb0b0ef90ce29)"
   },
   "open_questions": [
-    "Phase invert and 48 V state bytes; preamp link, mixer strip link and rack link readback (category 0x0b indices 0, 3, 4 are all zeros in the only capture).",
-    "Do the output flags combine (mute + dim = 03) or does dim replace mute as on the Zen Go?",
-    "Headphones 2-4: bus ids, dim ids and state bytes are guesses (buses.known).",
-    "48 V (param 0x51 on the Zen Go) is not captured on this device and must stay unmapped until the owner clears it.",
-    "Routing: group 09 (the source of the four rack channels), line / digital / DAW destinations, oscillator and preamp sources for strips 5-16, COMPUTER PLAY beyond 2.",
-    "Mixer: strips not exercised, pairs 17-32 and bytes 66-132 of the category 0x04 record, strip links other than strips 1+2 of mix 0, whether the device mutes other strips itself on solo.",
-    "Body layouts for readback categories 0x0a, 0x0e, 0x11, 0x15-0x18 and routing groups 0-5, 7-9.",
+    "48 V state bit and frame: NOT captured (the 2026-11-22 run deliberately did not click it; param 0x51 on the Zen Go). Must stay unmapped until the owner clears it.",
+    "Mic modelling: NOT captured. The MIC MODELING selector in the channel window did not move and sent nothing (2026-11-22); cat 0x16 read 00 00 00 32 per preamp throughout.",
+    "Clock source and sample rate writes: NOT captured. Both dropdowns were greyed (USB, 48 kHz) and sent nothing; state bytes 18 = 02 and 19 = 05 throughout (2026-11-22).",
+    "Reverb returns of Headphones 2-4 (cat 0x17 body[1..3], expected 68 01..03): NOT captured, not writable.",
+    "Hi-Z gain range: NOT captured (held to 0-20 dB). Does the preamp link copy an unequal gain on this device?",
+    "Routing groups 1-5 (2 slots each, probably the fixed Monitor / HP sources): no panel control writes them.",
+    "Mixer: strip links other than the captured pairs, mixes 2-3 links, pairs 17-32 and bytes 67-132 of the category 0x04 record beyond the sends, whether the device mutes other strips itself on solo.",
+    "Brightness byte 26 reads one off the written value (0e 60 -> 61, 0e 64 -> 63) and read 0xff at the start of the run while the panel showed 100.",
+    "Body layouts for readback categories 0x11, 0x15, 0x16.",
     "Meter report 0x83 and the meter bytes from offset 160 of the state report.",
     "Does snd-usb-audio stream 16x16 at every rate without a quirk? Clock-source behaviour?"
   ]

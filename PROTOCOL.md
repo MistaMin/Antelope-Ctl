@@ -2402,3 +2402,48 @@ writes to the device when this was written.
 - **Not captured**: mic-model selection (all models greyed), clock source
   and sample rate (greyed at USB / 48 kHz), HP2 mute / dim, 48 V, session
   transfer (saving sends nothing; loading replays the frames above).
+
+## Fork addendum: Discrete 4 vendor panel run (2026-11-22)
+
+Evidence: the owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine,
+usbmon, every non-effect control clicked or wheeled once with a marker per
+action. Payload bytes from report byte 16 as above; status and evidence lines
+in `profiles/discrete_4_a270.json`, the capture stays private. Reverb
+settings, sends, returns, Monitor Out Trim, pan law, oscillator and
+brightness use the Zen Go frames of the addendum above, byte for byte. Only
+what differs or is new on this device:
+
+- **Preamp status byte** `0x73` offset 44 + ch: bits 0-1 input mode, bit
+  `0x40` phase (`52 <ch> <0/1>`). Hi-Z (`4f <ch> 02`) exists on preamps 1-2
+  only. Preamp links `a2 00 <pair 0/1> <on>`, cat `0x0b` index 0 byte pair.
+- **Outputs**: `47` / `48` bus ids 0 Monitor, 1-4 Headphones 1-4, 5 Line Out
+  (one volume and mute for the four line outs, offsets 38 / 39); dim `66`
+  ids 4 (Monitor), 0-3 (HP1-4), none for the Line Out. **A dim write keeps
+  the mute bit** (`01` -> `03` -> `01`), unlike the Zen Go. The Monitor Out
+  Trim is not repeated in the Monitor flags byte.
+- **Line Out 1-4 trims** `cb 42 01 <link> t1 00 t2 00 t3 00 t4` (opcode
+  `0x54`), the whole frame on every change: t 0-6 = 20.0-14.0 dBu, link
+  `01` = off, `00` = on (one link for all four; the panel copies the value
+  to all four trims itself). Readback cat `0x0e` index 0: `01 <link> t1 00
+  t2 00 t3 00 t4`.
+- **Mixer links** `a2 03 <mix*16 + pair> <on>`, preceded by `a2 04 <pair>
+  <on>` (rack link) for mix 0 pairs 0-1 only; readback cat `0x0b` index 3
+  byte `mix*16 + pair`, index 4 byte pair.
+- **Page tabs** `49 00 <v>`: `0e` MONITOR/HP1, `0b`-`0d` HEADPHONES 2-4,
+  `10` DIGITAL OUTS, `09` ANALOG OUTS, `01` DAW; `0x73` offset 124.
+- **Routing groups**: 0 = Line Out 1-4, 7 = ADAT OUT 1-8, 8 = SPDIF OUT 1-2,
+  9 = Record 1-4 = the four rack inputs, 6 and 10-13 = the mixer strip map
+  (Record 5-8 = strips 5-8). Each change wrote only its group (the map: its
+  five mirrors). **Source banks**: `00` PREAMP 1-4, `01` COMPUTER PLAY 1-16,
+  `02` ADAT IN 1-8, `03` SPDIF IN 1-2, `04` AFX OUT (strips 1-4 of the map
+  only), `05` LOOPBACK HP 1/MON, `06` LOOPBACK HP 2 (both only in the DAW
+  page menu), `09` MUTE, `0a` OSCILLATOR 1-2, `0b` EMU MIC 1-4.
+- **Effects**: bypass `98 <instance> <type> <on>` (instances 0 and 1 seen;
+  never read back by the panel), rack reorder one chain write in the new
+  order (`d7 49 00 1b 00 27` -> `d7 49 00 27 00 1b`). The panel never reads
+  the guitar amp's settings (no cat `0x07` request at all).
+- **Brightness** offset 26 reads one off the written value (`0e 64` -> `63`)
+  and read `ff` before the run.
+- **Not captured**: 48 V (not clicked), mic-model selection (the selector
+  did not move), clock source and sample rate (greyed at USB / 48 kHz),
+  HEADPHONES 2-4 reverb returns, the Hi-Z gain range.

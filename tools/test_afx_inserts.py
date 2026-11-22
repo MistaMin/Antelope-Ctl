@@ -30,6 +30,7 @@ class FakeDevice:
         self.profile, self.snapshot, self.structured, self.rb_ver = profile, {'online': True}, {}, 0
         self._lock, self._transport = threading.RLock(), self
         self.racks, self.written, self.deaf, self.active = {}, [], False, {0: 1, 1: 1}   # flag per instance
+        self.blocks = {}
         self.clearq = bytearray(36 * 8)
 
     def submit(self, work):
@@ -46,11 +47,14 @@ class FakeDevice:
         elif packet[16] == 0xd5 and packet[18] == 1:   # one band: <inst> <band> <7 bytes>
             start = packet[19] * 36 + packet[20] * 7
             self.clearq[start:start + 7] = packet[21:28]
+        elif packet[16] == 0xd5:                       # any other effect: <type> <inst> <whole block>
+            self.blocks[packet[18], packet[19]] = packet[20:18 + packet[17]]
 
     def query(self, request, accept, timeout):
         category, index = request[8], request[12]
         effect = self.profile['afx_inserts']['parameters']['effects'].get(str(index), {})
-        flags = b''.join(bytes([self.active[inst]]).ljust(effect.get('read_stride', 17), b'\0') for inst in (0, 1))
+        flags = b''.join((bytes([self.active[inst]]) + self.blocks.get((index, inst), b'')).ljust(
+            effect.get('read_stride', 17), b'\0') for inst in (0, 1))
         body = {0x19: bytes(self.racks.get(index, b'')), 0x15: bytes([1, 8, 3, 1, 4, 1]), 0x0b: b'',
                 0x07: bytes(self.clearq) if index == 0 else flags}[category]
         reply = (bytes([0x75]) + bytes(7) + bytes([category, 0, 0, 0]) + request[12:16] + body).ljust(320, b'\0')
@@ -275,21 +279,20 @@ class InsertChainTests(unittest.TestCase):
             self.assertEqual(len(frames), 1)
             self.assertEqual(frames[0][:5].hex(' '), '70 00 00 00 24')
             self.assertEqual(payload(frames[0]), 'd5 12 03 00 00 46 3e 3f 00 44 00 32 59 00 01')
-            # Discrete 4: no captured read, nothing to compare with. Zen Go: read captured 2026-11-21.
-            self.assertEqual(block, None if profile is d4 else bytes.fromhex('00463e3f004400325900010000000000'))
+            # Read back on both devices (Zen Go capture 2026-11-21, Discrete 4 own read 2026-11-22).
+            self.assertEqual(block, bytes.fromhex('00463e3f004400325900010000000000'))
             self.assertEqual(profile['afx_inserts']['writes']['effects']['3']['instances'], [0])
         self.assertEqual(protocol.afx_load_defaults(d4, 39, 0), ([], None))   # PowerGate: chain write only
 
-    def test_guitar_amp_is_not_editable(self):
+    def test_guitar_amp_block(self):
         profile = load('discrete_4_a270')
         effect = protocol.afx_parameter_effect(profile, 3)
         block = bytes.fromhex(effect['defaults'])
         # The mapping itself is the captured one (amp_darkface_65_sweep: model 0x0a, output 0xd0)...
         changed = protocol.afx_block_set(effect, protocol.afx_block_set(effect, block, 'model', 10), 'output', -48)
         self.assertEqual(changed.hex(' '), '0a 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 d0')
-        # ...but no frame is built for it until its read is confirmed.
-        with self.assertRaises(protocol.ConstraintError):
-            protocol.build_afx_parameter_writes(profile, 3, 0, changed)
+        frames = protocol.build_afx_parameter_writes(profile, 3, 0, changed)
+        self.assertEqual([payload(frame) for frame in frames], ['d5 12 03 00 0a 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 d0'])
         for key, value in (('model', 11), ('output', 13), ('volume', 101)):
             with self.assertRaises(protocol.ConstraintError):
                 protocol.afx_block_set(effect, block, key, value)
@@ -316,7 +319,7 @@ class InsertChainTests(unittest.TestCase):
         self.assertIsNotNone(rack.failure)
 
     def test_discrete_4_bypass_is_per_instance(self):
-        d4 = load('discrete_4_a270')   # candidate: frame seen on the device, instance and flag byte from the Zen Go
+        d4 = load('discrete_4_a270')   # frame captured on instances 0 and 1 (2026-11-22); flag byte from the Zen Go
         self.assertEqual([protocol.build_afx_bypass(d4, 39, inst, False)[16:20].hex(' ') for inst in (0, 1)],
                          ['98 00 27 00', '98 01 27 00'])
         device = FakeDevice(d4)
@@ -326,7 +329,8 @@ class InsertChainTests(unittest.TestCase):
         self.assertEqual((active(rack.parameters(2, 0)), active(rack.parameters(2, 1))), (1, 1))
         self.assertEqual(active(rack.set_parameter(2, 1, 'active', 0)), 0)   # flag at 1 * read_stride + 0
         self.assertEqual((device.written[-1][16:20].hex(' '), active(rack.parameters(2, 0))), ('98 01 27 00', 1))
-        self.assertNotIn('reorder', d4['afx_inserts']['writes'])
+        # d4_panel/live.log: 98 01 1b 00 from the BP button of rack 2's De-esser (instance 1)
+        self.assertEqual(protocol.build_afx_bypass(d4, 0x1b, 1, False)[16:20].hex(' '), '98 01 1b 00')
 
     def test_rack_loads_and_edits_clearq_like_the_vendor_panel(self):
         device = FakeDevice(load('discrete_4_a270'))
@@ -339,7 +343,7 @@ class InsertChainTests(unittest.TestCase):
                           'd5 0a 01 00 02 e8 03 47 00 00 00 02', 'd5 0a 01 00 03 88 13 47 00 00 00 02',
                           'd5 0a 01 00 04 98 3a 47 00 00 00 01'])
         self.assertIn(1, state['mapped_types'])
-        self.assertNotIn(3, state['mapped_types'])
+        self.assertIn(3, state['mapped_types'])
         shown = rack.parameters(0, 0)
         self.assertEqual([field['key'] for field in shown['fields']][:6],
                          ['b1_freq', 'b2_q', 'b2_gain', 'b3_freq', 'b3_q', 'b3_gain'])
@@ -355,17 +359,17 @@ class InsertChainTests(unittest.TestCase):
             rack.set_parameter(0, 0, 'b2_gain', 100)
         self.assertFalse(rack.state()['writes_enabled'])
 
-    def test_rack_loads_the_amp_but_never_edits_it(self):
+    def test_rack_loads_and_edits_the_amp(self):
         device = FakeDevice(load('discrete_4_a270'))
         rack = InsertRack(device)
         rack.change(1, 'load', type_id=3)
         self.assertEqual([payload(packet) for packet in device.written],
                          ['d7 49 01 03', 'd5 12 03 00 00 46 3e 3f 00 44 00 32 59 00 01'])
         del device.written[:]
-        with self.assertRaises(ValueError):
-            rack.set_parameter(1, 0, 'output', 2)
-        self.assertEqual(device.written, [])
-        self.assertEqual(rack.parameters(1, 0)['fields'], [])   # raw reply only
+        shown = rack.set_parameter(1, 0, 'output', 2)   # whole block, read back
+        self.assertEqual([payload(packet) for packet in device.written],
+                         ['d5 12 03 00 00 46 3e 3f 00 44 00 32 59 00 01 00 00 00 00 02'])
+        self.assertEqual(next(field['value'] for field in shown['fields'] if field['key'] == 'output'), 2)
         with self.assertRaises(RuntimeError):                    # instance 0 is taken, 1 is not verified
             rack.change(0, 'load', type_id=3)
         with self.assertRaises(ValueError):                      # cabinet: impulse-response data, not loadable
@@ -388,11 +392,20 @@ class InsertChainTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             rack.change(2, 'move', source=0, slot=1)
         self.assertIsNotNone(rack.failure)
-        other = FakeDevice(load('discrete_4_a270'))      # not captured on the Discrete 4
-        other.racks[0] = bytes([0x27, 0, 0x33, 0])
+        orion = FakeDevice(load('orion_studio_sc'))      # no insert contract there at all
         with self.assertRaises(ValueError):
-            InsertRack(other).change(0, 'move', source=1, slot=0)
-        self.assertEqual(other.written, [])
+            InsertRack(orion).change(0, 'move', source=1, slot=0)
+
+    def test_discrete_4_reorder_matches_the_panel_drag(self):
+        # d4_panel/live.log 2026-11-22: d7 49 00 1b 00 27, slot 2 dragged onto slot 1, d7 49 00 27 00 1b
+        device = FakeDevice(load('discrete_4_a270'))
+        device.racks[0] = bytes([0x1b, 0, 0x27, 0])
+        rack = InsertRack(device)
+        self.assertTrue(rack.state()['reorder'])
+        state = rack.change(0, 'move', source=1, slot=0)
+        self.assertEqual([payload(packet) for packet in device.written], ['d7 49 00 27 00 1b'])
+        self.assertEqual(device.written[0][:5].hex(' '), '70 00 00 00 5b')
+        self.assertEqual([row['type'] for row in state['racks']['0']], [0x27, 0x1b])
 
     def test_orion_has_no_insert_contract(self):
         self.assertIsNone(protocol.afx_insert_writes(load('orion_studio_sc')))

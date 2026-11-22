@@ -17,9 +17,9 @@ Detailed status per feature: [linux-parity-plan.md](linux-parity-plan.md).
 | Mixers: fader, pan, mute, solo, strip link, strip source | yes (4 mixes x 16 strips) | upstream profile |
 | AFX racks: show, load, remove effects | yes | yes (63 of 72 types loadable) |
 | Effect settings (knobs) | 45 effects + ClearQ | the same 45 + ClearQ + 22 Zen-Go-only effects |
-| Effect switches and selectors | ported from the Zen Go maps, Discrete 4 live trial pending | 85 on 38 effects (shown as plain controls) |
-| Effect bypass | per instance, ported from the Zen Go (frame seen on the Discrete 4); live trial pending | yes, read back from the device (first instance) |
-| Guitar amp | load / remove only; knob and switch fields ported from the Zen Go, still not editable (no settings read captured), live trial pending | model, output level, all knobs and switches |
+| Effect switches and selectors | ported from the Zen Go maps, live-tested (shown as plain controls) | 85 on 38 effects (shown as plain controls) |
+| Effect bypass | yes, per instance, read back from the device (two instances tested) | yes, read back from the device (first instance) |
+| Guitar amp | model, output level, all knobs and switches (settings read works through this project although the vendor panel never reads it) | model, output level, all knobs and switches |
 | Effect faceplates in the WebUI | 47 layouts, own artwork | same layouts; the 22 Zen-Go-only effects show plain controls |
 
 - **Faceplates** are drawn with the owner's GoodLookin DRI knob/switch/plate renderer
@@ -52,14 +52,42 @@ identical. Dim on a muted output was refused. The JS page changes were not exerc
 | Routing: Record 1-8, S/PDIF out, AFX rack inputs 1-4, loopback and AFX OUT sources | yes | Routing tab |
 | AFX racks: reorder by drag | yes | rack list |
 
+## Discrete 4: implemented from the vendor panel run, live-tested
+
+Discrete 4, from the vendor panel run of 2026-11-22 (every non-effect control of the panel). The frames
+and readbacks are rebuilt in the offline tests from the captured bytes. On 2026-11-22 each write path
+below was sent once through this project's server on the owner's unit, read back raw and restored; a raw
+snapshot before and after was identical. The JS page changes were not exercised in a browser.
+
+| Area | Discrete 4 | Where |
+|------|-----------|-------|
+| Phase state read back (status byte 44 + channel, bit `0x40`) | fix | preamp strip shows the device's value |
+| Hi-Z only on preamps 1-2 (3-4 are Mic / Line) | fix | refused on 3-4 (WebUI, API, CLI) |
+| Preamp 3+4 link, link state read back (cat `0x0b` idx 0) | yes | preamp strip |
+| Gain range Mic -12..65, Line -6..20 (swept); Hi-Z stays 0..20 | fix | preamp knob |
+| Headphones 2-4 level, mute, dim | yes | output strips |
+| Dim keeps the mute on this device: dim on a muted Monitor allowed | fix | output strips, CLI |
+| Line Out volume and mute (bus 5) | yes | Settings panel |
+| Line Out 1-4 trims and their link | API only | `POST /api/line-trim` |
+| Monitor out trim, brightness | yes | Settings panel |
+| Panning law, oscillator | API only | `POST /api/pan-law`, `POST /api/oscillator` |
+| Gazelle Reverb: 8 knobs, FX on/off | yes | reverb panel |
+| Reverb send per strip (MONITOR/HP1 mix) | yes | mixer send knob |
+| Reverb send pan, Monitor/HP1 reverb return | API only | `POST /api/mix` `send_pan`, `POST /api/reverb-return` |
+| Routing: Line Out 1-4, ADAT Out 1-8, S/PDIF Out 1-2, Record 1-4 = AFX rack inputs, full source list | yes | Routing tab |
+| Mixer strip links: mix 0 strips 3+4 and 15+16, mix 1 strips 7+8; link state read back | yes | mixer |
+| AFX racks: reorder by drag | yes | rack list |
+
 ## Not done yet
 
-- Discrete 4: headphones 2-4, line outs and trims, digital outs, output routing, clock source, sample
-  rate, 48V, mic modelling, AuraVerb, oscillator.
+- Discrete 4 (not captured in the 2026-11-22 run): 48V, mic modelling (the selector did not move), clock
+  source and sample rate writes (greyed), the reverb returns of headphones 2-4, the Hi-Z gain range,
+  mixer links other than the captured pairs. No page control yet for line-out trims, panning law,
+  oscillator, reverb return and send pan.
 - Zen Go: mic modelling (models were greyed in the vendor panel: no frame captured), clock source and
   sample rate writes on the owner's unit (greyed too), page controls for panning law, oscillator,
   reverb returns and send pan, sources of the Monitor / HP outputs (no selector in the vendor panel).
-- Discrete 4: switches, menus, stacked rings and effect bypass are ported from the Zen Go maps, live trial pending. Both: cabinet (no control found).
+- Both: cabinet (no control found).
 
 ## Install
 

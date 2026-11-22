@@ -543,6 +543,11 @@ def t_write_bus_flags(dev):
             record(SKIP, f'WRITE bus {bus} dim/mono', 'protected or unconfirmed bus')
             continue
         for param, key in (('bus_dim', 'dim'), ('bus_mono', 'mono')):
+            try:   # e.g. the Discrete 4 Line Out has no dim id
+                proto.build_command(dev.p, param, bus, 0)
+            except (KeyError, ValueError, proto.ConstraintError):
+                record(SKIP, f'WRITE bus {bus} {key}', 'no such control on this bus')
+                continue
             data = dev.t.read_one(proto.state_report_magic(dev.p), timeout=3.0)
             if data is None:
                 return record(FAIL, f'WRITE bus {bus} {key}', 'no state report before write')
