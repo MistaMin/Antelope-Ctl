@@ -1,11 +1,34 @@
 #!/bin/sh
-# Start the WebUI server unless one already listens on the port, then open it in the default browser.
+# One Flatpak for every interface: start one WebUI server per connected, supported interface
+# (ports 8714, 8715, ...; profile picked by USB id) and open each in the default browser.
+# No interface connected: one server with the default profile, so the page still opens.
+# A port that already answers is only opened, not started again.
+# shortcut: do not also run the systemd units from packaging/ for the same interface (one controller per device).
+app=${ANTELOPE_APP:-/app/share/antelope-ctl}
+cd "$app/webui" || exit 1
+listening() { python3 -c "import socket,sys; sys.exit(socket.socket().connect_ex(('127.0.0.1',$1)))"; }
+profiles=$(PYTHONPATH="$app" python3 -c '
+import glob, json, os, sys
+from antelope.transport import list_connected_hid
+connected = list_connected_hid()
+for path in sorted(glob.glob(os.path.join(sys.argv[1], "profiles", "*.json"))):
+    try:
+        dev = json.load(open(path)).get("device", {})
+        ids = (int(str(dev["vid"]), 16), int(str(dev["pid"]), 16))
+    except (OSError, ValueError, KeyError):
+        continue
+    if ids in connected:
+        print(os.path.basename(path))
+' "$app")
 port=${ANTELOPE_PORT:-8714}
-listening() { python3 -c "import socket,sys; sys.exit(socket.socket().connect_ex(('127.0.0.1',$port)))"; }
-cd /app/share/antelope-ctl/webui || exit 1
-if ! listening; then
-  python3 server.py &
-  for _ in $(seq 100); do listening && break; sleep 0.1; done
-fi
-xdg-open "http://127.0.0.1:$port"
+for profile in ${profiles:-default}; do
+  if ! listening "$port"; then
+    if [ "$profile" = default ]; then ANTELOPE_PORT=$port python3 server.py &
+    else ANTELOPE_PROFILE=$profile ANTELOPE_PORT=$port python3 server.py &
+    fi
+    for _ in $(seq 100); do listening "$port" && break; sleep 0.1; done
+  fi
+  [ -n "$ANTELOPE_NO_BROWSER" ] || xdg-open "http://127.0.0.1:$port"
+  port=$((port + 1))
+done
 wait
