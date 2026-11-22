@@ -46,7 +46,8 @@ class FaceplateLayoutTests(unittest.TestCase):
                 controls = layout["controls"]
                 keys = [control["key"] for control in controls]
                 self.assertEqual(len(keys), len(set(keys)), "a key is used twice")
-                self.assertEqual(set(keys), set(fields), "controls and fields differ")
+                # Fields without a control (ported from the Zen Go) are drawn by the plain grid.
+                self.assertLessEqual(set(keys), set(fields), "a control without a field")
                 for control in controls:
                     key, kind = control["key"], control["kind"]
                     span = fields[key]["max"] - fields[key]["min"]

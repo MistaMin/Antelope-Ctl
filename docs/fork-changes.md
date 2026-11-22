@@ -17,9 +17,9 @@ Detailed status per feature: [linux-parity-plan.md](linux-parity-plan.md).
 | Mixers: fader, pan, mute, solo, strip link, strip source | yes (4 mixes x 16 strips) | upstream profile |
 | AFX racks: show, load, remove effects | yes | yes (63 of 72 types loadable) |
 | Effect settings (knobs) | 45 effects + ClearQ | the same 45 + ClearQ + 22 Zen-Go-only effects |
-| Effect switches and selectors | not captured | 85 on 38 effects (shown as plain controls) |
-| Effect bypass | not captured | yes, read back from the device (first instance) |
-| Guitar amp | load / remove only | model, output level, all knobs and switches |
+| Effect switches and selectors | ported from the Zen Go maps, Discrete 4 live trial pending | 85 on 38 effects (shown as plain controls) |
+| Effect bypass | per instance, ported from the Zen Go (frame seen on the Discrete 4); live trial pending | yes, read back from the device (first instance) |
+| Guitar amp | load / remove only; knob and switch fields ported from the Zen Go, still not editable (no settings read captured), live trial pending | model, output level, all knobs and switches |
 | Effect faceplates in the WebUI | 47 layouts, own artwork | same layouts; the 22 Zen-Go-only effects show plain controls |
 
 - **Faceplates** are drawn with the owner's GoodLookin DRI knob/switch/plate renderer
@@ -59,7 +59,7 @@ identical. Dim on a muted output was refused. The JS page changes were not exerc
 - Zen Go: mic modelling (models were greyed in the vendor panel: no frame captured), clock source and
   sample rate writes on the owner's unit (greyed too), page controls for panning law, oscillator,
   reverb returns and send pan, sources of the Monitor / HP outputs (no selector in the vendor panel).
-- Discrete 4: switches, menus and stacked rings inside effects, effect bypass. Both: cabinet (no control found).
+- Discrete 4: switches, menus, stacked rings and effect bypass are ported from the Zen Go maps, live trial pending. Both: cabinet (no control found).
 
 ## Install
 

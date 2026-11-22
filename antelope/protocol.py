@@ -2700,8 +2700,8 @@ def _afx_parameter_frame(profile: dict, type_id: int, instance: int, block: byte
     return bytes(pkt)
 
 
-def build_afx_bypass(profile: dict, type_id: int, active: bool) -> bytes:
-    """The vendor panel's bypass frame for one effect type (first instance only)."""
+def build_afx_bypass(profile: dict, type_id: int, instance: int, active: bool) -> bytes:
+    """The vendor panel's bypass frame for one effect instance."""
     spec = (profile['afx_inserts']['parameters'].get('bypass') or None)
     if spec is None or afx_parameter_effect(profile, type_id) is None:
         raise ConstraintError(f'bypass of effect type {type_id} is not captured on this device')
@@ -2710,7 +2710,7 @@ def build_afx_bypass(profile: dict, type_id: int, active: bool) -> bytes:
     pkt[_as_int(command['magic_offset'])] = _as_int(command['magic'])
     pkt[_as_int(command['opcode_offset'])] = _as_int(spec['opcode'])
     start = _as_int(command['param_id_offset'])
-    pkt[start:start + 4] = bytes([_as_int(spec['param_id']), 0, type_id, 1 if active else 0])
+    pkt[start:start + 4] = bytes([_as_int(spec['param_id']), instance, type_id, 1 if active else 0])
     return bytes(pkt)
 
 

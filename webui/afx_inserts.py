@@ -134,9 +134,9 @@ class InsertRack:
 
     def _active(self, spec, effect, instance):
         """1 active / 0 bypassed from the last reply's flag byte, or None where bypass is not captured."""
-        if not spec['parameters'].get('bypass') or instance or int(effect.get('read_offset', 0)) < 1:
+        if not spec['parameters'].get('bypass') or int(effect.get('read_offset', 0)) < 1:
             return None
-        return self.last_reply[int(effect['read_offset']) - 1]
+        return self.last_reply[instance * int(effect['read_stride']) + int(effect['read_offset']) - 1]
 
     def _describe(self, effect, type_id, instance, block, spec):
         values = protocol.afx_block_get(effect, block)
@@ -202,7 +202,7 @@ class InsertRack:
             if key == 'active' and self._active(spec, effect, instance) is not None:
                 if value not in (0, 1) or type(value) is not int:
                     raise ValueError('Active must be 0 or 1')
-                transport.write(protocol.build_afx_bypass(self.device.profile, type_id, value))
+                transport.write(protocol.build_afx_bypass(self.device.profile, type_id, instance, value))
                 time.sleep(0.15)
                 if (self._read_block(transport, type_id, instance, effect) != before
                         or self._active(spec, effect, instance) != value):

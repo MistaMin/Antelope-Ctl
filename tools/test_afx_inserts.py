@@ -29,7 +29,7 @@ class FakeDevice:
     def __init__(self, profile):
         self.profile, self.snapshot, self.structured, self.rb_ver = profile, {'online': True}, {}, 0
         self._lock, self._transport = threading.RLock(), self
-        self.racks, self.written, self.deaf, self.active = {}, [], False, 1
+        self.racks, self.written, self.deaf, self.active = {}, [], False, {0: 1, 1: 1}   # flag per instance
         self.clearq = bytearray(36 * 8)
 
     def submit(self, work):
@@ -42,15 +42,17 @@ class FakeDevice:
         if packet[16] == 0xd7:
             self.racks[packet[18]] = packet[19:35]
         elif packet[16] == 0x98:
-            self.active = packet[19]
+            self.active[packet[17]] = packet[19]
         elif packet[16] == 0xd5 and packet[18] == 1:   # one band: <inst> <band> <7 bytes>
             start = packet[19] * 36 + packet[20] * 7
             self.clearq[start:start + 7] = packet[21:28]
 
     def query(self, request, accept, timeout):
         category, index = request[8], request[12]
+        effect = self.profile['afx_inserts']['parameters']['effects'].get(str(index), {})
+        flags = b''.join(bytes([self.active[inst]]).ljust(effect.get('read_stride', 17), b'\0') for inst in (0, 1))
         body = {0x19: bytes(self.racks.get(index, b'')), 0x15: bytes([1, 8, 3, 1, 4, 1]), 0x0b: b'',
-                0x07: bytes(self.clearq) if index == 0 else bytes([self.active]) + bytes(16)}[category]
+                0x07: bytes(self.clearq) if index == 0 else flags}[category]
         reply = (bytes([0x75]) + bytes(7) + bytes([category, 0, 0, 0]) + request[12:16] + body).ljust(320, b'\0')
         return reply if accept(reply) else None
 
@@ -194,9 +196,8 @@ class InsertChainTests(unittest.TestCase):
             if kind in own:
                 self.assertEqual((effect['read_offset'], effect['read_stride']), (1, effect['block_length'] + 1), kind)
                 continue
-            # The Discrete 4's fields come first; switches clicked only on the Zen Go follow.
-            shared = d4['afx_inserts']['parameters']['effects'][kind]['fields']
-            self.assertEqual(effect['fields'][:len(shared)], shared, kind)
+            # Ported to the Discrete 4 (live trial pending): same fields, ClearQ and the amp included.
+            self.assertEqual(effect['fields'], d4['afx_inserts']['parameters']['effects'][kind]['fields'], kind)
             taken = [byte for field in effect['fields'] for byte in
                      range(field['offset'], field['offset'] + protocol._AFX_FIELD_TYPES[field['type']][0])]
             self.assertEqual(len(taken), len(set(taken)), kind)
@@ -216,8 +217,9 @@ class InsertChainTests(unittest.TestCase):
         # Read body the vendor panel got back right after loading ClearQ (d4_afx_two_effects, frame 68405).
         instance = bytes.fromhex(CLEARQ_DEFAULTS.replace('|', '')) + b'\x01'
         defaults = (instance * 8)[36:71]   # instance 1 of the reply
-        self.assertEqual(protocol.afx_block_get(effect, defaults),
-                         {'b1_freq': 30, 'b2_q': 71, 'b2_gain': 0, 'b3_freq': 1000, 'b3_q': 71, 'b3_gain': 0})
+        want = {'b1_freq': 30, 'b2_q': 71, 'b2_gain': 0, 'b3_freq': 1000, 'b3_q': 71, 'b3_gain': 0}
+        got = protocol.afx_block_get(effect, defaults)   # plus the fields ported from the Zen Go
+        self.assertEqual({key: got[key] for key in want}, want)
         # The Zen Go owner's ClearQ (panels_connect_walk, frame 28225): band 1 at 125 Hz, shape 4.
         owner = bytes.fromhex('7d004700000004' + CLEARQ_DEFAULTS.replace('|', '').replace(' ', '')[14:])
         self.assertEqual(protocol.afx_block_get(effect, owner)['b1_freq'], 125)
@@ -240,7 +242,7 @@ class InsertChainTests(unittest.TestCase):
                          ['d5 0a 01 00 00 7d 00 47 00 00 00 04', 'd5 0a 01 00 01 c8 00 47 00 00 00 02'])
         self.assertEqual(len(frames), 5)
         self.assertEqual(protocol.build_afx_parameter_writes(d4, 1, 0, defaults, defaults), [])
-        for key, value in (('b1_freq', 801), ('b2_gain', 1201), ('b3_q', 49), ('b4_freq', 5000), ('b1_gain', 0)):
+        for key, value in (('b1_freq', 801), ('b2_gain', 1201), ('b3_q', 49), ('b4_freq', 399), ('b1_gain', 1201)):
             with self.assertRaises(protocol.ConstraintError):
                 protocol.afx_block_set(effect, defaults, key, value)
         with self.assertRaises(protocol.ConstraintError):   # five frames, not one
@@ -288,17 +290,17 @@ class InsertChainTests(unittest.TestCase):
         # ...but no frame is built for it until its read is confirmed.
         with self.assertRaises(protocol.ConstraintError):
             protocol.build_afx_parameter_writes(profile, 3, 0, changed)
-        for key, value in (('model', 11), ('output', 13), ('volume', 50)):
+        for key, value in (('model', 11), ('output', 13), ('volume', 101)):
             with self.assertRaises(protocol.ConstraintError):
                 protocol.afx_block_set(effect, block, key, value)
 
     def test_zen_go_bypass_frame_and_readback(self):
         zen = load('zen_go_sc')
         # bypass_veq56.pcapng: 70 00 00 00 14 .. | 98 00 4a 00, then 98 00 4a 01.
-        frame = protocol.build_afx_bypass(zen, 74, False)
+        frame = protocol.build_afx_bypass(zen, 74, 0, False)
         self.assertEqual((frame[:5].hex(' '), frame[16:20].hex(' '), any(frame[20:])), ('70 00 00 00 14', '98 00 4a 00', False))
-        with self.assertRaises(protocol.ConstraintError):   # not captured on the Discrete 4
-            protocol.build_afx_bypass(load('discrete_4_a270'), 74, False)
+        with self.assertRaises(protocol.ConstraintError):   # a Zen-Go-only effect, not on the Discrete 4
+            protocol.build_afx_bypass(load('discrete_4_a270'), 74, 0, False)
         device = FakeDevice(zen)
         device.racks[2] = bytes([74, 0])
         rack = InsertRack(device)
@@ -313,6 +315,19 @@ class InsertChainTests(unittest.TestCase):
             rack.set_parameter(2, 0, 'active', 1)
         self.assertIsNotNone(rack.failure)
 
+    def test_discrete_4_bypass_is_per_instance(self):
+        d4 = load('discrete_4_a270')   # candidate: frame seen on the device, instance and flag byte from the Zen Go
+        self.assertEqual([protocol.build_afx_bypass(d4, 39, inst, False)[16:20].hex(' ') for inst in (0, 1)],
+                         ['98 00 27 00', '98 01 27 00'])
+        device = FakeDevice(d4)
+        device.racks[2] = bytes([39, 0, 39, 1])
+        rack = InsertRack(device)
+        active = lambda result: next(field['value'] for field in result['fields'] if field['key'] == 'active')
+        self.assertEqual((active(rack.parameters(2, 0)), active(rack.parameters(2, 1))), (1, 1))
+        self.assertEqual(active(rack.set_parameter(2, 1, 'active', 0)), 0)   # flag at 1 * read_stride + 0
+        self.assertEqual((device.written[-1][16:20].hex(' '), active(rack.parameters(2, 0))), ('98 01 27 00', 1))
+        self.assertNotIn('reorder', d4['afx_inserts']['writes'])
+
     def test_rack_loads_and_edits_clearq_like_the_vendor_panel(self):
         device = FakeDevice(load('discrete_4_a270'))
         rack = InsertRack(device)
@@ -326,7 +341,7 @@ class InsertChainTests(unittest.TestCase):
         self.assertIn(1, state['mapped_types'])
         self.assertNotIn(3, state['mapped_types'])
         shown = rack.parameters(0, 0)
-        self.assertEqual([field['key'] for field in shown['fields']],
+        self.assertEqual([field['key'] for field in shown['fields']][:6],
                          ['b1_freq', 'b2_q', 'b2_gain', 'b3_freq', 'b3_q', 'b3_gain'])
         del device.written[:]
         result = rack.set_parameter(0, 0, 'b3_freq', 3000)
