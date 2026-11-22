@@ -385,10 +385,12 @@ class Discrete4PanelTests(unittest.TestCase):
         back = server.api_reverb_return
         self.assertEqual(self.call(back, bus=0, level=0x5a, mute=True)[1], ['13 | 68 00 da'])
         self.assertEqual(self.call(back, bus=0, level=0x60, mute=False)[1], ['13 | 68 00 60'])  # restore value, not captured as a write
-        self.refused(back, bus=1, level=0x60, mute=False)                       # HP2-4 returns: not captured
+        self.assertEqual(self.call(back, bus=3, level=0x5f, mute=True)[1], ['13 | 68 03 df'])   # returns 1-3: own trial 2026-11-22
+        self.refused(back, bus=4, level=0x60, mute=False)
         self.device.structured[(0x17, 0)] = protocol.parse_readback_records(
             self.profile, bytes.fromhex('da 60 60 60'), 0x17, 0)
-        self.assertEqual(server.api_auraverb()['returns'], [{'bus': 0, 'level': 0x5a, 'mute': True}])
+        self.assertEqual(server.api_auraverb()['returns'], [{'bus': 0, 'level': 0x5a, 'mute': True}]
+                         + [{'bus': bus, 'level': 0x60, 'mute': False} for bus in (1, 2, 3)])
 
     def test_settings_frames_and_state_bytes(self):
         self.assertEqual(self.call(server.api_output_trim, target=0, value=6)[1], ['54 | cb 42 00 01 06'])

@@ -957,7 +957,7 @@
       "frame": "global_command (opcode 0x12) -- index @17",
       "range": [0, 6],
       "values": { "0": 32000, "1": 44100, "2": 48000, "3": 88200, "4": 96000, "5": 176400, "6": 192000 },
-      "values_note": "Hz mapping carried from Orion (same opcode 0x12 / param 0x03). Zen Go idle report shows 44100 (0xAC44) as the active rate; the capture name confirms 48/32/44.1 were exercised with 44.1 the default. Index-to-Hz not individually re-verified for all 7. NOT CAPTURED on the owner's unit: in the 2026-11-21 panel run the SAMPLE RATE dropdown was greyed (48.0 kHz shown, state byte 18 = 02, bytes 22-23 = bb 80) and sent nothing, so the write rests on capture_05 alone.",
+      "values_note": "Hz mapping carried from Orion (same opcode 0x12 / param 0x03). Zen Go idle report shows 44100 (0xAC44) as the active rate; the capture name confirms 48/32/44.1 were exercised with 44.1 the default. Index-to-Hz not individually re-verified for all 7. NOT CAPTURED on the owner's unit: in the 2026-11-21 panel run the SAMPLE RATE dropdown was greyed (48.0 kHz shown, state byte 18 = 02, bytes 22-23 = bb 80) and sent nothing, so the write rests on capture_05 alone. LIVE on the owner's unit 2026-11-22 through this project, no audio stream open, clock source USB: writing index 1, 4 and 2 made the state byte follow (2 -> 1 -> 4 -> 2) each time within 2.5 s; left at 2 (48 kHz). Not tested with a stream open.",
       "readback": "state_report offset 18 (index, tracks ~immediately)",
       "evidence": "capture_05_sample_rate_in_the_end_48_32_44.1_44.1default.pcapng: op 0x12 param 0x03 value 1..6..0, offset 18 followed 1:1; offsets 21-24 carry a rate-derived clock word."
     },
@@ -972,7 +972,7 @@
       },
       "frame": "global_command (opcode 0x12) -- index @17",
       "range": [0, 2],
-      "values_note": "Zen Go exposes exactly 3 clock sources: 0 = Internal, 1 = S/PDIF, 2 = USB. Raw 0 is the internal-clock value used for sample-rate gating. NOT CAPTURED on the owner's unit: in the 2026-11-21 panel run the CLOCK SOURCE dropdown was greyed (USB shown, state byte 19 = 02) and sent nothing, so the write rests on capture_06 alone.",
+      "values_note": "Zen Go exposes exactly 3 clock sources: 0 = Internal, 1 = S/PDIF, 2 = USB. Raw 0 is the internal-clock value used for sample-rate gating. NOT CAPTURED on the owner's unit: in the 2026-11-21 panel run the CLOCK SOURCE dropdown was greyed (USB shown, state byte 19 = 02) and sent nothing, so the write rests on capture_06 alone. LIVE 2026-11-22: 12 04 00 (Internal) was sent once through this project with no stream open; the state byte stayed 2 (USB), so the unit ignored it while connected by USB. Not offered as a control.",
       "readback": "state_report offset 19",
       "evidence": "capture_06_clock_source_no_word_clock_exists.pcapng: op 0x12 param 0x04 values 0/1/2/0 and offset 19 followed 1:1; the capture-derived project clock-source map and the existing antelope-protocol ClockSource code/label mapping both identify 0=Internal, 1=S/PDIF, 2=USB."
     },
