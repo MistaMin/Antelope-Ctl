@@ -86,17 +86,35 @@ class InsertRack:
             device.rb_ver += 1
         return loaded
 
+    @staticmethod
+    def _expect(slot, held, expected):
+        """Refuse when the slot no longer holds the (type, instance) the caller was shown."""
+        if expected is None:
+            return
+        want_type, want_instance = expected
+        if (want_type is not None and held[0] != want_type
+                or want_instance is not None and held[1] != want_instance):
+            raise RuntimeError(f'Slot {slot + 1} now holds type {held[0]} instance {held[1]}, not '
+                               f'type {want_type} instance {want_instance}; refresh the rack. '
+                               'Nothing was changed')
+
     def _run(self, work):
         device = self.device
         with device._lock:
             if not device.snapshot.get('online') or device._transport is None:
                 raise RuntimeError('The device is offline')
+            generation = device.connection_generation
         future = Future()
 
         def queued(transport):
+            # A timed-out caller cancels the future; work that has not started then never runs.
             if not future.set_running_or_notify_cancel():
                 return
             try:
+                with device._lock:
+                    if device.connection_generation != generation or device._transport is not transport:
+                        raise RuntimeError('The device reconnected after this request was sent; '
+                                           'refresh the rack. Nothing was changed')
                 future.set_result(work(transport))
             except Exception as error:
                 future.set_exception(error)
@@ -154,7 +172,7 @@ class InsertRack:
                             **({'values': field['values']} if 'values' in field else {}),
                             'value': values[field['key']]} for field in effect['fields']] + extra}
 
-    def _slot(self, transport, spec, channel, slot):
+    def _slot(self, transport, spec, channel, slot, expected=None):
         index = spec.get('record_index_for_channel', {}).get(str(channel))
         if type(channel) is not int or index is None:
             raise ValueError('That channel has no insert rack')
@@ -162,6 +180,7 @@ class InsertRack:
         if type(slot) is not int or not 0 <= slot < len(chain):
             raise ValueError('There is no effect in that slot')
         type_id, instance = chain[slot]
+        self._expect(slot, chain[slot], expected)
         effect = protocol.afx_parameter_effect(self.device.profile, type_id)
         if effect is None:
             raise ValueError('The controls of this effect are not mapped yet')
@@ -170,13 +189,13 @@ class InsertRack:
             raise ValueError('Only the first instance of an effect can be edited on this device so far')
         return type_id, instance, effect
 
-    def parameters(self, channel, slot):
+    def parameters(self, channel, slot, expected=None):
         spec = self._spec()
         if spec is None:
             raise ValueError('Insert editing is not available for this device')
 
         def work(transport):
-            type_id, instance, effect = self._slot(transport, spec, channel, slot)
+            type_id, instance, effect = self._slot(transport, spec, channel, slot, expected)
             if effect.get('editable') is False:
                 # Read layout not confirmed: return the raw reply only, for mapping work.
                 return {'ok': True, 'type': type_id, 'instance': instance, 'editable': False,
@@ -187,7 +206,7 @@ class InsertRack:
                     'reply': self.last_reply.hex(' ')}
         return self._run(work)
 
-    def set_parameter(self, channel, slot, key, value):
+    def set_parameter(self, channel, slot, key, value, expected=None):
         spec = self._spec()
         if spec is None:
             raise ValueError('Insert editing is not available for this device')
@@ -195,7 +214,7 @@ class InsertRack:
             raise RuntimeError(self.failure)
 
         def work(transport):
-            type_id, instance, effect = self._slot(transport, spec, channel, slot)
+            type_id, instance, effect = self._slot(transport, spec, channel, slot, expected)
             if effect.get('editable') is False:
                 raise ValueError('The settings of this effect cannot be read back yet, so they are not edited')
             before = self._read_block(transport, type_id, instance, effect)
@@ -229,7 +248,8 @@ class InsertRack:
             return self._describe(effect, type_id, instance, after, spec)
         return self._run(work)
 
-    def change(self, channel, operation, slot=None, type_id=None, source=None):
+    def change(self, channel, operation, slot=None, type_id=None, source=None, expected=None):
+        """``expected`` (type, instance) is checked against the removed or moved effect."""
         spec = self._spec()
         if spec is None:
             raise ValueError('Insert editing is not available for this device')
@@ -252,12 +272,14 @@ class InsertRack:
             if operation == 'remove':
                 if type(slot) is not int or not 0 <= slot < len(before):
                     raise ValueError('There is no effect in that slot')
+                self._expect(slot, before[slot], expected)
                 after = before[:slot] + before[slot + 1:]
             elif operation == 'move':
                 # The same effects in a new order (captured: two effects swapped).
                 if any(type(index) is not int or not 0 <= index < len(before)
                        for index in (source, slot)) or source == slot:
                     raise ValueError('Move needs two different loaded slots')
+                self._expect(source, before[source], expected)
                 after = list(before)
                 after.insert(slot, after.pop(source))
             else:
@@ -282,7 +304,7 @@ class InsertRack:
                     raise RuntimeError('Every verified instance of this effect is already in use')
                 after = before + [(type_id, instance)]
                 # Built before anything is written: a bad profile entry must not leave a half load.
-                frames, expected = protocol.afx_load_defaults(self.device.profile, type_id, instance)
+                frames, defaults = protocol.afx_load_defaults(self.device.profile, type_id, instance)
             packet = protocol.build_afx_insert_chain(self.device.profile, strip, after)
             transport.write(packet)
             time.sleep(0.2)
@@ -300,10 +322,10 @@ class InsertRack:
                     transport.write(frame)
                     time.sleep(0.01)
                 limit = (spec.get('parameters') or {}).get('max_instance')
-                if frames and expected is not None and (limit is None or instance <= limit):
+                if frames and defaults is not None and (limit is None or instance <= limit):
                     time.sleep(0.15)
                     params = protocol.afx_parameter_effect(self.device.profile, type_id)
-                    if self._read_block(transport, type_id, instance, params) != expected:
+                    if self._read_block(transport, type_id, instance, params) != defaults:
                         self.failure = ('The default settings of the loaded effect did not read back as '
                                         'written. Insert editing is off until the server restarts; check '
                                         'the effect in the vendor panel.')

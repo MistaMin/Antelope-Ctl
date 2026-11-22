@@ -2,8 +2,10 @@
 
 Current hardware development targets **Orion Studio Synergy Core only**. Other
 profiles remain useful reference data; new device work needs its own evidence
-and an explicit scope change. Read [AGENTS.md](AGENTS.md) and [SCOPE.md](SCOPE.md)
-before changing device contracts.
+and an explicit scope change. This fork has made that scope change for the
+Discrete 4 (`0xa270`) and Zen Go Synergy Core (`0xa015`); see
+[SCOPE.md](SCOPE.md#discrete-4-0xa270-and-zen-go-0xa015-fork-extension).
+Read [AGENTS.md](AGENTS.md) and [SCOPE.md](SCOPE.md) before changing device contracts.
 
 ## Start without hardware
 

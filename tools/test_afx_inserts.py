@@ -28,7 +28,7 @@ class FakeDevice:
 
     def __init__(self, profile):
         self.profile, self.snapshot, self.structured, self.rb_ver = profile, {'online': True}, {}, 0
-        self._lock, self._transport = threading.RLock(), self
+        self._lock, self._transport, self.connection_generation = threading.RLock(), self, 0
         self.racks, self.written, self.deaf, self.active = {}, [], False, {0: 1, 1: 1}   # flag per instance
         self.blocks = {}
         self.clearq = bytearray(36 * 8)
@@ -406,6 +406,39 @@ class InsertChainTests(unittest.TestCase):
         self.assertEqual([payload(packet) for packet in device.written], ['d7 49 00 27 00 1b'])
         self.assertEqual(device.written[0][:5].hex(' '), '70 00 00 00 5b')
         self.assertEqual([row['type'] for row in state['racks']['0']], [0x27, 0x1b])
+
+    def test_expected_slot_content_is_checked_before_any_write(self):
+        device = FakeDevice(load('zen_go_sc'))
+        device.racks[2] = bytes([0x27, 0, 0x33, 0])   # PowerGate, PowerEx
+        rack = InsertRack(device)
+        # Old callers (no expected) still work; a matching expectation passes.
+        self.assertEqual(rack.parameters(2, 0)['type'], 0x27)
+        self.assertEqual(rack.parameters(2, 0, (0x27, 0))['type'], 0x27)
+        for call in (lambda: rack.parameters(2, 0, (0x33, 0)),
+                     lambda: rack.set_parameter(2, 0, 'active', 0, (0x27, 1)),
+                     lambda: rack.change(2, 'remove', slot=1, expected=(0x27, None)),
+                     lambda: rack.change(2, 'move', source=1, slot=0, expected=(0x27, 0))):
+            with self.assertRaisesRegex(RuntimeError, 'now holds'):
+                call()
+        self.assertEqual(device.written, [])
+        self.assertIsNone(rack.failure)
+        rack.change(2, 'remove', slot=1, expected=(0x33, 0))
+        self.assertEqual([payload(packet) for packet in device.written], ['d7 11 02 27'])
+
+    def test_request_queued_before_a_reconnect_is_refused(self):
+        device = FakeDevice(load('zen_go_sc'))
+        device.racks[2] = bytes([0x27, 0])
+        rack = InsertRack(device)
+        run = device.submit
+        def reconnect_then_run(work):
+            device.connection_generation += 1
+            run(work)
+        device.submit = reconnect_then_run
+        with self.assertRaisesRegex(RuntimeError, 'reconnected'):
+            rack.change(2, 'remove', slot=0)
+        with self.assertRaisesRegex(RuntimeError, 'reconnected'):
+            rack.set_parameter(2, 0, 'active', 0)
+        self.assertEqual(device.written, [])
 
     def test_orion_has_no_insert_contract(self):
         self.assertIsNone(protocol.afx_insert_writes(load('orion_studio_sc')))

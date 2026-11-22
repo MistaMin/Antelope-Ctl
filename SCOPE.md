@@ -50,7 +50,7 @@ These categories separate device control from effect assignment and licensing:
 | B | Slot bypass/enable | Decode and expose when the command is verified |
 | C | Reading slot/parameter state | Decode and display measured device state |
 | D | Parameter controls on an effect available under its target-device license | Device control; independent of Native/Cosmos licensing |
-| E | Assign/load/remove/reorder effects | Limited to the Orion captured-effect pilot below |
+| E | Assign/load/remove/reorder effects | Limited to the Orion captured-effect pilot and the fork extension below |
 | F | Licensing/activation/entitlement traffic | Excluded from capture, implementation and replication |
 
 A–D follow the same evidence and verification standards as other controls.

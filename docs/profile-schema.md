@@ -707,7 +707,7 @@ Machine-enforced bounds. `protocol.check_opcode` / `check_target` /
 | `input_mode_allowed_values` `[...]` | `check_enum` | portable-enum guard (a foreign value crashed a sibling) |
 | `gain_bounds` / `adat_gain_bounds` / `spdif_gain_bounds` | the gain CLI commands | dB clamp ranges |
 | `min_write_interval_ms` | (advisory) | rate-limit hint |
-| `mixer_bounds` `{mixes,strips,fader,pan}` | `build_mix_command` | optional: refuse a mix / strip outside the device, clamp fader and pan |
+| `mixer_bounds` `{mixes,strips,fader,pan}` | `build_mix_command` | optional: refuse a mix, strip, fader or pan outside the device |
 | `protected_mute_buses` `[...]` | self-tests, WebUI `bus-toggle`, CLI `set-bus-dim` / `set-bus-mono` (`protocol.bus_flag_may_release_mute`) | optional: buses whose mute no automatic action may release |
 
 Optional keys for devices that differ from the Orion / Zen Go shape (all

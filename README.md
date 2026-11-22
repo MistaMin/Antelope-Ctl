@@ -294,7 +294,7 @@ request you agree to license your contribution that way.
 - Linux and Python; the CLI/protocol core uses only the standard library.
   For the verified contributor workflow use Python 3.11+ and Node.js 24.
   See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and hardware-free checks.
-  The optional WebUI also needs `webui/requirements.txt` (FastAPI/Uvicorn).
+  The optional WebUI needs Python 3.10+ and `webui/requirements.txt` (FastAPI/Uvicorn).
 - Live controls require read/write access to the device's `hidraw` node. Either run with `sudo`,
   or install [`packaging/70-antelope.rules`](packaging/70-antelope.rules)
   (any `23e5` device: the desktop user, plus the `audio` group for SSH/headless)

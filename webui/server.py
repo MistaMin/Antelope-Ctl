@@ -527,6 +527,9 @@ class InsertChange(BaseModel):
     slot: StrictInt | None = None
     type: StrictInt | None = None
     source: StrictInt | None = None   # move: the slot the effect comes from
+    # Optional: what the UI shows in the removed/moved slot; refused if the slot now holds another effect.
+    expected_type: StrictInt | None = None
+    expected_instance: StrictInt | None = None
 
 
 @app.get("/api/afx-inserts")
@@ -541,7 +544,8 @@ def api_afx_inserts_change(change: InsertChange):
     try:
         return AFX_INSERTS.change(change.channel, change.operation,
                                   slot=change.slot, type_id=change.type,
-                                  source=change.source)
+                                  source=change.source,
+                                  expected=(change.expected_type, change.expected_instance))
     except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
         return _bad(str(error))
 
@@ -551,13 +555,16 @@ class InsertParameter(BaseModel):
     slot: StrictInt
     key: str
     value: StrictInt | StrictFloat   # float only for an f32 field; the codec refuses it elsewhere
+    expected_type: StrictInt | None = None       # optional, as in InsertChange
+    expected_instance: StrictInt | None = None
 
 
 @app.get("/api/afx-inserts/parameters")
-def api_afx_insert_parameters(channel: int, slot: int):
+def api_afx_insert_parameters(channel: int, slot: int, expected_type: int | None = None,
+                               expected_instance: int | None = None):
     """Mapped settings of the effect in one rack slot, read from the device."""
     try:
-        return AFX_INSERTS.parameters(channel, slot)
+        return AFX_INSERTS.parameters(channel, slot, (expected_type, expected_instance))
     except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
         return _bad(str(error))
 
@@ -566,7 +573,8 @@ def api_afx_insert_parameters(channel: int, slot: int):
 def api_afx_insert_parameter_set(change: InsertParameter):
     """Change one mapped setting: whole-block write, verified by readback."""
     try:
-        return AFX_INSERTS.set_parameter(change.channel, change.slot, change.key, change.value)
+        return AFX_INSERTS.set_parameter(change.channel, change.slot, change.key, change.value,
+                                         (change.expected_type, change.expected_instance))
     except (ValueError, RuntimeError, KeyError, proto.ConstraintError) as error:
         return _bad(str(error))
 
@@ -1670,12 +1678,13 @@ def api_mix_solo(s: MixSolo):
                     updated = group["restore"]
                     DEV.solo_state.pop(m, None)
 
-        for idx, slot in enumerate(slots[:n_slots]):
-            mute, solo = updated[idx]
-            t.write(proto.build_mix_command(
-                PROFILE, m, idx, slot["fader"], slot["pan"], slot["send"],
-                mute, solo))
-            slots[idx] = {**slot, "mute": mute, "solo": solo}
+        # Every frame is built first: a strip read back out of range refuses before any write.
+        frames = [proto.build_mix_command(PROFILE, m, idx, slot["fader"], slot["pan"], slot["send"],
+                                          *updated[idx])
+                  for idx, slot in enumerate(slots[:n_slots])]
+        for idx, frame in enumerate(frames):
+            t.write(frame)
+            slots[idx] = {**slots[idx], "mute": updated[idx][0], "solo": updated[idx][1]}
         DEV._cache_mixer(m, slots)
 
     DEV.submit(do)
@@ -1852,15 +1861,18 @@ def api_mix(s: MixStrip):
         mute = cur["mute"] if s.mute is None else bool(s.mute)
         solo = cur["solo"] if s.solo is None else bool(s.solo)
         send_change = s.send is not None or s.send_pan is not None
-        extra = {}
+        extra, frames = {}, []
+        # Both frames are built before either is written: a refusal writes nothing.
         if send_frame and send_change:
             send_pan = cur["send_pan"] if s.send_pan is None else max(p_lo, min(p_hi, s.send_pan))
-            t.write(proto.build_reverb_send_command(PROFILE, ch, send, send_pan))
+            frames.append(proto.build_reverb_send_command(PROFILE, ch, send, send_pan))
             extra = {"send_pan": send_pan}
         if not send_frame or any(v is not None for v in (s.fader, s.pan, s.mute, s.solo)):
             # a send-only change on the Zen Go leaves the strip frame unsent
-            t.write(proto.build_mix_command(PROFILE, m, ch, fader, pan,
-                                            send if has_send else 0, mute, solo))
+            frames.append(proto.build_mix_command(PROFILE, m, ch, fader, pan,
+                                                  send if has_send else 0, mute, solo))
+        for frame in frames:
+            t.write(frame)
         slots[ch] = {**cur, "fader": fader, "pan": pan, "send": send,
                      "mute": mute, "solo": solo, **extra}
         DEV._cache_mixer(m, slots)

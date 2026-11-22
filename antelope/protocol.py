@@ -1560,9 +1560,11 @@ def build_mix_command(profile: dict, mix: int, channel: int, fader: int,
             raise ConstraintError(
                 f'mixer strip {channel} is outside 0..{int(bounds["strips"]) - 1}')
         lo, hi = bounds.get('fader', (0, 255))
-        fader = max(lo, min(hi, fader))
+        if not lo <= fader <= hi:
+            raise ConstraintError(f'mixer fader {fader} is outside {lo}..{hi}')
         lo, hi = bounds.get('pan', (-32, 31))
-        pan_deg = max(lo, min(hi, pan_deg))
+        if not lo <= pan_deg <= hi:
+            raise ConstraintError(f'mixer pan {pan_deg} is outside {lo}..{hi}')
     # Discrete 4 0xa270 numbers strips from 1 on the wire (channel_base 1).
     channel += _as_int(f.get('channel_base', 0))
     pan_center = _as_int(f.get('pan_center', 32))

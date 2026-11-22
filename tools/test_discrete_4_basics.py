@@ -240,8 +240,11 @@ class Discrete4BasicsTests(unittest.TestCase):
             protocol.build_command(self.profile, 'phantom', 0, 1)
         with self.assertRaises(ValueError):
             protocol.resolve_route_source(self.profile, 'compplay', 17)
-        # levels are clamped, not wrapped
-        self.check(protocol.build_mix_command(self.profile, 0, 0, 200, 99, 0),
+        # out-of-range levels are refused, not clamped or wrapped
+        for fader, pan in [(91, 0), (-1, 0), (0, 31), (0, -31)]:
+            with self.assertRaises(refused):
+                protocol.build_mix_command(self.profile, 0, 0, fader, pan, 0)
+        self.check(protocol.build_mix_command(self.profile, 0, 0, 90, 30, 0),
                    0x16, 'd4 04 00 01 5a 3e')
         self.assertEqual(protocol.gain_range(self.profile, 'Mic'), (-12, 65))   # swept 2026-11-22
         self.assertEqual(protocol.gain_range(self.profile, 'HiZ'), (0, 20))     # not captured

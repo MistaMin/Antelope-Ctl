@@ -761,7 +761,7 @@ function renderInsertRacks() {
       remove.title = `Remove ${row.label}`;
       remove.setAttribute('aria-label', `Remove ${row.label} from channel ${channel + 1}`);
       remove.disabled = !editable;
-      remove.addEventListener('click', () => changeInsertRack({channel, operation: 'remove', slot}));
+      remove.addEventListener('click', () => changeInsertRack({channel, operation: 'remove', slot, expected_type: row.type, expected_instance: row.instance}));
       if (editable && state.reorder && rows.length > 1) {
         // Drag one effect onto another of the same rack: one whole-rack write in the new order.
         line.draggable = true;
@@ -771,7 +771,9 @@ function renderInsertRacks() {
         line.addEventListener('drop', e => {
           e.preventDefault();
           const [from, source] = e.dataTransfer.getData('text/plain').split(':').map(Number);
-          if (from === channel && source !== slot) changeInsertRack({channel, operation: 'move', source, slot});
+          // The server refuses if the dragged slot no longer holds what this rack shows.
+          if (from === channel && source !== slot && rows[source]) changeInsertRack({channel, operation: 'move', source, slot,
+            expected_type: rows[source].type, expected_instance: rows[source].instance});
         });
       }
       if (state.mapped_types?.includes(row.type)) {
@@ -781,7 +783,7 @@ function renderInsertRacks() {
         edit.textContent = 'Edit';
         edit.title = `Edit ${row.label} settings`;
         edit.disabled = !state.online;
-        edit.addEventListener('click', () => openInsertParams(channel, slot));
+        edit.addEventListener('click', () => openInsertParams(channel, slot, {type: row.type, instance: row.instance}));
         line.append(name, edit, remove);
       } else line.append(name, remove);
       card.append(line);
@@ -873,11 +875,13 @@ function renderInsertParams() {
   box.replaceChildren(head, ...(covered.size ? [panel] : []), ...(knobs.children.length || !covered.size ? [knobs] : []), note);
 }
 
-async function openInsertParams(channel, slot) {
-  INSERT_PARAMS = {channel, slot, data: null, pending: {}, busy: false};
+async function openInsertParams(channel, slot, expected) {
+  // expected {type, instance}: the effect the rack showed; the server refuses if the slot now holds another.
+  INSERT_PARAMS = {channel, slot, expected, data: null, pending: {}, busy: false};
   renderInsertParams();
   try {
-    const response = await fetch(`/api/afx-inserts/parameters?channel=${channel}&slot=${slot}`);
+    const response = await fetch(`/api/afx-inserts/parameters?channel=${channel}&slot=${slot}`
+      + `&expected_type=${expected.type}&expected_instance=${expected.instance}`);
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'The settings could not be read.');
     const face = await loadFaceplate(result.type);
@@ -901,7 +905,8 @@ async function queueInsertParam(key, value) {
     try {
       const response = await fetch('/api/afx-inserts/parameters', {method: 'POST',
         headers: {'content-type': 'application/json'},
-        body: JSON.stringify({channel: view.channel, slot: view.slot, key: nextKey, value: nextValue})});
+        body: JSON.stringify({channel: view.channel, slot: view.slot, key: nextKey, value: nextValue,
+                              expected_type: view.expected.type, expected_instance: view.expected.instance})});
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'The change was refused.');
       view.data = result;
@@ -910,7 +915,7 @@ async function queueInsertParam(key, value) {
       reportMessage('inserts', 'Effect settings', error.message);
       view.pending = {};
       view.busy = false;
-      if (INSERT_PARAMS === view) openInsertParams(view.channel, view.slot);
+      if (INSERT_PARAMS === view) openInsertParams(view.channel, view.slot, view.expected);
       return;
     }
   }
