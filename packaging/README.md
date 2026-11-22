@@ -19,7 +19,7 @@ per interface: do not start the systemd user units and the launcher for the same
 | Debian / Ubuntu `.deb` | Debian 13+, Ubuntu 24.04+ | `packaging/deb/build.sh` | `sudo apt install ./antelope-ctl_0.1.0_all.deb` | nothing | built without dpkg; archive, control, md5sums and modes checked; not installed, no `lintian` |
 | Fedora `.rpm` | Fedora and similar | see the header of `rpm/antelope-ctl.spec` | `sudo dnf install ./antelope-ctl-0.1.0-1*.noarch.rpm` | nothing | not built (no `rpmbuild`); spec read and its install step simulated |
 | AppImage | any x86_64 distribution | `packaging/appimage/build.sh PYTHON_TARBALL` (prints what it needs) | `chmod +x` the file and run it; `... cli --help` runs the CLI | udev rule | not built (no `appimagetool`); AppDir assembly and `AppRun cli` tried with a stand-in Python |
-| Flatpak | Flathub-style desktops | `packaging/flatpak/build.sh` | `flatpak install --user antelope-ctl.flatpak` | udev rule | not built or tested |
+| Flatpak | Flathub-style desktops | `packaging/flatpak/build.sh` | `flatpak install --user antelope-ctl.flatpak` | udev rule | built with flatpak-builder (freedesktop 25.08, 7.5 MB bundle), installed for the user and run: with a Zen Go and a Discrete 4 connected it started one server per interface and both came online |
 
 The distribution packages use the distribution's FastAPI and Uvicorn (Uvicorn 0.22 or newer); the pinned
 [`webui/requirements.txt`](../webui/requirements.txt) is what pipx, the AppImage and the Flatpak install.

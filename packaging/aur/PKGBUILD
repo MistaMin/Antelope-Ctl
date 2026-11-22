@@ -13,7 +13,8 @@ optdepends=('xdg-utils: open the WebUI in the default browser')
 makedepends=(git)
 provides=("$_name")
 conflicts=("$_name")
-source=("$_name::git+$url.git")
+# The packaging lives on this branch until it is merged to main.
+source=("$_name::git+$url.git#branch=MARCOS/antelope-audio-linux-driver")
 sha256sums=('SKIP')
 
 pkgver() {

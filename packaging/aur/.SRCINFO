@@ -13,7 +13,7 @@ pkgbase = antelope-ctl-git
 	optdepends = xdg-utils: open the WebUI in the default browser
 	provides = antelope-ctl
 	conflicts = antelope-ctl
-	source = antelope-ctl::git+https://github.com/MistaMin/Antelope-Ctl.git
+	source = antelope-ctl::git+https://github.com/MistaMin/Antelope-Ctl.git#branch=MARCOS/antelope-audio-linux-driver
 	sha256sums = SKIP
 
 pkgname = antelope-ctl-git
