@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>antelope-ctl</title>
-<link rel="stylesheet" href="/webui/static/app.css?v=routing-mix-colors-v1">
+<link rel="stylesheet" href="/webui/static/app.css?v=page-settings-v1">
   <link rel="stylesheet" href="/webui/static/surround.css?v=surround-controls-v16">
 <link rel="stylesheet" href="/webui/static/afx.css?v=afx-channel-rack-v12">
 </head>
@@ -142,8 +142,25 @@
       <div class="srow"><span>Monitor B</span><select data-trim="1"></select></div>
       <div class="srow"><span>Line Out</span><select data-trim="2"></select></div>
     </div>
+    <div class="sgroup" data-set-linetrim hidden>
+      <h3>Line Out trim</h3>
+      <div class="srow"><span>Line Out 1</span><select data-linetrim="0" aria-label="Line Out 1 trim"></select></div>
+      <div class="srow"><span>Line Out 2</span><select data-linetrim="1" aria-label="Line Out 2 trim"></select></div>
+      <div class="srow"><span>Line Out 3</span><select data-linetrim="2" aria-label="Line Out 3 trim"></select></div>
+      <div class="srow"><span>Line Out 4</span><select data-linetrim="3" aria-label="Line Out 4 trim"></select></div>
+      <div class="srow"><span>Link</span><button class="btn" data-linetrim-link aria-label="link Line Out trims" aria-pressed="false">OFF</button></div>
+    </div>
+    <div class="sgroup" data-set-osc hidden>
+      <h3>Oscillator</h3>
+      <div class="srow"><span>Osc 1</span><select data-osc-freq="1" aria-label="oscillator 1 frequency"></select>
+        <button class="btn" data-osc-mute="64" aria-label="mute oscillator 1" aria-pressed="false">–</button></div>
+      <div class="srow"><span>Osc 2</span><select data-osc-freq="4" aria-label="oscillator 2 frequency"></select>
+        <button class="btn" data-osc-mute="128" aria-label="mute oscillator 2" aria-pressed="false">–</button></div>
+      <div class="srow"><span>Level</span><select data-osc-level="48" aria-label="oscillator level"></select></div>
+    </div>
     <div id="setbuses"></div>
     <div class="sgroup">
+      <div class="srow" hidden><span>Pan law</span><select data-panlaw aria-label="pan law"></select></div>
       <div class="srow"><span>DC coupled</span><button class="btn" data-dc>OFF</button></div>
       <div class="srow"><span>Brightness</span>
         <input type="range" id="bright" min="0" max="100">
@@ -153,14 +170,14 @@
   <p class="hint" style="margin:0;padding:0 12px 12px;font-size:11px;color:var(--dim)">
     Line Out / Reamp levels, output trim and DC-coupling -- the Launcher's Settings tab.
     Trim steps show the raw 0-6 index (dB mapping not decoded). No device readback for
-    DC-coupling. Oscillator, pan law and latency mode aren't wired yet.</p>
+    DC-coupling. Latency mode isn't wired yet.</p>
 </div>
 
 <div id="auraverbpanel" hidden></div>
 
 <script src="/webui/static/ui/core.js?v=input-link-readback-v1"></script>
 <script src="/webui/static/ui/inputs.js?v=input-link-spaces-v3"></script>
-<script src="/webui/static/ui/settings.js"></script>
+<script src="/webui/static/ui/settings.js?v=page-settings-v1"></script>
 <script src="/webui/static/ui/preamp.js"></script>
 <script src="/webui/static/ui/meters.js"></script>
 <script src="/webui/static/ui/buses.js?v=bus-knob-attenuation-v3"></script>
@@ -173,9 +190,9 @@
 <script src="/webui/static/ui/afx-test.js?v=afx-channel-rack-v13"></script>
 <script src="/webui/static/ui/afx-live.js?v=afx-live-v6"></script>
 <script src="/webui/static/ui/faceplate.js"></script>
-<script src="/webui/static/ui/mixer.js"></script>
+<script src="/webui/static/ui/mixer.js?v=page-settings-v1"></script>
 <script src="/webui/static/ui/surround.js?v=surround-controls-v20"></script>
-<script src="/webui/static/ui/readback.js?v=afx-reconnect-v1"></script>
+<script src="/webui/static/ui/readback.js?v=page-settings-v1"></script>
 <script src="/webui/static/ui/boot.js?v=afx-reconnect-v2"></script>
 </body>
 </html>

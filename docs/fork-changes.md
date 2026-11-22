@@ -46,9 +46,9 @@ identical. Dim on a muted output was refused. The JS page changes were not exerc
 | Mixer strip number on the wire (was one strip off) | fix | profile `channel_base` |
 | Gazelle Reverb: 8 knobs, FX on/off | yes | reverb panel |
 | Reverb send per strip (mix 1) | yes | mixer send knob |
-| Reverb send pan, reverb returns (level, mute) | API only | `POST /api/mix` `send_pan`, `POST /api/reverb-return` |
+| Reverb send pan, reverb returns (level, mute) | yes | mixer SEND PAN knob, reverb panel returns |
 | Monitor out trim, brightness | yes | Settings panel |
-| Panning law, oscillator | API only | `POST /api/pan-law`, `POST /api/oscillator` |
+| Panning law, oscillator | yes | Settings panel |
 | Routing: Record 1-8, S/PDIF out, AFX rack inputs 1-4, loopback and AFX OUT sources | yes | Routing tab |
 | AFX racks: reorder by drag | yes | rack list |
 
@@ -68,12 +68,12 @@ snapshot before and after was identical. The JS page changes were not exercised 
 | Headphones 2-4 level, mute, dim | yes | output strips |
 | Dim keeps the mute on this device: dim on a muted Monitor allowed | fix | output strips, CLI |
 | Line Out volume and mute (bus 5) | yes | Settings panel |
-| Line Out 1-4 trims and their link | API only | `POST /api/line-trim` |
+| Line Out 1-4 trims and their link | yes | Settings panel |
 | Monitor out trim, brightness | yes | Settings panel |
-| Panning law, oscillator | API only | `POST /api/pan-law`, `POST /api/oscillator` |
+| Panning law, oscillator | yes | Settings panel |
 | Gazelle Reverb: 8 knobs, FX on/off | yes | reverb panel |
 | Reverb send per strip (MONITOR/HP1 mix) | yes | mixer send knob |
-| Reverb send pan, Monitor/HP1 reverb return | API only | `POST /api/mix` `send_pan`, `POST /api/reverb-return` |
+| Reverb send pan, reverb returns 1-4 (level, mute) | yes | mixer SEND PAN knob, reverb panel returns |
 | Routing: Line Out 1-4, ADAT Out 1-8, S/PDIF Out 1-2, Record 1-4 = AFX rack inputs, full source list | yes | Routing tab |
 | Mixer strip links: mix 0 strips 3+4 and 15+16, mix 1 strips 7+8; link state read back | yes | mixer |
 | AFX racks: reorder by drag | yes | rack list |
@@ -82,12 +82,11 @@ snapshot before and after was identical. The JS page changes were not exercised 
 
 - Discrete 4 (not captured in the 2026-11-22 run): 48V, mic modelling (the selector did not move), clock
   source and sample rate writes (greyed), the reverb returns of headphones 2-4, the Hi-Z gain range,
-  mixer links other than the captured pairs. No page control yet for line-out trims, panning law,
-  oscillator, reverb return and send pan.
+  mixer links other than the captured pairs.
 - Zen Go: mic modelling (models were greyed in the vendor panel: no frame captured), clock source and
-  sample rate writes on the owner's unit (greyed too), page controls for panning law, oscillator,
-  reverb returns and send pan, sources of the Monitor / HP outputs (no selector in the vendor panel).
-- Both: cabinet (no control found).
+  sample rate writes on the owner's unit (greyed too), sources of the Monitor / HP outputs (no selector in the vendor panel).
+- Both: cabinet (no control found). The page controls for panning law, oscillator, reverb returns,
+  send pan (and the Discrete 4 Line Out 1-4 trims) exist but have not been clicked in a browser on the devices.
 
 ## Install
 

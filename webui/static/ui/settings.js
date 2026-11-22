@@ -184,6 +184,39 @@ function buildSettings() {
         post('/api/output-trim', { target: +sel.dataset.trim, value: +sel.value }));
     });
   }
+  const unknown = '<option value="" disabled>–</option>';
+  const lt = PROFILE.frame?.line_trim_command;
+  if (lt) {
+    $('[data-set-linetrim]').hidden = false;
+    const dbu = ot?.trim_dbu || {};   // same 0..6 = 20..14 dBu scale as the output trim
+    $$('[data-linetrim]').forEach(sel => {
+      sel.innerHTML = unknown + Array.from({ length: lt.trim_range[1] - lt.trim_range[0] + 1 }, (_, k) => k + lt.trim_range[0])
+        .map(i => `<option value="${i}">${dbu[i] != null ? dbu[i] + ' dBu' : i}</option>`).join('');
+      sel.addEventListener('change', () => LINE_TRIM && sendLineTrim(lineTrimFrame(LINE_TRIM, +sel.dataset.linetrim, +sel.value)));
+    });
+    $('[data-linetrim-link]').addEventListener('click', () =>
+      LINE_TRIM && sendLineTrim({ linked: !LINE_TRIM.linked, trims: LINE_TRIM.trims }));
+  }
+  const osc = PROFILE.params?.oscillator;
+  if (osc?.value_mask != null) {
+    $('[data-set-osc]').hidden = false;
+    const hasBits = mask => ('0x' + mask.toString(16).padStart(2, '0')) in (osc.value_bits || {});
+    // option labels are the value_bits descriptions in both profiles
+    const fill = (sel, labels) => { sel.innerHTML = unknown + labels.map((l, i) => `<option value="${i}">${l}</option>`).join(''); };
+    $$('[data-osc-freq], [data-osc-level], [data-osc-mute]').forEach(el => {
+      const mask = +(el.dataset.oscFreq || el.dataset.oscLevel || el.dataset.oscMute);
+      el.hidden = !hasBits(mask);
+      if (el.dataset.oscMute) { el.addEventListener('click', () => sendOsc(mask, oscField(OSC_BYTE, mask) ? 0 : 1)); return; }
+      fill(el, el.dataset.oscLevel ? ['0 dBFS', '-6 dBFS', '-12 dBFS', '-18 dBFS'] : ['1 kHz', '440 Hz']);
+      el.addEventListener('change', () => sendOsc(mask, +el.value));
+    });
+  }
+  const pl = $('[data-panlaw]'), plv = PROFILE.params?.pan_law?.values;
+  if (pl && plv) {
+    pl.closest('.srow').hidden = false;
+    pl.innerHTML = unknown + Object.entries(plv).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+    pl.addEventListener('change', () => { settingSent('panlaw', +pl.value); post('/api/pan-law', { value: +pl.value }); });
+  }
   const dc = $('[data-dc]');
   if (dc) dc.closest('.srow').hidden = !PROFILE.params?.dc_coupling;   // Zen Go: no such control
   if (dc) {
@@ -201,12 +234,77 @@ function buildSettings() {
   }
 }
 function applySettings(s) {
-  if (!s || !s.trim) return;
   const tgt = { monitor_a: '0', monitor_b: '1', line_out: '2' };
-  Object.entries(s.trim).forEach(([k, v]) => {
+  Object.entries(s?.trim || {}).forEach(([k, v]) => {
     const sel = $(`[data-trim="${tgt[k]}"]`);
     if (sel && document.activeElement !== sel) sel.value = v;
   });
+  const show = (sel, v, lock = true) => {   // lock: the write is composed from the shown value
+    sel.disabled = lock && v == null;
+    if (document.activeElement !== sel) sel.value = v ?? '';
+  };
+  if (!$('[data-set-osc]').hidden) {
+    OSC_BYTE = settingShown('osc', typeof s?.oscillator === 'number' ? s.oscillator : null, MIX_PENDING_TTL);
+    const known = OSC_BYTE != null;
+    $$('[data-osc-freq], [data-osc-level]').forEach(sel =>
+      show(sel, known ? oscField(OSC_BYTE, +(sel.dataset.oscFreq || sel.dataset.oscLevel)) : null));
+    $$('[data-osc-mute]').forEach(btn => {
+      const muted = known && !!oscField(OSC_BYTE, +btn.dataset.oscMute);
+      btn.disabled = !known; btn.classList.toggle('on', muted);
+      btn.textContent = known ? 'MUTE' : '–'; btn.setAttribute('aria-pressed', String(muted));
+    });
+  }
+  const pl = $('[data-panlaw]');
+  if (!pl.closest('.srow').hidden) show(pl, settingShown('panlaw', readbackRecord('pan_law')?.index, readbackHold()), false);
+  const lt = PROFILE?.frame?.line_trim_command;
+  if (lt && !$('[data-set-linetrim]').hidden) {
+    const rec = readbackRecord('line_out_trims');
+    const dev = rec && JSON.stringify({ linked: rec.link === lt.link_values.linked,
+                                        trims: [rec.trim_1, rec.trim_2, rec.trim_3, rec.trim_4] });
+    const shown = settingShown('linetrim', dev, readbackHold());
+    LINE_TRIM = shown ? JSON.parse(shown) : null;
+    $$('[data-linetrim]').forEach(sel => show(sel, LINE_TRIM?.trims[+sel.dataset.linetrim]));
+    const link = $('[data-linetrim-link]'), on = !!LINE_TRIM?.linked;
+    link.disabled = !LINE_TRIM; link.classList.toggle('on', on);
+    link.textContent = LINE_TRIM ? (on ? 'ON' : 'OFF') : '–'; link.setAttribute('aria-pressed', String(on));
+  }
+}
+
+// ---- pan law, oscillator, Line Out 1-4 trims ----
+// A sent value is shown until the device reports it, or `ttl` ms pass; then the device value wins.
+const SETTING_SENT = {};
+const settingSent = (key, value) => { SETTING_SENT[key] = { value, ts: Date.now() }; };
+function settingShown(key, device, ttl) {
+  const sent = SETTING_SENT[key];
+  if (sent && sent.value !== device && Date.now() - sent.ts < ttl) return sent.value;
+  delete SETTING_SENT[key];
+  return device;
+}
+// structured readbacks are re-read in the slow background cycle (refresh_seconds)
+const readbackHold = () => ((STRUCTURED?.refresh_seconds || 45) + 5) * 1000;
+function readbackRecord(kind) {
+  const layout = STRUCTURED?.layouts?.find(l => l.kind === kind && l.safe);
+  return layout && Object.values(layout.current || {})[0]?.[0];
+}
+// The oscillator byte packs every control as a bit field (params.oscillator.value_bits).
+let OSC_BYTE = null;
+const oscField = (byte, mask) => (byte & mask) / (mask & -mask);
+const oscWith = (byte, mask, v) => (byte & ~mask & 0xff) | ((v * (mask & -mask)) & mask);
+function sendOsc(mask, v) {
+  if (OSC_BYTE == null) return;     // never compose over an unknown byte
+  OSC_BYTE = oscWith(OSC_BYTE, mask, v);
+  settingSent('osc', OSC_BYTE);
+  post('/api/oscillator', { value: OSC_BYTE });
+  applySettings({});
+}
+// Line Out 1-4: the whole frame each time; with LINK on the panel copies one trim to all four.
+let LINE_TRIM = null;
+const lineTrimFrame = (cur, i, v) =>
+  ({ linked: cur.linked, trims: cur.trims.map((t, j) => (cur.linked || j === i ? v : t)) });
+function sendLineTrim(frame) {
+  settingSent('linetrim', JSON.stringify(frame));
+  post('/api/line-trim', frame);
+  applySettings({});
 }
 
 // ---- settings gear (Line Out / Reamp output levels) ----

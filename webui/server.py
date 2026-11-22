@@ -1247,7 +1247,7 @@ def api_output_trim(t: Trim):
 def api_line_trim(t: LineTrim):
     """Discrete 4 Line Out 1-4 trims (0..6 = 20..14 dBu) and their one link:
     one whole frame, as the vendor panel sends it. Read back from cat 0x0e
-    (GET /api/readbacks, layout line_out_trims). No page control."""
+    (GET /api/readbacks, layout line_out_trims). Settings panel: Line Out trim."""
     try:
         packet = proto.build_line_trim_command(PROFILE, t.linked, t.trims)
     except (KeyError, ValueError, proto.ConstraintError) as e:
@@ -1376,7 +1376,7 @@ def api_brightness(s: Scalar):
 @app.post("/api/pan-law")
 def api_pan_law(s: Scalar):
     """Mixer panning law (SET_GLOBAL), an index into params.pan_law.values.
-    The index order differs per device. No page control yet."""
+    The index order differs per device. Settings panel: Pan law."""
     if str(s.value) not in PROFILE["params"].get("pan_law", {}).get("values", {}):
         return _bad(f"pan-law index {s.value} is not declared by this profile")
     DEV.submit(lambda t: t.write(proto.build_global_command(PROFILE, "pan_law", s.value)))

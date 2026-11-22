@@ -112,6 +112,39 @@ function refreshAuraVerb() {
   }
   const status = panel.querySelector('[data-av-status]');
   if (status) status.textContent = state ? (enabled ? 'FX ON' : 'FX OFF') : 'WAITING FOR READBACK';
+  refreshReverbReturns();
+}
+// Reverb returns: level and mute share one device byte, so every write carries both.
+// The shown pair is the readback (GET /api/auraverb `returns`) or the last one sent until it is read back.
+function reverbReturn(bus) {
+  const dev = AURAVERB?.returns?.find(r => r.bus === bus);
+  const shown = settingShown('return:' + bus, dev && JSON.stringify({level: dev.level, mute: dev.mute}), readbackHold());
+  return shown ? JSON.parse(shown) : null;
+}
+function sendReverbReturn(bus, patch) {
+  const cur = reverbReturn(bus);
+  if (!cur) return;                 // unknown pair: never write a guessed mute or level
+  const next = {...cur, ...patch};
+  settingSent('return:' + bus, JSON.stringify(next));
+  post('/api/reverb-return', {bus, ...next});
+  refreshReverbReturns();
+}
+function refreshReverbReturns() {
+  const panel = $('#auraverbpanel');
+  if (!panel || panel.hidden) return;
+  panel.querySelectorAll('[data-av-return]').forEach(input => {
+    const bus = +input.dataset.avReturn, r = reverbReturn(bus);
+    const mute = panel.querySelector(`[data-av-return-mute="${bus}"]`);
+    input.disabled = mute.disabled = !r;
+    if (document.activeElement !== input) {
+      if (r) input.value = -r.level;
+      panel.querySelector(`[data-av-return-value="${bus}"]`).textContent = r ? mixerFaderLabel(r.level) : '–';   // raw dB attenuation; 96 is not documented as off
+      paintAuraKnob(input);
+    }
+    mute.textContent = r ? (r.mute ? 'ON' : 'OFF') : '–';
+    mute.classList.toggle('on', !!r?.mute);
+    mute.setAttribute('aria-pressed', String(!!r?.mute));
+  });
 }
 function initAuraVerbPanel() {
   const panel = $('#auraverbpanel');
@@ -119,12 +152,18 @@ function initAuraVerbPanel() {
   if (!panel.children.length) {
     const [lo, hi] = AURAVERB?.range || avCommand().param_range || [0, 100];
     const span = key => AURAVERB?.ranges?.[key] || [lo, hi];   // Zen Go: delays 0..150, level 1..100
+    const rr = PROFILE?.params?.reverb_return;
     panel.innerHTML = `<div class="av-hd"><span class="av-logo">Gazelle <span>Reverb</span></span>
       <span class="av-sub">MIX 1 REVERB</span><button class="modal-x" data-av-close aria-label="close">&times;</button></div>
       <div class="av-body"><div class="av-controls">${AV_PARAM_META.map(([key, label]) =>
         `<div class="av-control"><span class="av-value" data-av-value="${key}">–</span>
           <div class="av-knob"><i></i><input type="range" data-av-param="${key}" min="${span(key)[0]}" max="${span(key)[1]}" value="${span(key)[0]}" aria-label="${AV_DISPLAY_NAME} ${label.toLowerCase()}"></div>
           <span class="av-label">${label}</span></div>`).join('')}</div>
+        ${rr ? `<div class="av-controls">${Object.entries(rr.targets).map(([bus, label]) =>
+          `<div class="av-control"><span class="av-value" data-av-return-value="${bus}">–</span>
+            <div class="av-knob"><i></i><input type="range" data-av-return="${bus}" min="${-rr.range[1]}" max="${-rr.range[0]}" value="${-rr.range[1]}" disabled aria-label="${AV_DISPLAY_NAME} ${label} level"></div>
+            <span class="av-label">${label}</span>
+            <span class="av-toggle">MUTE <button type="button" data-av-return-mute="${bus}" disabled aria-label="mute ${AV_DISPLAY_NAME} ${label}" aria-pressed="false">–</button></span></div>`).join('')}</div>` : ''}
         <div class="av-center"><span data-av-status>WAITING FOR READBACK</span><span class="av-screen">ROOM_SIZE</span>
           <span class="av-toggle">FX <button type="button" data-av-enable>OFF</button></span></div>
         <p class="av-note">${AV_DISPLAY_NAME} is the bundled Mix 1 effect. Each change sends the complete read-modify-write state.</p>
@@ -166,6 +205,17 @@ function initAuraVerbPanel() {
         avRemember({params: {[key]: value}});
         post('/api/auraverb', {mix: 0, param: key, value});
       });
+    });
+    panel.querySelectorAll('[data-av-return]').forEach(input => {
+      const bus = +input.dataset.avReturn;
+      wirePrecisionRange(input);
+      input.addEventListener('input', () => {
+        panel.querySelector(`[data-av-return-value="${bus}"]`).textContent = mixerFaderLabel(-input.value);
+        paintAuraKnob(input);
+      });
+      input.addEventListener('change', () => sendReverbReturn(bus, {level: -input.value}));
+      panel.querySelector(`[data-av-return-mute="${bus}"]`).addEventListener('click', () =>
+        sendReverbReturn(bus, {mute: !reverbReturn(bus)?.mute}));
     });
     panel.querySelector('[data-av-enable]').addEventListener('click', e => {
       const on = !(avCurrent()?.enabled === true);
@@ -315,13 +365,13 @@ function mixerPendingActive(mix, ch, field, actual) {
   }
   return true;
 }
-function commitMixerPan(m, ch, pan, pval, value) {
+function commitMixerPan(m, ch, pan, pval, value, field = 'pan') {
   value = +value;
   pan.value = value;
   pval.textContent = mixerPanLabel(value);
   paintMixerKnob(pan);
-  markMixerPending(m, ch, 'pan', value);
-  post('/api/mix', {mix: m, channel: ch, pan: value});
+  markMixerPending(m, ch, field, value);
+  post('/api/mix', {mix: m, channel: ch, [field]: value});
 }
 
 function applyMixerMeters(meters) {
@@ -905,6 +955,7 @@ function renderMix(pane, m) {
   const hasMaster = mixerHasMaster();
   const rows = pane.querySelector('[data-strips]');
   const hasSend = MIXER.has_send !== false && (MIXER.send_mixes || []).includes(m);
+  const hasSendPan = hasSend && !!PROFILE?.frame?.reverb_send_command;   // Zen Go / Discrete 4: the send has its own pan
   const sourceFeature = mixerSourceFeature(m);
   const n = Math.max((Number(MIXER.channels_per_mix) || 0) + (hasMaster ? 1 : 0), slots.length);
   rows.innerHTML = Array.from({length: n}, (_, ch) => {
@@ -926,6 +977,11 @@ function renderMix(pane, m) {
         <output data-sval class="mixer-readout">${mixerSendLabel(send, sHi)}</output>
         <div class="mixer-knob"><i></i><input type="range" data-send min="${-sHi}" max="${-sLo}" value="${-send}" aria-label="channel ${ch} ${AV_DISPLAY_NAME} send"></div>
         <label class="mixer-knob-label">SEND</label>
+      </div>` : ''}
+      ${hasSendPan && !isMaster ? `<div class="mixer-knob-control">
+        <output data-spval class="mixer-readout">${mixerPanLabel(s.send_pan)}</output>
+        <div class="mixer-knob"><i></i><input type="range" data-send-pan min="${pLo}" max="${pHi}" value="${Number(s.send_pan) || 0}" aria-label="channel ${ch} ${AV_DISPLAY_NAME} send pan"></div>
+        <label class="mixer-knob-label">SEND PAN</label>
       </div>` : ''}
       ${!isMaster ? `<div class="mixer-knob-control">
         <output data-pval class="mixer-readout">${mixerPanLabel(pan)}</output>
@@ -983,17 +1039,18 @@ function renderMix(pane, m) {
       const value = -(+fader.value);
       postLinkedMix(m, ch, {fader: value});
     });
-    const pan = strip.querySelector('[data-pan]'), pval = strip.querySelector('[data-pval]');
-    if (pan) {
+    for (const [field, sel, out] of [['pan', '[data-pan]', '[data-pval]'], ['send_pan', '[data-send-pan]', '[data-spval]']]) {
+      const pan = strip.querySelector(sel), pval = strip.querySelector(out);
+      if (!pan) continue;
       wirePrecisionRange(pan);
       paintMixerKnob(pan);
       pan.addEventListener('input', e => { pval.textContent = mixerPanLabel(e.target.value); paintMixerKnob(pan); });
       pan.addEventListener('change', e => {
-        commitMixerPan(m, ch, pan, pval, e.target.value);
+        commitMixerPan(m, ch, pan, pval, e.target.value, field);
       });
       pan.addEventListener('dblclick', e => {
         e.preventDefault();
-        commitMixerPan(m, ch, pan, pval, 0);
+        commitMixerPan(m, ch, pan, pval, 0, field);
       });
     }
     const send = strip.querySelector('[data-send]'), sval = strip.querySelector('[data-sval]');
@@ -1059,16 +1116,18 @@ function refreshMixer() {
       strip.querySelector('[data-fval]').textContent = mixerFaderLabel(s.fader);
     }
     paintMixerFader(strip, fader.value);
-    const pan = strip.querySelector('[data-pan]');
-    if (pan && !mixerPendingActive(m, ch, 'pan', s.pan) && document.activeElement !== pan) {
-      pan.value = s.pan;
-      strip.querySelector('[data-pval]').textContent = mixerPanLabel(s.pan);
-      paintMixerKnob(pan);
+    for (const [field, sel, out] of [['pan', '[data-pan]', '[data-pval]'], ['send_pan', '[data-send-pan]', '[data-spval]']]) {
+      const pan = strip.querySelector(sel);
+      if (pan && s[field] != null && !mixerPendingActive(m, ch, field, s[field]) && document.activeElement !== pan) {
+        pan.value = s[field];
+        strip.querySelector(out).textContent = mixerPanLabel(s[field]);
+        paintMixerKnob(pan);
+      }
     }
     const send = strip.querySelector('[data-send]');
     if (send && !mixerPendingActive(m, ch, 'send', s.send) && document.activeElement !== send) {
       send.value = -s.send;
-      send.parentElement.querySelector('[data-sval]').textContent = mixerSendLabel(s.send, MIXER.ranges.send[1]);
+      strip.querySelector('[data-sval]').textContent = mixerSendLabel(s.send, MIXER.ranges.send[1]);
       paintMixerKnob(send);
     }
     const source = strip.querySelector('[data-mix-source]');

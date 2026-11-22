@@ -108,14 +108,14 @@
       "enabled": true,
       "mix": 0,
       "controls": ["auraverb", "reverb_return"],
-      "status": "the page has the eight knobs and FX on/off; the Monitor/HP1 return and the send pans are API only"
+      "status": "the page has the eight knobs, FX on/off, the four returns (level + mute) and a send pan knob per Mix 1 strip"
     },
     "settings": {
       "kind": "device_settings",
       "label": "Settings",
       "enabled": true,
-      "controls": ["screen_brightness", "output_trim"],
-      "status": "Monitor Out Trim, brightness and the Line Out volume / mute in the Settings panel; pan law, oscillator and the Line Out 1-4 trims are captured and writable through the API but have no page control, so they are not listed"
+      "controls": ["screen_brightness", "output_trim", "line_trim", "pan_law", "oscillator"],
+      "status": "Monitor Out Trim, brightness and the Line Out volume / mute in the Settings panel; pan law, oscillator and the Line Out 1-4 trims there since 2026-11-22, not yet clicked in a browser on the device"
     }
   },
   "usb_interfaces": {
@@ -587,11 +587,11 @@
           "fields": [
             {"key": "b1_freq", "label": "Band 1 Frequency", "offset": 0, "type": "u16", "min": 20, "max": 800, "unit": "Hz"},
             {"key": "b2_q", "label": "Band 2 Q", "offset": 9, "type": "u16", "min": 50, "max": 1800, "scale": 0.01},
-            {"key": "b2_gain", "label": "Band 2 Gain", "offset": 11, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01},
+            {"key": "b2_gain", "label": "Band 2 Gain", "offset": 11, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01, "unit": "dB"},
             {"key": "b3_freq", "label": "Band 3 Frequency", "offset": 14, "type": "u16", "min": 125, "max": 8000, "unit": "Hz"},
             {"key": "b3_q", "label": "Band 3 Q", "offset": 16, "type": "u16", "min": 50, "max": 1800, "scale": 0.01},
-            {"key": "b3_gain", "label": "Band 3 Gain", "offset": 18, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01},
-            {"key": "b1_gain", "label": "B1 Gain", "offset": 4, "type": "i16", "min": -2400, "max": 1200},
+            {"key": "b3_gain", "label": "Band 3 Gain", "offset": 18, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01, "unit": "dB"},
+            {"key": "b1_gain", "label": "B1 Gain", "offset": 4, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01, "unit": "dB"},
             {
               "key": "b1_shape",
               "label": "B1 Shape",
@@ -601,12 +601,12 @@
               "max": 4,
               "values": [0, 4]
             },
-            {"key": "b2_freq", "label": "B2 Freq", "offset": 7, "type": "u16", "min": 20, "max": 800},
-            {"key": "b4_freq", "label": "B4 Freq", "offset": 21, "type": "u16", "min": 400, "max": 20000},
-            {"key": "b4_q", "label": "B4 Q", "offset": 23, "type": "u16", "min": 50, "max": 1800},
-            {"key": "b4_gain", "label": "B4 Gain", "offset": 25, "type": "i16", "min": -2400, "max": 1200},
-            {"key": "b5_freq", "label": "B5 Freq", "offset": 28, "type": "u16", "min": 400, "max": 20000},
-            {"key": "b5_gain", "label": "B5 Gain", "offset": 32, "type": "i16", "min": -2400, "max": 1200},
+            {"key": "b2_freq", "label": "B2 Freq", "offset": 7, "type": "u16", "min": 20, "max": 800, "unit": "Hz"},
+            {"key": "b4_freq", "label": "B4 Freq", "offset": 21, "type": "u16", "min": 400, "max": 20000, "unit": "Hz"},
+            {"key": "b4_q", "label": "B4 Q", "offset": 23, "type": "u16", "min": 50, "max": 1800, "scale": 0.01},
+            {"key": "b4_gain", "label": "B4 Gain", "offset": 25, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01, "unit": "dB"},
+            {"key": "b5_freq", "label": "B5 Freq", "offset": 28, "type": "u16", "min": 400, "max": 20000, "unit": "Hz"},
+            {"key": "b5_gain", "label": "B5 Gain", "offset": 32, "type": "i16", "min": -2400, "max": 1200, "scale": 0.01, "unit": "dB"},
             {
               "key": "b5_shape",
               "label": "B5 Shape",
@@ -1824,7 +1824,7 @@
       "range": [0, 6],
       "trim_dbu": {"0": 20, "1": 19, "2": 18, "3": 17, "4": 16, "5": 15, "6": 14},
       "readback": "cat 0x0e index 0 (record_layouts line_out_trims)",
-      "notes": "Whole frame on every change: POST /api/line-trim with all four trims and the link. No page control. Start value on the owner's unit: 0 0 6 0, link off.",
+      "notes": "Whole frame on every change: POST /api/line-trim with all four trims and the link. Settings panel rows (Line Out trim). Start value on the owner's unit: 0 0 6 0, link off.",
       "evidence": "see frame.line_trim_command"
     },
     "pan_law": {
@@ -1834,7 +1834,7 @@
       "frame": "global_command (opcode 0x12) -- index @17",
       "values": {"0": "0 dB", "1": "-6 dB", "2": "-3 dB", "3": "-4.5 dB"},
       "readback": "cat 0x12 index 0 body[0]",
-      "notes": "Same menu order as the Zen Go (not the Orion's). No page control: POST /api/pan-law.",
+      "notes": "Same menu order as the Zen Go (not the Orion's). Settings panel select (POST /api/pan-law).",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log, analysis/panel_d4_settings.txt): 24 00 / 01 / 02 / 03 for the four menu rows; cat 0x12 read 03 at start and end"
     },
     "oscillator": {
@@ -1851,7 +1851,7 @@
         "0x80": "oscillator 2 mute"
       },
       "readback": "state_report byte 20 (oscillator_byte_offset), the same byte",
-      "notes": "Same bits as the Zen Go; bits 0x02 and 0x08 were never set and are refused. Start value on the owner's unit 0x30. No page control: POST /api/oscillator.",
+      "notes": "Same bits as the Zen Go; bits 0x02 and 0x08 were never set and are refused. Start value on the owner's unit 0x30. Settings panel controls (POST /api/oscillator).",
       "evidence": "owner's unit (bcdDevice 02.00), vendor panel 1.9.22 under Wine, usbmon on Linux, vendor panel run 2026-11-22 (d4_panel/live.log): 0a 31 / 0a 34 (frequencies), 0a 00 / 10 / 20 / 30 (level), 0a 70 / 0a b0 (mutes); byte 20 followed each"
     },
     "screen_brightness": {

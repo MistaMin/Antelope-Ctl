@@ -178,6 +178,7 @@ function applyState(s) {
   applyDig('adat', s.adat);
   applyDig('spdif', s.spdif);
   applySettings(s);
+  refreshReverbReturns();
   applyClock(s);
 
   if (typeof s.brightness === 'number' && document.activeElement !== $('#bright')) {
