@@ -1,0 +1,11 @@
+#!/bin/sh
+# AppImage entry point. No argument: the WebUI launcher (one server per connected interface).
+# "cli ARGS...": the antelope-ctl CLI. Both use the Python bundled in usr/bin.
+here=$(dirname "$(readlink -f "$0")")
+export PATH="$here/usr/bin:$PATH" ANTELOPE_APP="$here/usr/share/antelope-ctl"
+unset PYTHONHOME PYTHONPATH  # host settings must not redirect the bundled Python
+if [ "$1" = cli ]; then
+  shift
+  exec "$here/usr/bin/antelope-ctl" "$@"
+fi
+exec "$here/usr/bin/antelope-webui" "$@"

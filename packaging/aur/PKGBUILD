@@ -1,0 +1,35 @@
+# Maintainer: (placeholder: put the AUR maintainer's name and address here before publishing)
+# Build: cd packaging/aur && makepkg -si   (regenerate .SRCINFO with: makepkg --printsrcinfo > .SRCINFO)
+pkgname=antelope-ctl-git
+_name=antelope-ctl
+pkgver=0.1.0.r0.g0000000
+pkgrel=1
+pkgdesc="Profile-driven CLI and local WebUI for Antelope Audio USB interfaces"
+arch=(any)
+url="https://github.com/MistaMin/Antelope-Ctl"
+license=('GPL-3.0-or-later' 'MIT')
+depends=(python python-fastapi uvicorn)
+optdepends=('xdg-utils: open the WebUI in the default browser')
+makedepends=(git)
+provides=("$_name")
+conflicts=("$_name")
+source=("$_name::git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$_name"
+  # git describe once a vX.Y.Z tag exists; until then the pyproject.toml version plus the commit count.
+  if git describe --tags >/dev/null 2>&1; then
+    git describe --long --tags --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+  else
+    printf '%s.r%s.g%s' "$(sed -n 's/^version = "\(.*\)"/\1/p' pyproject.toml)" \
+      "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+  fi
+}
+
+package() {
+  cd "$_name"
+  packaging/install-tree.sh "$pkgdir"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 profiles/LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE-profiles"
+}

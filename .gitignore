@@ -16,6 +16,15 @@ captures/*.txt
 __pycache__/
 *.pyc
 .venv/
+# python -m build / pip install . output, and packaging/ build output (see packaging/README.md)
+/build/
+/dist/
+*.egg-info/
+*.deb
+*.rpm
+*.AppImage
+/packaging/aur/*/
+/packaging/aur/*.pkg.tar*
 
 # Local CLI cache (link state) lives in ~/.cache/antelope-ctl, not here, but just in case
 *.cache

@@ -1,10 +1,11 @@
 #!/bin/sh
-# One Flatpak for every interface: start one WebUI server per connected, supported interface
+# WebUI launcher shared by the Flatpak (/app/bin/antelope-ctl), the Arch/deb/rpm packages and the
+# AppImage (/usr/bin/antelope-webui): start one WebUI server per connected, supported interface
 # (ports 8714, 8715, ...; profile picked by USB id) and open each in the default browser.
 # No interface connected: one server with the default profile, so the page still opens.
 # A port that already answers is only opened, not started again.
 # shortcut: do not also run the systemd units from packaging/ for the same interface (one controller per device).
-app=${ANTELOPE_APP:-/app/share/antelope-ctl}
+app=${ANTELOPE_APP:-$(dirname "$0")/../share/antelope-ctl}
 cd "$app/webui" || exit 1
 listening() { python3 -c "import socket,sys; sys.exit(socket.socket().connect_ex(('127.0.0.1',$1)))"; }
 profiles=$(PYTHONPATH="$app" python3 -c '

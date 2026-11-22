@@ -24,7 +24,7 @@ modules:
       - mkdir -p /app/share/antelope-ctl/webui
       - cp -r antelope profiles LICENSE /app/share/antelope-ctl/
       - cp -r webui/*.py webui/static webui/assets /app/share/antelope-ctl/webui/
-      - install -Dm755 packaging/flatpak/antelope-ctl /app/bin/antelope-ctl
+      - install -Dm755 packaging/antelope-webui /app/bin/antelope-ctl
       - install -Dm644 packaging/flatpak/io.github.mistamin.AntelopeCtl.desktop -t /app/share/applications
       - install -Dm644 webui/assets/mon-knob.svg /app/share/icons/hicolor/scalable/apps/io.github.mistamin.AntelopeCtl.svg
     sources:

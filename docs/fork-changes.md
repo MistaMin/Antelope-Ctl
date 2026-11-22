@@ -98,3 +98,4 @@ packaging/install-user.sh
 
 A Flatpak manifest lives in `packaging/flatpak/` (`build.sh` writes `antelope-ctl.flatpak`). It is
 **not yet built or tested**; no binary is published so far. The udev rule above is needed either way.
+pipx, Arch, deb, rpm and AppImage recipes and their test status: [packaging/README.md](../packaging/README.md).

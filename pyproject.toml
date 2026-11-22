@@ -1,0 +1,33 @@
+# pip/pipx package: `pipx install '.[webui]'`. The version here is the one version of the project:
+# packaging/aur, packaging/deb and packaging/appimage read it from this file (packaging/rpm repeats it).
+# antelope, webui and profiles install side by side in site-packages, so the code's relative paths hold.
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "antelope-ctl"
+version = "0.1.0"
+description = "Profile-driven CLI and local WebUI for Antelope Audio USB interfaces on Linux"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later AND MIT"
+license-files = ["LICENSE", "profiles/LICENSE"]
+dynamic = ["optional-dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/MistaMin/Antelope-Ctl"
+
+[project.scripts]
+antelope-ctl = "antelope.cli:main"
+antelope-webui = "webui.server:run_server"
+
+[tool.setuptools]
+packages = ["antelope", "webui", "profiles", "profiles.afx"]
+
+[tool.setuptools.package-data]
+webui = ["static/**/*", "assets/*"]
+profiles = ["*.json", "LICENSE"]
+"profiles.afx" = ["*.json"]
+
+[tool.setuptools.dynamic]
+optional-dependencies.webui = { file = ["webui/requirements.txt"] }

@@ -295,6 +295,7 @@ request you agree to license your contribution that way.
   For the verified contributor workflow use Python 3.11+ and Node.js 24.
   See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and hardware-free checks.
   The optional WebUI needs Python 3.10+ and `webui/requirements.txt` (FastAPI/Uvicorn).
+- Packages (pipx, Arch, deb, rpm, AppImage, Flatpak) and their test status: [packaging/README.md](packaging/README.md).
 - Live controls require read/write access to the device's `hidraw` node. Either run with `sudo`,
   or install [`packaging/70-antelope.rules`](packaging/70-antelope.rules)
   (any `23e5` device: the desktop user, plus the `audio` group for SSH/headless)
